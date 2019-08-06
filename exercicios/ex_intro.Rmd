@@ -1,0 +1,63 @@
+---
+title: "CE227 - Inferência bayesiana"
+author: "Lista de exercícios 1"
+date: "2019-08-06"
+output:
+  pdf_document:
+    toc: false
+    keep_tex: false
+    highlight: "default"
+documentclass: article
+classoption: a4paper
+fontsize: 10pt
+geometry: margin=2.5cm
+urlcolor: blue
+header-includes:
+  - \usepackage{amsmath}
+  - \usepackage{mathpazo}
+  - \usepackage{inconsolata}
+---
+
+1) Em um estudo há interesse em estimar a proporção de estudantes da
+UFPR que possuem anticorpos para hepatite-C. Considere que a UFPR decida
+fazer um teste de *screening* (que pode ser aplicado em qualquer
+indivíduo da população, mesmo sem suspeita) para verificar indivíduos
+com anticorpos para uma determinada doença (considere por exemplo
+hepatite-C). Considera-se de antemão que a doença ocorre em 2% da
+população de estudantes. Sabe-se que o teste é *imperfeito*: acerta 90%
+dos que tem doença e 80% dos que não tem. Se o teste deu positivo para
+uma pessoa, qual a chance dela ter a doença?
+
+2) Assistir (e reassistir ...) os primeiros 55 segundos do vídeo
+disponível em https://youtu.be/gi_6SaqVQSw. Por que ocorre o mal
+entendido? Vamos analisar a situação com um olhar estatístico:
+- Que dado/informação se tem do cliente?
+- Existe alguma informação prévia que o vendedor tenha?
+- Em que o vendedor baseia sua decisão de oferecer as velas?
+
+3) Os dados a seguir referem-se a tamanhos de mandíbuldas de fêmeas e
+machos de uma determinada espécie. Há interesse em comparar os tamanhos
+de mandíbula e verificar se diferem para discutir o comportamento de
+animais desta espécie. Discuta e mostre como você abordaria, resolveria
+e responderia ao problema.
+```{r, echo=FALSE, results='asis'}
+dados <- structure(
+    list(
+        Fêmeas = c(120, 107, 110, 116, 114, 111, 113, 117, 114, 112),
+        Machos = c(110, 111, 107, 108, 110, 105, 107, 106, 111, 111)),
+    class = "data.frame", row.names = c(NA, -10L))
+library(xtable)
+print(xtable(dados, digits = 0), include.rownames = FALSE,
+      comment = FALSE)
+```
+
+4) No contexto da questão (1), deseja-se agora inferir sobre a proporção
+de estudantes com articorpos de hepatite-C. Para isto tomou-se uma
+amostra aleatória de 250 estudantes dos quais 32 apresentaram
+anticorpos. O que voce (como estatístico) apresentaria como
+resultado/conhecimento (inferência) sobre a proporção de alunos com
+anticorpos?
+
+5) No contexto do problema (3), voce deve ter resolvido de alguma forma,
+usando algum método estatístico para responder à pergunta de interesse.
+Você teria alguma(s) forma alternativa de proceder a análise dos dados?
