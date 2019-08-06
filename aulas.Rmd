@@ -22,7 +22,8 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
            datas2, " (Qui)", "**:\n"))
 ```
 
-- **06/08 (Ter)**: Apresentação da disciplina.
+- **06/08 (Ter)**: Apresentação da disciplina. Trazer a [lista de
+  exercícios 1](exercicios/ex_intro.pdf) para a próxima aula.
 - **08/08 (Qui)**:
 - **13/08 (Ter)**:
 - **15/08 (Qui)**:
