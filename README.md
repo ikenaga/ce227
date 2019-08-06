@@ -1,15 +1,15 @@
-# ce091
+# ce227
 
-[![Build Status](https://travis-ci.org/leg-ufpr/ce091.svg?branch=master)](https://travis-ci.org/leg-ufpr/ce091)
+[![Build Status](https://travis-ci.org/leg-ufpr/ce089.svg?branch=master)](https://travis-ci.org/leg-ufpr/ce089)
 
-## Métodos de Pesquisa
+## Inferência Bayesiana
 
-Repositório das disciplina **Métodos de Pesquisa** (CE091), ministrada
+Repositório das disciplina **Inferência Bayesiana** (CE227), ministrada
 na UFPR, para o curso de Estatística.
 
 Este repositório contém todo o material de aula e os arquivos
 necessários para gerar a página da disciplina, disponível em:
-http://cursos.leg.ufpr.br/ce091
+http://cursos.leg.ufpr.br/ce227
 
 ### Para gerar o site
 
