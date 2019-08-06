@@ -7,11 +7,28 @@ output:
 
 ## Referências básicas
 
+- Carlin, BP; Louis, TA. **Bayesian methods for data analysis**. Chapman
+  & Hall, 2009.
+- Gelman, A; Carlin, JB; Stern, HS; Dunson, DB; Vehtari, A; Rubin, DB.
+  **Bayesian data analysis**. Chapman & Hall, 2014.
+- Paulino, CD; Turkman, MAA; Murteira, B; Silva, GL. **Estatística
+  bayesiana**. Fundação Calouste Gulbenkian, 2018.
 
 ## Referências complementares
 
+- Hobbs, NT; Hooten, MB. **Bayesian models. A ststistical primer for
+  ecologistas**. Princeton University Press, 2015.
+- Jaynes, ET. **Probability theory: the logic of science**. Cambridge
+  University Press, 2003.
+- Kinas, PG; Andrade, HA. **Introdução à análise bayesiana (com R)**.
+  MaisQnada, 2010.
+- Kruschke, JK. **Doing bayesian data analysis**. Academic Press, 2015.
+- McElreath, R. **Statistical rethinking. A bayesian course with
+  examples in R and Stan**. Chapman & Hall, 2016.
 
 ## Referências *online*
 
+- Gómez-Rubio, V. [Bayesian inference with INLA and
+  R-INLA](https://becarioprecario.bitbucket.io/inla-gitbook/index.html).
 
 ## Leituras complementares

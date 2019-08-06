@@ -22,8 +22,8 @@ source("setup_knitr.R")
   - [Paulo Justiniano Ribeiro Jr.][], [LEG][]/DEST/UFPR
   - [Fernando de Pol Mayer][], [LEG][]/DEST/UFPR
 - **Horários e Locais:**
-  - Terça, 20:40 - 22:10h, **DEST Lab. A**
-  - Quinta, 19:00 - 20:30h, **Sala DEST Multimídia**
+  - Terça, 20:40 - 22:10h, **PA-02**
+  - Quinta, 19:00 - 20:30h, **DEST Lab. B**
 - **Horários de atendimento dos professores:**
     - Quartas e quintas, 14:00 - 19:00 (preferenciais). Outros horários
       podem ser agendados previamente por email.
