@@ -1,0 +1,17 @@
+---
+title: "Referências Bibliográficas"
+output:
+  html_document:
+    toc: false
+---
+
+## Referências básicas
+
+
+## Referências complementares
+
+
+## Referências *online*
+
+
+## Leituras complementares

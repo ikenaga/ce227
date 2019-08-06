@@ -1,0 +1,52 @@
+---
+title: "CE227 - Inferência Bayesiana"
+output:
+  html_document:
+    toc: false
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+source("setup_knitr.R")
+```
+
+[![Build Status](https://travis-ci.org/leg-ufpr/ce089.svg?branch=master)](https://travis-ci.org/leg-ufpr/ce089)
+
+<!-- <div class="alert alert-danger" role="alert"> -->
+<!-- **AVISO:** Exame final dia 6/7. Apostila (consulta) + análise de artigo -->
+<!-- </div> -->
+
+# Detalhes da oferta da disciplina
+
+- **Curso:** Estatística
+- **Período:** segundo semestre de 2019
+- **Professores Responsáveis:**
+  - [Paulo Justiniano Ribeiro Jr.][], [LEG][]/DEST/UFPR
+  - [Fernando de Pol Mayer][], [LEG][]/DEST/UFPR
+- **Horários e Locais:**
+  - Terça, 20:40 - 22:10h, **DEST Lab. A**
+  - Quinta, 19:00 - 20:30h, **Sala DEST Multimídia**
+- **Horários de atendimento dos professores:**
+    - Quartas e quintas, 14:00 - 19:00 (preferenciais). Outros horários
+      podem ser agendados previamente por email.
+- **Frequência**: de acordo com as normas da Universidade, mínimo de 75%
+- **Avaliação**:
+  - (60%) Duas provas escritas (30% cada uma)
+  - (20%) Avaliações esporádicas
+  - (20%) Apresentação de trabalho
+- **Datas importantes:** De acordo com a [Resolução 64/18 - CEPE][]:
+    - **05/08**: Início do semestre letivo
+    - **04/12**: Final do semestre letivo
+    - **09/12-14/12**: Período de exames
+
+# Programa/objetivos da disciplina
+
+
+# Ementa
+
+
+<!-- links -->
+
+[Paulo Justiniano Ribeiro Jr.]: http://leg.ufpr.br/~paulojus
+[Fernando de Pol Mayer]: http://leg.ufpr.br/~fernandomayer
+[LEG]: http://www.leg.ufpr.br
+[Resolução 64/18 - CEPE]: http://www.est.ufpr.br/calendario/cepe6418.pdf

@@ -1,0 +1,60 @@
+---
+title: "Cronograma das aulas do curso"
+output:
+  html_document:
+    toc: false
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+source("setup_knitr.R")
+```
+
+```{r, eval=FALSE, include=FALSE}
+## Gera a lista com as datas de todas as aulas. O resultado do último
+## comando pode ser copiado direto para o documento
+datas1 <- seq.Date(as.Date("2019-08-06"), as.Date("2019-12-03"),
+                   by = "week")
+datas1 <- format.Date(datas1, format = "%d/%m")
+datas2 <- seq.Date(as.Date("2019-08-08"), as.Date("2019-11-28"),
+                   by = "week")
+datas2 <- format.Date(datas2, format = "%d/%m")
+cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
+           datas2, " (Qui)", "**:\n"))
+```
+
+- **06/08 (Ter)**: Apresentação da disciplina.
+- **08/08 (Qui)**:
+- **13/08 (Ter)**:
+- **15/08 (Qui)**:
+- **20/08 (Ter)**:
+- **22/08 (Qui)**:
+- **27/08 (Ter)**:
+- **29/08 (Qui)**:
+- **03/09 (Ter)**:
+- **05/09 (Qui)**:
+- **10/09 (Ter)**:
+- **12/09 (Qui)**:
+- **17/09 (Ter)**:
+- **19/09 (Qui)**:
+- **24/09 (Ter)**: **Prova 1.**
+- **26/09 (Qui)**:
+- **01/10 (Ter)**:
+- **03/10 (Qui)**:
+- **08/10 (Ter)**:
+- **10/10 (Qui)**:
+- **15/10 (Ter)**:
+- **17/10 (Qui)**:
+- **22/10 (Ter)**:
+- **24/10 (Qui)**:
+- **29/10 (Ter)**:
+- **31/10 (Qui)**:
+- **05/11 (Ter)**:
+- **07/11 (Qui)**:
+- **12/11 (Ter)**:
+- **14/11 (Qui)**:
+- **19/11 (Ter)**:
+- **21/11 (Qui)**:
+- **26/11 (Ter)**: **Prova 2.**
+- **28/11 (Qui)**:
+- **03/12 (Ter)**:
+- **08/08 (Qui)**:
