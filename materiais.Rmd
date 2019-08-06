@@ -5,4 +5,8 @@ output:
     toc: false
 ---
 
-Em breve.
+- [Introdução à inferência
+  bayesiana](http://www.leg.ufpr.br/~paulojus/CE227/InferenciaBayesiana.pdf).
+  Apostila escrita por Stuart Coles, traduzida e adaptada por Paulo J.
+  Ribeiro Jr.
+- [Página com materiais do Prof Ricardo Ehlers (ICMC/USP)](http://www.icmc.usp.br/pessoas/ehlers/bayes/).
