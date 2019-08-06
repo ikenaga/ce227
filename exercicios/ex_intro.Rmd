@@ -60,4 +60,4 @@ anticorpos?
 
 5) No contexto do problema (3), voce deve ter resolvido de alguma forma,
 usando algum método estatístico para responder à pergunta de interesse.
-Voce teria alguma(s) forma alternativa de proceder a análise dos dados?
+Você teria alguma(s) forma alternativa de proceder a análise dos dados?
