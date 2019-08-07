@@ -13,9 +13,12 @@ output:
   **Bayesian data analysis**. Chapman & Hall, 2014.
 - Paulino, CD; Turkman, MAA; Murteira, B; Silva, GL. **Estatística
   bayesiana**. Fundação Calouste Gulbenkian, 2018.
+- Stone, JV. **Bayes' Rule: a tutorial introduction to Bayesian
+analysis**. Sebtel Press, 2013.
 
 ## Referências complementares
 
+- Albert, J. **Bayesian computation with R**. Springer, 2007.
 - Hobbs, NT; Hooten, MB. **Bayesian models. A ststistical primer for
   ecologistas**. Princeton University Press, 2015.
 - Jaynes, ET. **Probability theory: the logic of science**. Cambridge
@@ -23,6 +26,7 @@ output:
 - Kinas, PG; Andrade, HA. **Introdução à análise bayesiana (com R)**.
   MaisQnada, 2010.
 - Kruschke, JK. **Doing bayesian data analysis**. Academic Press, 2015.
+- Lee, PM. **Bayesian ststistics: an introduction**. Arnold, 2004.
 - McElreath, R. **Statistical rethinking. A bayesian course with
   examples in R and Stan**. Chapman & Hall, 2016.
 
@@ -32,3 +36,14 @@ output:
   R-INLA](https://becarioprecario.bitbucket.io/inla-gitbook/index.html).
 
 ## Leituras complementares
+
+*Leituras relevantes para o tema, mas não necessariamente relacionadas
+diretamente com a disciplina.*
+
+- Jeffreys, H. **Scientific inference**. Cambridge University
+  Press, 1957.
+- Jeffreys, H. [Theory of
+  probability](https://archive.org/details/in.ernet.dli.2015.2608/page/n5).
+  Cambridge University Press, 1948.
+- Pólya, G. **Mathematics and plausible reasoning**. Princeton
+  University Press, 1990.
