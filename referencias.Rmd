@@ -29,6 +29,8 @@ analysis**. Sebtel Press, 2013.
 - Lee, PM. **Bayesian ststistics: an introduction**. Arnold, 2004.
 - McElreath, R. **Statistical rethinking. A bayesian course with
   examples in R and Stan**. Chapman & Hall, 2016.
+- Sivia, DS; Skilling, J. **Data analysis: a Bayesian tutorial**. Oxford
+  University Press, 2006.
 
 ## Referências *online*
 
