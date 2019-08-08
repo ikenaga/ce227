@@ -11,8 +11,12 @@ output:
   & Hall, 2009.
 - Gelman, A; Carlin, JB; Stern, HS; Dunson, DB; Vehtari, A; Rubin, DB.
   **Bayesian data analysis**. Chapman & Hall, 2014.
+- Migon, H, Gamerman, D, & Louzada, F. **Statistical Inference: An
+  Integrated Approach**. Chapman & Hall, 2015.
 - Paulino, CD; Turkman, MAA; Murteira, B; Silva, GL. **Estatística
   bayesiana**. Fundação Calouste Gulbenkian, 2018.
+- Robert, CP; Casella, G. **Introducing Monte Carlo methods in R**.
+Springer, 2010.
 - Stone, JV. **Bayes' Rule: a tutorial introduction to Bayesian
 analysis**. Sebtel Press, 2013.
 
