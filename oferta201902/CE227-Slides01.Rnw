@@ -180,12 +180,14 @@ options(width = 120)
   \theta : \mbox{"quantidades"\ desconhecidas} \]
 \pause \item inferência é portanto falar sobre $\theta|y$ 
 \pause \item mas \ldots como aprendemos (sobre $\theta$) com os dados ($y$)?
+\pause \item mas \ldots \textbf{só} aprendemos (sobre $\theta$) com os dados ($y$)?
 \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile]
-\frametitle{Objetivos de inferência}
+  \frametitle{O que usamos para aprender/decidir?}
+%\frametitle{Objetivos de inferência}
 
   Em uma população (considerada \textit{infinita}) uma proporção $\theta$ de indivíduos
   apresenta determinada característica.
@@ -201,31 +203,30 @@ options(width = 120)
   \pause
   Dados de \textit{uma} amostra (considerada aleatória):\\
   $n = 80$ e $y = 19$
-  
   Como proceder?
 \end{frame}
 
+%\begin{frame}
+%  \frametitle{Paradigmas e métodos de inferência}
+
+%{\bf Objetivos:} \\
+%  Estimativa de $\theta$, \\
+%  expressão da incerteza sobre  $\theta$, \\
+%  opinião em relação a valor de interesse $\theta_0 = 0.20$
+%\vspace{1cm}
+
+%{\bf Abordagens (paradigmas):}  
+%  \begin{itemize}
+%    \itemsep 1.5ex
+%  \item frequentista,
+%  \item verossimilhança,
+%  \item bayesiana.
+%  \end{itemize}
+%\end{frame}
+
+
 \begin{frame}
-  \frametitle{Paradigmas e métodos de inferência}
-
-{\bf Objetivos:} \\
-  Estimativa de $\theta$, \\
-  expressão da incerteza sobre  $\theta$, \\
-  opinião em relação a valor de interesse $\theta_0 = 0.20$
-\vspace{1cm}
-
-{\bf Abordagens (paradigmas):}  
-  \begin{itemize}
-    \itemsep 1.5ex
-  \item frequentista,
-  \item verossimilhança,
-  \item bayesiana.
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}
-  \frametitle{Abordagem Bayesiana}
+  \frametitle{O que usamos para aprender/decidir?}
   
 Um \href{https://www.youtube.com/watch?v=OCbvCRkl_4U}{vídeo} vale mais que mil palavras!
 \\
