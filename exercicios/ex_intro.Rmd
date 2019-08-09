@@ -20,10 +20,10 @@ header-includes:
 
 1) Em um estudo há interesse em estimar a proporção de estudantes da
 UFPR que possuem anticorpos para hepatite-C. Considere que a UFPR decida
-fazer um teste de *screening* (que pode ser aplicado em qualquer
-indivíduo da população, mesmo sem suspeita) para verificar indivíduos
-com anticorpos para uma determinada doença (considere por exemplo
-hepatite-C). Considera-se de antemão que a doença ocorre em 2% da
+fazer um teste de *screening* (io teste é aplicado em qualquer
+indivíduo selecionado da população, independente de haver ou não suspeita ou indicação) 
+para verificar indivíduos com anticorpos para a doença. 
+Considera-se de antemão que a doença ocorre em 2% da
 população de estudantes. Sabe-se que o teste é *imperfeito*: acerta 90%
 dos que tem doença e 80% dos que não tem. Se o teste deu positivo para
 uma pessoa, qual a chance dela ter a doença?
@@ -52,8 +52,8 @@ print(xtable(dados, digits = 0), include.rownames = FALSE,
 ```
 
 4) No contexto da questão (1), deseja-se agora inferir sobre a proporção
-de estudantes com articorpos de hepatite-C. Para isto tomou-se uma
-amostra aleatória de 250 estudantes dos quais 32 apresentaram
+de estudantes com articorpos de hepatite-C em uma certa população. 
+Para isto tomou-se uma amostra aleatória de 250 estudantes dos quais 32 apresentaram
 anticorpos. O que voce (como estatístico) apresentaria como
 resultado/conhecimento (inferência) sobre a proporção de alunos com
 anticorpos?
@@ -61,3 +61,12 @@ anticorpos?
 5) No contexto do problema (3), voce deve ter resolvido de alguma forma,
 usando algum método estatístico para responder à pergunta de interesse.
 Você teria alguma(s) forma alternativa de proceder a análise dos dados?
+
+6) Retorne ao problema 1). Escreva a solução com uma notação
+que indique quem são os dados (denotando por $y$'s) e parâmetros
+(denotando com $\theta$'s).
+Faça o mesmo para o problema 2).
+
+
+
+
