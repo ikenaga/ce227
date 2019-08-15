@@ -27,4 +27,4 @@ output:
 ## Arquivos de comandos 
 
 - [Inferência sobre proporção](oferta201902/codigos/prop-paradigmas.R)
-  - [arquivos auxiliar](oferta021902/codigos/bayes-fun-01.R)
+  - [arquivos auxiliar](oferta201902/codigos/bayes-fun-01.R)
