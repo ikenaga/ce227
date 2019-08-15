@@ -168,15 +168,26 @@ options(width = 120)
 
 
 \begin{frame}
-\frametitle{Como proceder inferência?}
-  
-{\Large Como aprender com os dados?}
+\frametitle{Inferência}
 
+\begin{itemize}
+\pause \item inferência?
+\pause \item inferência estatística?
+\pause \item aprender com os dados!
+\pause \item como assim \ldots aprender com os dados! \\ 
+\pause Vamos usar alguma notação:
+\[ y : \mbox{dados} \;\;\;
+  \theta : \mbox{"quantidades"\ desconhecidas} \]
+\pause \item inferência é portanto falar sobre $\theta|y$ 
+\pause \item mas \ldots como aprendemos (sobre $\theta$) com os dados ($y$)?
+\pause \item mas \ldots \textbf{só} aprendemos (sobre $\theta$) com os dados ($y$)?
+\end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile]
-\frametitle{Objetivos de inferência}
+  \frametitle{O que usamos para aprender/decidir?}
+%\frametitle{Objetivos de inferência}
 
   Em uma população (considerada \textit{infinita}) uma proporção $\theta$ de indivíduos
   apresenta determinada característica.
@@ -192,31 +203,30 @@ options(width = 120)
   \pause
   Dados de \textit{uma} amostra (considerada aleatória):\\
   $n = 80$ e $y = 19$
-  
   Como proceder?
 \end{frame}
 
+%\begin{frame}
+%  \frametitle{Paradigmas e métodos de inferência}
+
+%{\bf Objetivos:} \\
+%  Estimativa de $\theta$, \\
+%  expressão da incerteza sobre  $\theta$, \\
+%  opinião em relação a valor de interesse $\theta_0 = 0.20$
+%\vspace{1cm}
+
+%{\bf Abordagens (paradigmas):}  
+%  \begin{itemize}
+%    \itemsep 1.5ex
+%  \item frequentista,
+%  \item verossimilhança,
+%  \item bayesiana.
+%  \end{itemize}
+%\end{frame}
+
+
 \begin{frame}
-  \frametitle{Paradigmas e métodos de inferência}
-
-{\bf Objetivos:} \\
-  Estimativa de $\theta$, \\
-  expressão da incerteza sobre  $\theta$, \\
-  opinião em relação a valor de interesse $\theta_0 = 0.20$
-\vspace{1cm}
-
-{\bf Abordagens (paradigmas):}  
-  \begin{itemize}
-    \itemsep 1.5ex
-  \item frequentista,
-  \item verossimilhança,
-  \item bayesiana.
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}
-  \frametitle{Abordagem Bayesiana}
+  \frametitle{O que usamos para aprender/decidir?}
   
 Um \href{https://www.youtube.com/watch?v=OCbvCRkl_4U}{vídeo} vale mais que mil palavras!
 \\
@@ -614,13 +624,6 @@ abline(h=sqrt(qchisq(c(0.9, 0.95, 0.99), df=1)), lty=2)
   \end{itemize}
 \end{frame}  
 
-\begin{frame}
-  \frametitle{O mundo estatístico}
-  \centering
-  \includegraphics[height=0.35\textwidth]{pics/intro-002}
-\end{frame}
-
-
 \begin{frame}[fragile]
   \frametitle{All we need is \ldots likelihood}
 %  \frametitle{Abordagem pela verossimilhança} 
@@ -672,13 +675,6 @@ plot(th, sqrt(-2*log(sX17/LMAX)), type="l", xlab=expression(theta), ylab=express
 abline(h=sqrt(qchisq(c(0.9, 0.95, 0.99), df=1)), lty=2)
 @ 
 \end{frame}
-
-
-%\begin{frame}
- % \frametitle{All we need is \ldots likelihood}
- % \centering
- % \includegraphics[height=0.8\textheight]{pics/intro-003}
-%\end{frame}
 
 
 \begin{frame}

@@ -19,3 +19,12 @@ output:
 ## Listas de exercícios
 
 - [Lista de exercícios 1](exercicios/ex_intro.pdf)
+
+## Slides utilizados nas aulas
+
+- [Slides iniciais](oferta201902/CE227-Slides01.pdf)
+
+## Arquivos de comandos 
+
+- [Inferência sobre proporção](oferta201902/codigos/prop.paradigmas.R)
+  - [arquivos auxiliar](oferta021902/codigos/bayes-fun-01.R)
