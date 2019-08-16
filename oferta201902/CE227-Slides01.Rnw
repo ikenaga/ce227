@@ -586,7 +586,7 @@ abline(h=sqrt(qchisq(c(0.9, 0.95, 0.99), df=1)), lty=2)
   Possíveis soluções:
   \begin{itemize}
     \itemsep 1.5ex
-  \item critérios de razoabilidade e comparação (e.g. moedas ou a família do Sr. João!)
+  \item critérios de razoabilidade e comparação (e.g. equivalência com caras consecutivas)% ou a família do Sr. João!)
   \item argumento frequentista (comportamento ``médio'' da verossimilhança)  estabelece relações:
     \begin{center}
       % \begin{tabular}{>{$}l <{$}>{$}c <{$}>{$}c <{$}>{$}c <{$}>{$}c <{$}}
@@ -660,21 +660,21 @@ text(0.1, LHIP, expression(L(theta[0])/L(hat(theta))), pos=3, cex=0.8, col="dark
 @
 \end{frame}
 
-\begin{frame}[fragile]
-  \frametitle{Representação alternativa} 
+%\begin{frame}[fragile]
+%  \frametitle{Representação alternativa} 
 
- \red{Função deviance} e cortes que definem intervalos (a 90, 95 e 99\%)
-\vspace{0.5cm}  
-<<fig.width=10, fig.height=5, out.width = "0.99\\textwidth">>=
-par(mfrow=c(1,2), mar=c(2.9,2.9,0.2,1), mgp=c(1.7, 0.7, 0))
-plot(th, -2*log(sX17/LMAX), type="l", xlab=expression(theta), ylab=expression(paste("D(", theta, "|", "y=17)")), 
-     xlim=range(th), lwd=2)
-abline(h=qchisq(c(0.9, 0.95, 0.99), df=1), lty=2)
-plot(th, sqrt(-2*log(sX17/LMAX)), type="l", xlab=expression(theta), ylab=expression(sqrt(paste("D(", theta, "|", "y=17)"))), 
-     xlim=range(th), lwd=2)
-abline(h=sqrt(qchisq(c(0.9, 0.95, 0.99), df=1)), lty=2)
-@ 
-\end{frame}
+% \red{Função deviance} e cortes que definem intervalos (a 90, 95 e 99\%)
+%\vspace{0.5cm}  
+%<<fig.width=10, fig.height=5, out.width = "0.99\\textwidth">>=
+%par(mfrow=c(1,2), mar=c(2.9,2.9,0.2,1), mgp=c(1.7, 0.7, 0))
+%plot(th, -2*log(sX17/LMAX), type="l", xlab=expression(theta), ylab=expression(p%aste("D(", theta, "|", "y=17)")), 
+%     xlim=range(th), lwd=2)
+%abline(h=qchisq(c(0.9, 0.95, 0.99), df=1), lty=2)
+%plot(th, sqrt(-2*log(sX17/LMAX)), type="l", xlab=expression(theta), ylab=expres%sion(sqrt(paste("D(", theta, "|", "y=17)"))), 
+%     xlim=range(th), lwd=2)
+%abline(h=sqrt(qchisq(c(0.9, 0.95, 0.99), df=1)), lty=2)
+%@ 
+%\end{frame}
 
 
 \begin{frame}
@@ -703,12 +703,12 @@ abline(h=sqrt(qchisq(c(0.9, 0.95, 0.99), df=1)), lty=2)
   \item Extensão da definição do modelo: \\
   \begin{align*} 
   [Y|\theta] &\sim B(n, \theta) \\
-  [\theta] &\sim Pr(a, b)  \;\; (\textit{priori})
+  [\theta] &\sim Pr(\psi)  \;\; (\textit{priori})
   \end{align*} 
   \item permite obter (via teorema de Bayes) 
   \begin{align*} 
   [\theta|y] &\propto [Y|\theta] [\theta]  \\
-  [\theta|y] & \sim \pi(a^{*}, b^{*})  \;\; (\textit{posteriori})
+  [\theta|y] & \sim \pi(\psi^{*})  \;\; (\textit{posteriori})
   \end{align*} 
   \item Analogias diretas para estimação (pontual e intervalar),
   \item \ldots mas não diretas ou triviais para testes de hipótese \\
