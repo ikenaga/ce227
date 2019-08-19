@@ -24,9 +24,12 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 
 - **06/08 (Ter)**: Apresentação da disciplina. Trazer a [lista de
   exercícios 1](exercicios/ex_intro.pdf) para a próxima aula.
-- **08/08 (Qui)**:
+- **08/08 (Qui)**: Discussão dos temas apresentados na lista 1.
 - **13/08 (Ter)**:
-- **15/08 (Qui)**:
+- **15/08 (Qui)**: Comparação entre os paradigmas da inferência
+  estatística.
+  - [SLides](oferta201902/CE227-Slides01.pdf) de aula.
+  - [Script](scripts/script_proporcao.R) feito em sala.
 - **20/08 (Ter)**:
 - **22/08 (Qui)**:
 - **27/08 (Ter)**:
