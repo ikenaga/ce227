@@ -27,8 +27,9 @@ output:
 ## Arquivos de comandos 
 
 - [Inferência sobre proporção](oferta201902/codigos/prop-paradigmas.R)
-  - [arquivos auxiliar](oferta201902/codigos/bayes-fun-01.R)
+  - [arquivos auxiliar para obtenção de priori e posteriori no modelo binomial/beta](oferta201902/codigos/bayes-fun-01.R)
 - [Comparação de duas amostras](oferta201902/codigos/duas-amostras-paradigmas.R)
   - [dados mandíbulas](oferta201902/dados/mandible.R)
   - [dados altura e peso](oferta201902/dados/alturapeso.csv)
+  - [codigo para teste aleatorizado](oferta201902/codigos/mctest.R)
 
