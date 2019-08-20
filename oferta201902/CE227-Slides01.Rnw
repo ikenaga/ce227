@@ -944,8 +944,6 @@ text(0.8, 18, "n=800 e y=190")
 %------------------------------------------------
 
 
-\end{document}
-
 
 \begin{frame}
 
@@ -1281,6 +1279,8 @@ plot(Btt, trace=F)
   \end{align*}
 \end{frame}
 
+
+
 \begin{frame}[fragile]
   \frametitle{Abordagem geral e generalizando}
 
@@ -1299,6 +1299,10 @@ plot(Btt, trace=F)
     \end{align*}
   \end{itemize}
 \end{frame}
+
+\end{document}
+
+
 
 \begin{frame}[fragile]
   \frametitle{Abordagem geral e generalizando}
