@@ -56,7 +56,7 @@
   if(is.null(ldots$xlim) & is.null(ldots$ylim))
     hist(MCstatistics, prob=TRUE, xlim = c(xmin, xmax), ylim=c(0, ymax),...)
   else
-    hist(x$sim, prob=TRUE, ...)
+    hist(x$sim, freq=FALSE, ...)
   arrows(x$data, ymax/5, x$data, 0, lwd=2)
   text(x$data, ymax/5, round(x$data, dig=4), pos=3, col="red")
   st <- round(x$p[1], dig=4)

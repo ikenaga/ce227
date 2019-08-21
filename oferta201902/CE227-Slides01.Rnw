@@ -1070,7 +1070,7 @@ with(mand, {
     t = \frac{\overline{y_2}-\overline{y_1}}{S \sqrt{\frac{1}{n_1}+\frac{1}{n_2}}} \sim{\rm t}(\nu)             
   \end{align*}
 
-\[ \nu = n1+n2-2 \;\;{\rm e}\;\; S =\hat{\sigma}^2= \sqrt{\frac{(n_1-1)S_1^2 + (n_2-1)S_2^2}{n_1 + n_2 - 2}} \]
+\[ \nu = n1+n2-2 \;\;{\rm e}\;\; S =\hat{\sigma}= \sqrt{\frac{(n_1-1)S_1^2 + (n_2-1)S_2^2}{n_1 + n_2 - 2}} \]
 \end{frame}
 
 \begin{frame}[fragile]
@@ -1090,9 +1090,9 @@ with(mandible, t.test(females, male, var.equal=TRUE))
 
   Diferentes ``cenários'' para o \blue{teste-t}:
   \begin{itemize}
-    \item Amostras independentes
+    \item \red{Amostras independentes}
   \begin{itemize}
-    \item Variâncias iguais
+    \item \red{Variâncias iguais}
     \item Variâncias diferentes
   \end{itemize}
  \item Amostras pareadas (dependentes)
@@ -1108,21 +1108,21 @@ with(mandible, t.test(females, male, var.equal=TRUE))
   
 \end{frame}
 
-\begin{frame}[fragile]
-  \frametitle{O teste-$t$ (2)}
+%\begin{frame}[fragile]
+%  \frametitle{O teste-$t$ (2)}
 
-<<echo=TRUE>>=
-with(mandible, t.test(females, male, var.equal=FALSE))
-@ 
-\end{frame}
+%<<echo=TRUE>>=
+%with(mandible, t.test(females, male, var.equal=FALSE))
+%@ 
+%\end{frame}
 
-\begin{frame}[fragile]
-  \frametitle{O teste-$t$ (3)}
-
-<<echo=TRUE>>=
-with(mandible, t.test(females, male, paired=TRUE))
-@ 
-\end{frame}
+%\begin{frame}[fragile]
+%  \frametitle{O teste-$t$ (3)}
+%
+%<<echo=TRUE>>=
+%with(mandible, t.test(females, male, paired=TRUE))
+%@ 
+%\end{frame}
 
 
 <<>>=
@@ -1205,7 +1205,7 @@ plot(prof, level=c(0.5, 0.8, 0.95, 0.99))
 \begin{frame}[fragile]
   \frametitle{Comparando modelos e verossimilhanças}
 
-  Comparando modelos para os dados (revisitando AULA 07)
+  Comparando modelos para os dados %(revisitando AULA 07)
   \begin{align*}
     Y_{ij} &\sim {\rm N}(\mu, \sigma^2) \\
     Y_{ij} &\sim {\rm N}(\mu_i, \sigma^2) \\
@@ -1246,7 +1246,7 @@ require(MCMCpack)
 \begin{frame}[fragile]
   \frametitle{Inferência Bayesiana}
 
-Obtenção de distribuição \red{posteriori} para a diferença de médias
+Obtenção de (amostras da) distribuição \red{posteriori} para a diferença de médias
 
 <<echo=TRUE>>=
 require(MCMCpack)
