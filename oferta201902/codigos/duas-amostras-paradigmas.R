@@ -60,7 +60,7 @@ mctest(mandible$f, mandible$m, paired=T)
 
 ## ----echo=TRUE-----------------------------------------------------------
 require(stats4)
-ll <- function(mu, theta, lsigma, am1, am2){
+ll1 <- function(mu, theta, lsigma, am1, am2){
     sigma <- exp(lsigma)
     l1 <- sum(dnorm(am1, m=mu, sd=sigma, log=T))    
     l2 <- sum(dnorm(am2, m=mu+theta, sd=sigma, log=T))
@@ -69,18 +69,18 @@ ll <- function(mu, theta, lsigma, am1, am2){
 
 
 ## ----echo=TRUE-----------------------------------------------------------
-fit <- mle(ll, start=list(mu=110, theta=0, lsigma=log(10)), 
+fit1 <- mle(ll1, start=list(mu=110, theta=0, lsigma=log(10)), 
            fixed=list(am1 = mandible$fem, am2 = mandible$male))
 
 
 ## ----echo=TRUE-----------------------------------------------------------
-summary(fit)
-confint(fit, level=0.95)
-prof <- profile(fit)
+summary(fit1)
+confint(fit1, level=0.95)
+prof1 <- profile(fit1)
 
 ## ----results="hide",fig.width=7, fig.height=3, out.width = "0.99\\textwidth"----
 par(mfrow=c(1,3), mar=c(2.5,2.5,0.3, 0.3), mgp=c(1.7, 0.7, 0))
-plot(prof, level=c(0.5, 0.8, 0.95, 0.99))
+plot(prof1, level=c(0.5, 0.8, 0.95, 0.99))
 
 
 ## variâncias diferentes
@@ -103,23 +103,23 @@ plot(prof2, level=c(0.5, 0.8, 0.95, 0.99))
 
 
 ## ----echo=TRUE-----------------------------------------------------------
-L1 <- lm(mandible~1, data=mand)
-(lLs <- c(logLik(L1), logLik(fit), logLik(fit2)))
+fot0 <- lm(mandible~1, data=mand)
+(lLs <- c(logLik(fit0), logLik(fit1), logLik(fit2)))
 nps <- c(2, 3, 4)
 (dlLs <-2* diff(lLs))
 dnps <- diff(nps)
 2*pchisq(dlLs, df=dnps, lower=FALSE)
 
 ## ----echo=TRUE-----------------------------------------------------------
--2 * logLik(L1) + 2 * 2
--2 * logLik(fit) + 2 * 3
+-2 * logLik(fit0) + 2 * 2
+-2 * logLik(fit1) + 2 * 3
 -2 * logLik(fit2) + 2 * 4
-c(AIC(L1), AIC(fit), AIC(fit2))
+c(AIC(fit0), AIC(fit1), AIC(fit2))
 ##
--2 * logLik(L1) + log(20) * 2
--2 * logLik(fit) + log(20) * 3
+-2 * logLik(fit0) + log(20) * 2
+-2 * logLik(fit1) + log(20) * 3
 -2 * logLik(fit2) + log(20) * 4
-c(AIC(L1, k=log(20)), AIC(fit, k=log(20)), AIC(fit2, k=log(20)))
+c(AIC(fit0, k=log(20)), AIC(fit1, k=log(20)), AIC(fit2, k=log(20)))
 
 ## ------------------------------------------------------------------------
 require(MCMCpack)
