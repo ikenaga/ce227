@@ -22,18 +22,19 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
            datas2, " (Qui)", "**:\n"))
 ```
 
-- **06/08 (Ter)**: Apresentação da disciplina. Trazer a [lista de
+- **06/08 (Ter)**: (PJ) Apresentação da disciplina. Trazer a [lista de
   exercícios 1](exercicios/ex_intro.pdf) para a próxima aula.
-- **08/08 (Qui)**: Discussão dos temas apresentados na lista 1.
-- **13/08 (Ter)**:
-- **15/08 (Qui)**: Comparação entre os paradigmas da inferência
+- **08/08 (Qui)**: (PJ) Discussão dos temas apresentados na lista 1.
+- **13/08 (Ter)**: (PJ) (dia de paralisação) Aula revisãode conceitos
+- **15/08 (Qui)**: (PJ) Comparação entre os paradigmas da inferência
   estatística.
-  - [SLides](oferta201902/CE227-Slides01.pdf) de aula.
+  - [Slides](oferta201902/CE227-Slides01.pdf) de aula.
   - [Script](scripts/script_proporcao.R) feito em sala.
-- **20/08 (Ter)**:
-- **22/08 (Qui)**:
-- **27/08 (Ter)**:
-- **29/08 (Qui)**:
+- **20/08 (Ter)**: (PJ) Comparação de duas amostras sob diferentes paradigmas (ver materiais para scripts) 
+- **22/08 (Qui)**: (PJ) Expecificação de priori e exemplo de Poisson com priori (conjugada) Gama
+- **27/08 (Ter)**: (PJ) Discussão e resolução de exercícios do Capítulo 2
+  - [Script](oferta201902/codigos/ExerciciosCap2.R)
+- **29/08 (Qui)**: (PJ) Avaliação intermediária
 - **03/09 (Ter)**:
 - **05/09 (Qui)**:
 - **10/09 (Ter)**:
