@@ -1,0 +1,11 @@
+##
+## Exercício 2.1
+##
+## a) Exemplo supondo p=3, q=5 e y=9
+## Priori Be(3,5)
+## Verossimilhança \propto Be(9, 2)
+## Posteriori Be(11, 6)
+
+curve(dbeta(x, 3, 5), from=0, to=1, col=2)
+curve(dbeta(x, 3, 5), from=0, to=1, add=T)
+curve(dbeta(x, 3, 5), from=0, to=1, col=4, add=T)
