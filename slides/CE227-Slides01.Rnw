@@ -1,0 +1,1948 @@
+%-----------------------------------------------------------------------
+%   Template para slides em Beamer do Curso de Especialiação em
+%   Data Science & Big Data - UFPR
+%
+%                                                   Prof. Walmes Zeviani
+%                                                       Vice-coordenador
+%-----------------------------------------------------------------------
+
+%%
+%% Disciplina:
+%% Prof Ministrante: PJ
+%% Aula 07 e 08
+%% Data: 17-23/05/2019
+\documentclass{beamer}
+\usepackage[brazil]{babel}
+\usepackage[utf8]{inputenc}
+
+%-----------------------------------------------------------------------
+% Pacotes.
+
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{upquote}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{color}
+
+
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+
+
+\definecolor{DarkBlue}{rgb}{0.0, 0.0, 0.55}
+\newcommand{\tcDB}[1]{\textcolor{DarkBlue}{#1}}
+\newcommand{\tcDR}[1]{\textcolor{DarkRed}{#1}}
+
+
+% Legenda de elementos flutuantes.
+\usepackage[hang]{caption}
+\captionsetup{
+  font=footnotesize,
+  labelfont=footnotesize,
+  labelsep=period}
+
+% Fontes.
+\usepackage[default]{lato}
+\usepackage{inconsolata}
+
+% Referências bibliográficas.
+\usepackage[
+  alf,
+  abnt-emphasize=bf,
+  abnt-etal-list=2,
+  abnt-and-type=&]{abntex2cite}
+% Usar \cite{<ref>} e \citeonline{<ref>}.
+
+%-----------------------------------------------------------------------
+% Configurações do Beamer, como cores e layout.
+
+\input{header.tex}
+
+%-----------------------------------------------------------------------
+% Meta dados do slide.
+
+\title[IFCD]{
+  \LARGE Inferência Bayesiana\\Introdução}
+
+\subtitle[Aula 01 a a definir]{
+  \large Contextualização}
+
+\author[PJ]{
+ \textcolor{gray}{Paulo Justiniano Ribeiro Jr}
+}
+
+\institute[]{
+  {\tiny Curso de Graduação em Estatística}\\
+%  {Data Science \& Big Data}\\
+  {\tiny Universidade Federal do Paraná}}
+
+% \date[]{
+%   \textcolor{lightgrey}{2018/1}
+% }
+\date{2o semestre de 2019}
+
+% Logo de canto e imagem de fundo.
+\logo{
+  \includegraphics[width=1.5cm]{leg.png}
+}
+%\usebackgroundtemplate{
+%%  \includegraphics[height=\paperheight]{../config/ufpr-fundo-4x3.jpg}
+%  \includegraphics[height=\paperheight]{ufpr-fundo-4x3.jpg}
+%}
+
+%-----------------------------------------------------------------------
+% Configuração para fragmentos de código R usando knitr.
+
+% Slides que não irão usar fragmentos de código R, essa seção pode ser
+% removida sem prejuízos.
+
+% % Tamanho de fonte e distância entre linhas.
+%\renewenvironment{knitrout}{
+%  \renewcommand{\baselinestretch}{0.75}%\tiny
+%}{}
+\renewenvironment{knitrout}{%
+  \setlength{\topsep}{-0.1ex}
+  \renewcommand{\baselinestretch}{0.8}
+%%  \footnotesize
+%%  \normalsize
+}{}
+
+
+<<setup, include=FALSE>>=
+library(knitr)
+
+# Define esquema de cores para code highlight.
+thm <- knit_theme$get("bclear")
+knit_theme$set(thm)
+
+# Controla execução e exibição de código R.
+opts_chunk$set(
+    cache.path="cache/",
+    fig.path="Rfigs/",
+    echo = FALSE,
+#    size = "tiny",
+    size = "footnotesize",
+    cache = FALSE,
+    tidy = FALSE,
+    fig.width = 7,
+    fig.height = 5,
+    out.width = "0.8\\textwidth",
+    fig.align = "center",
+    eval.after= "fig.cap",
+    dev.args = list(family = "Helvetica", bg = "white"),
+    warning = FALSE,
+    error = FALSE,
+    message = FALSE)
+
+
+#opts_chunk$set(
+#    size = "tiny",
+#    cache = FALSE,
+#    tidy = FALSE,
+#    fig.width = 7,
+#    fig.height = 5,
+#    out.width = "0.8\\textwidth",
+#    fig.align = "center",
+#    eval.after= "fig.cap",
+#    dev.args = list(family = "Helvetica", bg = "white"),
+#    warning = FALSE,
+#    error = FALSE,
+#    message = FALSE)
+
+# Largura do texto de saída.
+options(width = 120)
+@
+
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+% --------------------------------------------
+
+
+\begin{frame}
+\frametitle{Inferência}
+
+\begin{itemize}
+\pause \item inferência?
+\pause \item inferência estatística?
+\pause \item aprender com os dados!
+\pause \item como assim \ldots aprender com os dados! \\
+\pause Vamos usar alguma notação:
+\[ y : \mbox{dados} \;\;\;
+  \theta : \mbox{"quantidades"\ desconhecidas} \]
+\pause \item inferência é portanto falar sobre $\theta|y$
+\pause \item mas \ldots como aprendemos (sobre $\theta$) com os dados ($y$)?
+\pause \item mas \ldots \textbf{só} aprendemos (sobre $\theta$) com os dados ($y$)?
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{O que usamos para aprender/decidir?}
+%\frametitle{Objetivos de inferência}
+
+  Em uma população (considerada \textit{infinita}) uma proporção $\theta$ de indivíduos
+  apresenta determinada característica.
+
+  Deseja-se (\blue{inferências}):
+  \begin{itemize}
+  \item estimar $\theta$,
+  \item expressar a incerteza sobre esta estimativa,
+  \item verificar se $\theta$ (e portanto a população) está
+    fora de normas/referências (proporção max. de 20\%),
+    se há evidências de um desvio ``relevante'' (significativo).
+  \end{itemize}
+  \pause
+  Dados de \textit{uma} amostra (considerada aleatória):\\
+  $n = 80$ e $y = 19$
+  Como proceder?
+\end{frame}
+
+%\begin{frame}
+%  \frametitle{Paradigmas e métodos de inferência}
+
+%{\bf Objetivos:} \\
+%  Estimativa de $\theta$, \\
+%  expressão da incerteza sobre  $\theta$, \\
+%  opinião em relação a valor de interesse $\theta_0 = 0.20$
+%\vspace{1cm}
+
+%{\bf Abordagens (paradigmas):}
+%  \begin{itemize}
+%    \itemsep 1.5ex
+%  \item frequentista,
+%  \item verossimilhança,
+%  \item bayesiana.
+%  \end{itemize}
+%\end{frame}
+
+
+\begin{frame}
+  \frametitle{O que usamos para aprender/decidir?}
+
+Um \href{https://www.youtube.com/watch?v=OCbvCRkl_4U}{vídeo} vale mais que mil palavras!
+\\
+Vamos usar na discussão apenas de 0 e 50 segundos do vídeo.\\
+(baseado em \cite{stone:2013})
+
+\pause
+
+Por que ocorre o mal entendido? \\
+
+Elementos:
+\begin{itemize}
+\itemsep 2ex
+\item O pedido é a informação que o vendedor recebe.
+\item O vendedor tinha alguma opinião anterior sobre o que poderia ter sido pedido?
+\item O vendedor ao final acha mais provável que o cliente tenha pedido
+  quatro velas (\textit{four candles}) do que o cabo do garfo  (\textit{fork handles}).
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Um vídeo em \blue{notação}}
+
+\begin{itemize}
+\item ``Adivinhar''\ o que o cliente quer (\red{estado da natureza}):\\
+  \[ \theta_c \mbox{  vela  ou } \;\; \theta_h \mbox{ cabo}. \]
+\item Pela experiência o vendedor sabe se vende mais velas ou cabos,
+  tem ideia da chance de alguém comprar um ou outro:
+  \[ P[\theta_c] \mbox{  vela  ou } \;\; P[\theta_h] \mbox{ cabo}. \]
+\item Informação (dado) $y$  é a fala do comprador e
+  esta fala pode ocorrer para cada possível estado da natureza.
+  \[ P[Y|\theta_c] \mbox{  vela  ou } \;\; P[Y|\theta_h] \mbox{ cabo}. \]
+\item O vendedor ao final acha mais provável que o cliente tenha pedido
+  quatro velas (\textit{four candles}) do que o cabo do garfo  (\textit{fork handles}),
+  ou seja, ele avalia:
+  \[ P[\theta_c|y] \mbox{  vela  ou } \;\; P[\theta_h|y] \mbox{ cabo}. \]
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Revisando o Teorema de Bayes}
+  \[ P[A_j|B] = \frac{P[B|A_j] \cdot P[A_j]}{\sum_j P[B|A_j] \cdot P[A_j]} \]
+
+  \blue{Ex: O problema dos testes de diagnóstico}
+
+\begin{itemize}
+    \itemsep 1.5ex
+  \item[]{Teste de \textit{screening} para uma determinada doença.}
+  \item[]{Teste \textit{imperfeito}:
+    acerta 90\% dos que tem doença e 80\% dos que não tem.}
+  \item[]{Sabe-se de antemão que a doença ocorre em 2\% da população.}
+  \item[]{Se uma pessoa testou positivo, qual a chance de ter a doença?}
+\end{itemize}
+
+\end{frame}
+
+<<echo=FALSE>>=
+pD=0.02
+pS=0.98
+pPD=0.9
+pND=0.1
+pPS=0.2
+pNS=0.8
+pDP = (0.9*0.02)/(0.9*0.02+0.2*0.98)
+pSP = (0.2*0.98)/(0.9*0.02+0.2*0.98)
+pDN = (0.1*0.02)/(0.1*0.02+0.8*0.98)
+pSN = (0.8*0.98)/(0.8*0.98+0.1*0.02)
+@
+
+\begin{frame}
+  \frametitle{Testes de diagnóstico}
+  \textbf{A notação "usual"!}
+
+  \begin{align*}
+    P[+|D] &= 0,90 \longrightarrow P[-|D] = 0,10\\
+    P[-|\overline{D}]&= 0,80 \longrightarrow P[+|\overline{D}] = 0,20\\
+    P[D] &= 0,02 \\
+    P[D|+] &= ?
+  \end{align*}
+  \pause
+  \[ P[D|+] = \frac{P[+|D] \cdot P[D]}{P[+|D]\cdot P[D] + P[+|\overline{D}]\cdot P[\overline{D}]} =
+  \Sexpr{format(pDP,dig=3)} \]
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Teorema de Bayes}
+Alterando notação:
+  \[ P[\theta_j|y] = \frac{P[Y|\theta_j] \cdot P[\theta_j]}{\sum_j P[Y|\theta_j] \cdot P[\theta_j]} \]
+  \pause
+\begin{footnotesize}
+%  Notação:
+  \begin{align*}
+    \theta:& \mbox{estado do paciente}: \theta_1: \mbox{com a doença}, \theta_2: \mbox{sem a doença}  \\
+    Y:& \mbox{resultado do teste}: y_1: \mbox{positivo}, y_2: \mbox{negativo}
+  \end{align*}
+  Dados:
+  \begin{align*}
+    P[D] &= P[\theta_1] = 0,02   &  P[\overline{D}] &= P[\theta_2] = 0,98 \\
+    P[+|D] &= P[Y_1|\theta_1] = 0,90  & P[-|D] &= P[Y_2|\theta_1] = 0,10 \\
+    P[-|\overline{D}] &= P[Y_2|\theta_2] = 0,80  & P[+|\overline{D}] &= P[Y_2|\theta_2] = 0,20
+  \end{align*}
+  Teorema de Bayes:
+  \begin{align*}
+    P[\theta_1|y_1] &= \frac{P[Y_1|\theta_1] \cdot P[\theta_1]}{P[Y_1]} =
+             \frac{P[Y_1|\theta_1] \cdot P[\theta_1]}{P[Y_1|\theta_1] \cdot P[\theta_1] + P[Y_1|\theta_2] \cdot P[\theta_2]}
+          \\   &= \frac{0,90 \cdot 0,02}{0,90 \cdot 0.02 + 0,20 \cdot 0,98}
+    = \Sexpr{format((.9*.02)/(.9*0.02+.2*.98), dig=3)}
+  \end{align*}
+\end{footnotesize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Teorema de Bayes}
+  \[ P[\theta_j|y] = \frac{P[Y|\theta_j] \cdot P[\theta_j]}{\sum_j P[Y|\theta_j] \cdot P[\theta_j]} \]
+  \pause
+
+  \begin{itemize}
+  \item[] No exemplo só haviam dois possíveis \red{estados da natureza}: \\
+    \[  \theta_1: \mbox{com a doença}, \theta_2: \mbox{sem a doença}\]
+  \item[] O resultado é mais geral, para várias categorias.
+  \item[] Aplicação em \blue{problemas de classificação}.
+  \item[] \red{Estados da natureza} não precisar ser apenas categóricos (ou ainda discretos/enumeráveis)
+  \item[] Os \red{estados da natureza} podem ocorrer em um domínio contínuo.
+  \end{itemize}
+  O Teorema de Bayes pode então ser reescrito como:
+  \[ f(\theta|y) = \frac{f(y|\theta) \cdot f(\theta)}{\int f(y|\theta) \cdot f(\theta) {\rm d}\theta} \]
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{\textbf{Abordagem Frequentista}}
+
+  \begin{itemize}[<+->]
+  \item Baseia-se em considerar o comportamento das quantidades de interesse medidas na amostra,
+    supondo que diversas amostras fossem tomadas da população.
+  \item Tais quantidades, por serem baseadas em amostras aleatórias  são portanto aleatórias, e possuem alguma distribuição de probabilidades.
+  \item Tal distribuição de probabilidades é chamada de \texttt{distribuição amostral}.
+  \item As inferências frequentistas são baseadas em probabilidades medidas nestas distribuições.
+  \item Usual nos métodos, técnicas e procedimentos de estatística, especialmente os ligados a cursos e textos básicos e aplicados a diversas áreas.
+  \item As distribuições amostrais podem ser obtidas analiticamente em alguns casos (e.g teste-$t$),
+    aproximadas por distribuições conhecidas, ou obtidas por procedimentos computacionais intensivos (e.g. testes aleatorizados e bootstrap).
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Abordagem frequentista}
+
+  Inferência se baseia na \red{distribuição amostral}
+
+  \begin{align*}
+    \blue{{\rm Estimativa}}: \hat{\theta} &= \frac{Y}{n} \\
+    \hat{\theta} &\sim {\rm N}(\mu = \theta, \sigma^2 = \frac{\theta(1-\theta)}{n}) (\mbox{\red{distribuição amostral}}) \\
+    \blue{{\rm IC}}: & \hat{\theta} \pm z_{1-\alpha/2} \sqrt{\frac{\theta(1-\theta)}{n}} \\
+    \blue{{\rm TH}}: (H_1: \theta > \theta_0): & \;  \hat{\theta} \sim{\rm N}(\theta_0, \frac{\theta_0(1-\theta_0)}{n}) \\
+    \mbox{equivalentemente}  & \;  z = \frac{\hat{\theta} - \theta_0 }{\sqrt{\frac{\theta_0(1-\theta_0)}{n}}} \sim{\rm N}(0,1)
+  \end{align*}
+  \pause
+  Usa-se $\theta= \hat{\theta}$ (assintótico) ou $\theta=0,5$ (conservador)
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Simulação da distribuição amostral}
+
+  (código completo em arquivo \href{http://www.leg.ufpr.br/~paulojus/dsbd2019/inf-prop.R}{inf-prop.R})
+  As estimativas variam se tomamos diversas amostras da população:
+<<echo=F>>=
+rm(list=ls())
+set.seed(2018)
+th <- 0.17
+POP <- sample(c(0,1), 10000000, prob=c((1-th), th), rep=TRUE)
+AMs <- matrix(sample(POP, 80*10000, rep=T), nrow=80)
+ps <- apply(AMs, 2, mean)
+@
+<<echo=TRUE,results="markup">>=
+summary(ps)
+@
+<<echo=FALSE,fig.width=6, fig.height=4, out.width = "0.75\\textwidth">>=
+par(mar=c(2.7,2.7,0.2,0.2), mgp=c(1.7, 0.7, 0))
+hist(ps, prob=TRUE, main="", xlab=expression(hat(theta)), ylab="densidade")
+lines(density(ps, bw=0.01), lwd=2)
+#abline(v=quantile(ps, prob=c(0.025, 0.975)), lty=2)
+@
+\end{frame}
+
+\begin{frame}
+  \frametitle{Distribuição amostral (estimada)}
+<<>>=
+LWD=2
+@
+<<amostralestimada>>=
+par(mgp=c(2,0.8,0))
+p <- 19/80
+vp <- p*(1-p)/80
+curve(dnorm(x, m=p, sd=sqrt(vp)), from=0.05, to=0.40,
+      ylab=expression(f(hat(theta))), xlab=expression(hat(theta)), ylim=c(0,10), lwd=LWD)
+abline(v=p, lty=2, lwd=LWD)
+abline(v=prop.test(19, 80)$conf, lty=2, lwd=LWD)
+@
+\end{frame}
+
+\begin{frame}
+  \frametitle{Distribuição amostral}
+<<>>=
+LWD=1
+<<amostralestimada>>
+p0 <- 0.20
+vp0 <- p0*(1-p0)/80
+curve(dnorm(x, m=p0, sd=sqrt(vp0)), from=0.05, to=0.40,
+      ylab=expression(f(hat(theta))), xlab=expression(hat(theta)), add=TRUE, col=2, lwd=2)
+segments(p, 0, p, dnorm(p, m=p0, sd=sqrt(vp0)), col=2)
+pseq <- seq(p, 0.4, l=100)
+polygon(c(pseq, rev(pseq)), c(rep(0, 100), rev(dnorm(pseq, m=p0, sd=sqrt(vp0)))), density=5, col=2)
+legend("topright", c("estimada","sob H_0"), col=c(1,2), lwd=c(1, 2))
+text(0.27, 1, "p-valor", col=2)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Inferência para proporção - frequentista}
+Na prática, com recursos computacionais
+<<echo=TRUE,results="markup">>=
+prop.test(19, 80)$conf
+prop.test(19, 80, p=0.20, alt="greater")
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Inferência para proporção - frequentista}
+  Resumindo:
+  \begin{itemize}
+    \itemsep 2ex
+  \item Se baseia no comportamento das \textit{possíveis amostras} que poderiam ser retiradas da população
+  \item Interpretação de intervalo de confiança:
+    \textit{ o calculado a partir da amostra é um entre os possíveis, sendo que uma proporção dos possíveis (nível de confiança)
+    conteria o verdadeiro valor}
+%  \item dedos cruzados \ldots fé
+  \item Interpretação do Teste de Hipótese e \red{valor-p}: \textit{mesmo sob $H_0$ uma proporção das possíveis amostras produziria valores tão ou mais extremos que o visto na amostra. Se esta proporção (\red{p-valor}) é \red{baixa} (nível de significância) a amostra é considerada incompatível com a hipótese nula e rejeita-se a hipótese nula. }
+  \end{itemize}
+
+%  Método fortemente baseado em suposições e aproximações!
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Uma alternativa (ainda) frequentista: Teste aleatorizado}
+
+  Ideia básica:\\
+  Reproduzir a essência da ideia frequentista porém
+  obtendo a \red{distribuição amostral} por simulação sob $H_0$
+
+  \vspace{1cm}
+
+  Algorítmo:
+  \begin{itemize}
+    \itemsep 1ex
+  \item Simular amostras da população sob $H_0$
+  \item Calcular o valor de interesse ou estatística de teste para cada amostra simulada
+  \item \red{valor-p} proporção destes que são mais ``extremos'' do que o valor observado na amostra
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Teste aleatorizado}
+<<>>=
+## Simulando sob H_0
+th0 <- 0.20    ## supondo theta da hipótese
+##POP0 <- sample(c(0,1), 10000000, prob=c((1-th0), th0), rep=TRUE)
+##mean(POP0)   ## só para conferir...
+##AM0s <- matrix(sample(POP0, 80*10000, rep=T), nrow=80)
+set.seed(2018)
+AM0s <- matrix(rbinom(80*10000, size=1, prob=0.20), nrow=80)
+#dim(AMs)
+p0s <- apply(AM0s, 2, mean)
+@
+<<echo=TRUE,results="markup">>=
+summary(p0s)
+(pvalor <- mean(p0s >= 19/80))
+@
+<<fig.width=6, fig.height=4, out.width = "0.75\\textwidth">>=
+par(mar=c(2.7,2.7,0.2,0.2), mgp=c(1.7, 0.7, 0))
+hist(p0s, prob=TRUE, main="")
+lines(density(p0s, bw=0.01), lwd=2)
+abline(v=19/80, lty=2, col=2, lwd=2)
+text(0.25, 8, substitute(pvalor==p, list(p=pvalor)), pos=4)
+curve(dnorm(x, m=th0, sd=sqrt(th0*(1-th0)/80)), from=0, to=0.40, col=2, add=TRUE)
+legend("topright", c("teórica","simulada"), lty=1, col=2:1)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Abordagem pela verossimilhança}
+
+  Inferência é baseada nas características da \\ \red{função de verossimilhança}
+
+<<fig.width=5, fig.height=4, out.width = "0.7\\textwidth">>=
+par(mar=c(2.7,2.7,0.2,0.2), mgp=c(1.7, 0.7, 0))
+Mf <- Vectorize(function(theta, y, size, log=F) dbinom(y, prob=theta, size, log=log))
+th0=0.20
+n=80
+y=19
+est <- 19/80
+LMAX <- dbinom(y, size=n, prob=est)
+th <- seq(0.08, 0.45, l=101)
+sX17 <- drop(outer(th, y, Mf, size=n))
+plot(th, sX17/LMAX, type="l", xlab=expression(theta), ylab=expression(paste("L(", theta, "|", "y=17)")),
+     xlim=range(th), ylim=c(-0.05, 1), lwd=2)
+arrows(est, 1, est, 0, length=0.1, col=2)
+LINT <- 0.25*dbinom(y, size=n, prob=est)/LMAX
+abline(h=LINT, lty=3)
+LL <- function(x){dbinom(y, size=n, prob=x)/LMAX - LINT}
+int <- rootSolve:::uniroot.all(LL, c(0,1))
+arrows(int, rep(LINT, 2), int, 0, length=0.1, lty=1, col=4)
+LHIP <- dbinom(y, size=n, prob=th0)/LMAX
+segments(th0, 0, th0, LHIP, col="darkolivegreen")
+arrows(th0, LHIP, min(th), LHIP, length=0.1, col="darkolivegreen")
+#text(0.5, 0, "0,5", cex=0.7)
+text(th0, 0, expression(theta[0]), cex=0.7, col="darkolivegreen", pos=1, offset=0.2)
+text(est, 0, expression(hat(theta)), pos=1, cex=0.7, offset=0.2, col=2)
+text(int, 0, c(expression(hat(theta)[I]),expression(hat(theta)[S])),
+             pos=1, cex=0.7, offset=0.2, col=4)
+text(0.1, LHIP, expression(L(theta[0])/L(hat(theta))), pos=3, cex=0.8, col="darkolivegreen", offset=0.2)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Representação alternativa}
+
+ \red{Função deviance} e cortes que definem intervalos (a 90, 95 e 99\%)
+\vspace{0.5cm}
+<<fig.width=10, fig.height=5, out.width = "0.99\\textwidth">>=
+par(mfrow=c(1,2), mar=c(2.9,2.9,0.2,1), mgp=c(1.7, 0.7, 0))
+plot(th, -2*log(sX17/LMAX), type="l", xlab=expression(theta), ylab=expression(paste("D(", theta, "|", "y=17)")),
+     xlim=range(th), lwd=2)
+abline(h=qchisq(c(0.9, 0.95, 0.99), df=1), lty=2)
+plot(th, sqrt(-2*log(sX17/LMAX)), type="l", xlab=expression(theta), ylab=expression(sqrt(paste("D(", theta, "|", "y=17)"))),
+     xlim=range(th), lwd=2)
+abline(h=sqrt(qchisq(c(0.9, 0.95, 0.99), df=1)), lty=2)
+@
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Inferência pela verossimilhança}
+  Necessidade de critérios:
+  \begin{itemize}
+    \itemsep 1.5ex
+  \item definir o valor para corte da função para obter intervalos de confiança (IC's) ?
+  \item definir limiar para o valor de verossimilhança (relativa ao máximo) para $\theta_0$?
+  \end{itemize}
+  Possíveis soluções:
+  \begin{itemize}
+    \itemsep 1.5ex
+  \item critérios de razoabilidade e comparação (e.g. equivalência com caras consecutivas)% ou a família do Sr. João!)
+  \item argumento frequentista (comportamento ``médio'' da verossimilhança)  estabelece relações:
+    \begin{center}
+      % \begin{tabular}{>{$}l <{$}>{$}c <{$}>{$}c <{$}>{$}c <{$}>{$}c <{$}}
+      \begin{tabular}{lcc}
+        \hline
+        $r$ & ``Caras'' & $P[|Z| < \sqrt{c^*}$]\\
+        \hline
+        50\%  & 1,00  & 0,761\\
+        26\%  & 1,94  & 0,899\\
+        15\%  & 2,74  & 0,942\\
+        3,6\% & 4,80  & 0,990\\
+        \hline
+      \end{tabular}
+    \end{center}
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Comparando}
+
+  \blue{Inferência frequentista}
+  \begin{itemize}
+  \item{\red{Estimativa de $\theta$}: }{fornecido por algum \blue{método de estimação}}
+  \item{\red{expressão da incerteza}: }{variabilidade da distribuição amostral}
+  \item{\red{opinião em relação a valor de interesse $\theta_0 = 0,20$}: }{probabilidade na distribuição amostral}
+  \end{itemize}
+\vspace{0.5cm}
+  \blue{Inferência pela verossimilhança}
+  \begin{itemize}
+  \item{\red{Estimativa de $\theta$}: }{máximo (supremo) da função}
+  \item{\red{expressão da incerteza}: }{faixa de valores dentro de um limite de compatibilidade com a amostra, curvatura da função}
+  \item{\red{opinião em relação a valor de interesse $\theta_0 = 0.20$}: }{comparação da verossimilhança deste valor com a do máximo}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{All we need is \ldots likelihood}
+%  \frametitle{Abordagem pela verossimilhança}
+
+  Inferência é baseada nas características da \\ \red{função de verossimilhança}
+
+<<fig.width=5, fig.height=4, out.width = "0.7\\textwidth">>=
+par(mar=c(2.7,2.7,0.2,0.2), mgp=c(1.7, 0.7, 0))
+Mf <- Vectorize(function(theta, y, size, log=F) dbinom(y, prob=theta, size, log=log))
+th0=0.20
+n=80
+y=19
+est <- 19/80
+LMAX <- dbinom(y, size=n, prob=est)
+th <- seq(0.08, 0.45, l=101)
+sX17 <- drop(outer(th, y, Mf, size=n))
+plot(th, sX17/LMAX, type="l", xlab=expression(theta), ylab=expression(paste("L(", theta, "|", "y=17)")),
+     xlim=range(th), ylim=c(-0.05, 1), lwd=2)
+arrows(est, 1, est, 0, length=0.1, col=2)
+LINT <- 0.25*dbinom(y, size=n, prob=est)/LMAX
+abline(h=LINT, lty=3)
+LL <- function(x){dbinom(y, size=n, prob=x)/LMAX - LINT}
+int <- rootSolve:::uniroot.all(LL, c(0,1))
+arrows(int, rep(LINT, 2), int, 0, length=0.1, lty=1, col=4)
+LHIP <- dbinom(y, size=n, prob=th0)/LMAX
+segments(th0, 0, th0, LHIP, col="darkolivegreen")
+arrows(th0, LHIP, min(th), LHIP, length=0.1, col="darkolivegreen")
+#text(0.5, 0, "0,5", cex=0.7)
+text(th0, 0, expression(theta[0]), cex=0.7, col="darkolivegreen", pos=1, offset=0.2)
+text(est, 0, expression(hat(theta)), pos=1, cex=0.7, offset=0.2, col=2)
+text(int, 0, c(expression(hat(theta)[I]),expression(hat(theta)[S])),
+             pos=1, cex=0.7, offset=0.2, col=4)
+text(0.1, LHIP, expression(L(theta[0])/L(hat(theta))), pos=3, cex=0.8, col="darkolivegreen", offset=0.2)
+@
+\end{frame}
+
+%\begin{frame}[fragile]
+%  \frametitle{Representação alternativa}
+
+% \red{Função deviance} e cortes que definem intervalos (a 90, 95 e 99\%)
+%\vspace{0.5cm}
+%<<fig.width=10, fig.height=5, out.width = "0.99\\textwidth">>=
+%par(mfrow=c(1,2), mar=c(2.9,2.9,0.2,1), mgp=c(1.7, 0.7, 0))
+%plot(th, -2*log(sX17/LMAX), type="l", xlab=expression(theta), ylab=expression(p%aste("D(", theta, "|", "y=17)")),
+%     xlim=range(th), lwd=2)
+%abline(h=qchisq(c(0.9, 0.95, 0.99), df=1), lty=2)
+%plot(th, sqrt(-2*log(sX17/LMAX)), type="l", xlab=expression(theta), ylab=expres%sion(sqrt(paste("D(", theta, "|", "y=17)"))),
+%     xlim=range(th), lwd=2)
+%abline(h=sqrt(qchisq(c(0.9, 0.95, 0.99), df=1)), lty=2)
+%@
+%\end{frame}
+
+
+\begin{frame}
+  \frametitle{Abordagem Bayesiana}
+
+  O objeto de inferência é a \red{distribuição à posteriori}
+
+  \begin{itemize}
+  \item A incerteza inicial sobre $\theta$ é expressa na forma de uma distribuição \blue{priori} para $\theta$
+  \item Com amostra \red{atualizamos} opinião $\theta$ com a informação contida na \blue{verossimilhança}
+  \item O conhecimento/incerteza atualizados sobre $\theta$ é expresso pela distribuição \blue{posteriori}
+  \end{itemize}
+  \pause
+  Formalmente:
+  \[ f(\theta|y) = \frac{f(y|\theta) \cdot f(\theta)}{\int f(y|\theta) \cdot f(\theta) {\rm d}\theta}  \propto f(\theta) \cdot L(\theta|y) \]
+  ou, usando jargão técnico:
+  \[ posteriori \propto priori \cdot verossimilhança \]
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{\textbf{Abordagem Bayesiana}}
+  No contexto do exemplo de estimação de proporção $\theta$:\\
+  \begin{itemize}
+    \itemsep 1ex
+  \item Extensão da definição do modelo: \\
+  \begin{align*}
+  [Y|\theta] &\sim B(n, \theta) \\
+  [\theta] &\sim Pr(\psi)  \;\; (\textit{priori})
+  \end{align*}
+  \item permite obter (via teorema de Bayes)
+  \begin{align*}
+  [\theta|y] &\propto [Y|\theta] [\theta]  \\
+  [\theta|y] & \sim \pi(\psi^{*})  \;\; (\textit{posteriori})
+  \end{align*}
+  \item Analogias diretas para estimação (pontual e intervalar),
+  \item \ldots mas não diretas ou triviais para testes de hipótese \\
+    (valores na \textit{posteriori} sem analogias diretas com razão de verossimilhanças).
+ % \centerline{\includegraphics[width=0.95\textwidth]{Rfigs/intro-002}}
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{\textbf{Abordagem Bayesiana}}
+  No contexto do exemplo de estimação de proporção $\theta$:\\
+
+  \begin{itemize}
+    \itemsep 2ex
+  \item Priori: $[\theta] \sim {\rm Beta}(a, b)$ (distribuição Beta)
+    \[ f(\theta) = \frac{\Gamma(a+b)}{\Gamma(a)+\Gamma(b)} \theta^{a-1}(1-\theta)^{b-1} \]
+  \item Verossimilhança: $[Y|\theta] \sim {\rm Bin}(n, \theta)$ (em $\theta$, é proporcional à distribuição Beta)
+    \[ L[\theta|y] \equiv f(y|\theta) = \binom{n}{y}\theta^{y}(1-\theta)^{n-y} \]
+\item Posteriori:
+  \[ f(\theta|y) \propto f(\theta) \cdot L(\theta|y) \propto
+    \theta^{y+a-1}(1-\theta)^{n-y+b-1} \]
+  Logo
+  \[ [\theta|y] \sim {\rm Beta}(a+y, n-y+b)\]
+  (distribuição Beta - conjugada)
+\end{itemize}
+
+\end{frame}
+
+
+<<echo=FALSE>>=
+source("../scripts/bayes-fun-01.R")
+@
+<<priori03,echo=FALSE>>=
+prI <- prioriBeta(0.4, c(0.30, 0.50), 0.70)
+postI <- postBinom(19, 80, prI, plot=FALSE)
+@
+
+\begin{frame}[fragile]
+  \frametitle{A essência de Bayes ilustrada (I)}
+
+  Exemplo I : estimação da proporção de atributo ($\theta$) na população
+  \begin{itemize}
+  \item[]{\blue{Priori}: }{Acredita-se que o atributo ocorre em 40\% da população
+    com 70\% de chance de estar entre 30 e 50\%.\\
+  Informação expressa como distribuição de probabilidades para $\theta$:
+  \[ [\theta] \sim Beta(\Sexpr{format(prI[1], dig=2)}, \Sexpr{format(prI[2], dig=2)})\]}
+  \item[]{\blue{Verossimilhança}: }{Modelo Binomial, amostra n=80 e y=19 \\
+  \[ [y|\theta] = \binom{80}{19}\theta^{19}(1-\theta)^{80-19} \]}
+  \item[]{\blue{Posteriori}: }{a distribuição de probabilidades para $\theta$
+  após observar os dados:\\
+    \[[\theta|y] \sim Beta(\Sexpr{format(postI$pars[2,1], dig=2)}, \Sexpr{format(postI$pars[2,2], dig=2)})\]}
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{A essência de Bayes ilustrada (I)}
+<<echo=FALSE,results = "hide", fig.width=6, fig.height=4, out.width = "0.75\\textwidth">>=
+par(mar=c(2.7,2.7,0.2,0.2), mgp=c(1.7, 0.7, 0))
+postBinom(19, 80, prI)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{A essência de Bayes ilustrada (I)}
+<<echo=TRUE>>=
+(prI <- prioriBeta(0.4, c(0.30, 0.50), 0.70))
+postBinom(19, 80, prI, plot=FALSE)
+@
+\end{frame}
+%%
+%%
+%%
+<<echo=FALSE>>=
+prII <- prioriBeta(0.08, c(0.03, 0.20), 0.90)
+postII <- postBinom(19, 80, prII, plot=FALSE)
+@
+
+\begin{frame}[fragile]
+  \frametitle{A essência de Bayes ilustrada (II)}
+  Uma priori bem diferente:
+  \begin{itemize}
+  \item{\blue{Priori}: }{Acredita-se que o atributo ocorre em 8\% da população
+    com 90\% de chance de estar entre 3 e 20\%.\\
+  \[ [\theta] \sim Beta(\Sexpr{format(prII[1], dig=2)}, \Sexpr{format(prII[2], dig=2)})\]}
+  \item{\blue{Verossimilhança}: }{Modelo Binomial, amostra n=80 e y=19 \\
+  \[ [y|\theta] = \binom{80}{19}\theta^{19}(1-\theta)^{80-19} \]}
+  \item{\blue{Posteriori}: }{após observar os dados:\\
+    \[[\theta|y] \sim Beta(\Sexpr{format(postII$pars[2,1], dig=2)}, \Sexpr{format(postII$pars[2,2], dig=2)})\]}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{A essência de Bayes ilustrada (II)}
+<<results="hide",fig.width=6, fig.height=4, out.width = "0.75\\textwidth">>=
+par(mar=c(2.7,2.7,0.2,0.2), mgp=c(1.7, 0.7, 0))
+prII <- prioriBeta(0.08, c(0.03, 0.20), 0.90)
+postII <- postBinom(19, 80, prII)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{A essência de Bayes ilustrada (II)}
+<<echo=TRUE>>=
+(prII <- prioriBeta(0.08, c(0.03, 0.20), 0.90))
+postBinom(19, 80, prII, plot=FALSE)
+@
+\end{frame}
+
+
+<<echo=FALSE>>=
+prIII <- prioriBeta(0.5, c(0.05, 0.95), 0.90)
+postIII <- postBinom(19, 80, prIII, plot=FALSE)
+@
+
+\begin{frame}[fragile]
+  \frametitle{A essência de Bayes ilustrada (III)}
+  Uma \red{priori vaga} :
+  \begin{itemize}
+  \item{\blue{Priori}: }{Não se sabe praticamente nada sobre $\theta$. Expressa-se então
+    que o atributo ocorre em 50\% da população mas com 90\% de chance de estar entre 5 e 95\%.\\
+  \[ [\theta] \sim Beta(\Sexpr{format(prIII[1], dig=2)}, \Sexpr{format(prIII[2], dig=2)})\]}
+  \item{\blue{Verossimilhança}: }{Modelo Binomial, amostra n=80 e y=19 \\
+  \[ [y|\theta] = \binom{80}{19}\theta^{19}(1-\theta)^{80-19} \]}
+  \item{\blue{Posteriori}: }{após observar os dados:\\
+    \[[\theta|y] \sim Beta(\Sexpr{format(postIII$pars[2,1], dig=2)}, \Sexpr{format(postIII$pars[2,2], dig=2)})\]}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{A essência de Bayes ilustrada (III)}
+<<results="hide",fig.width=6, fig.height=4, out.width = "0.75\\textwidth">>=
+par(mar=c(2.7,2.7,0.2,0.2), mgp=c(1.7, 0.7, 0))
+postIII <- postBinom(19, 80, prIII)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{A essência de Bayes ilustrada (III)}
+<<echo=TRUE>>=
+(prIII <- prioriBeta(0.50, c(0.05, 0.95), 0.90))
+postBinom(19, 80, prIII, plot=FALSE)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Efeito da priori (fixando amostra)}
+<<results="hide",fig.width=6, fig.height=4, out.width = "0.99\\textwidth">>=
+par(mar=c(2.7,2.7,0.2,0.2), mgp=c(1.7, 0.7, 0), mfrow=c(2,3))
+res <- postBinom(19, 80, c(3,3), cex.leg=0.6, ylim=c(0,10))
+res <- postBinom(19, 80, c(1,1), cex.leg=0.6, ylim=c(0,10))
+res <- postBinom(19, 80, c(0.5,5), cex.leg=0.6, ylim=c(0,10))
+res <- postBinom(19, 80, c(10,7), cex.leg=0.6, ylim=c(0,10))
+res <- postBinom(19, 80, c(16,11), cex.leg=0.6, ylim=c(0,10))
+res <- postBinom(19, 80, c(43,29), cex.leg=0.6, ylim=c(0,10))
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Efeito do tamanho da amostra (fixando priori)}
+<<fig.width=6, fig.height=4, out.width = "0.99\\textwidth">>=
+par(mar=c(2.7,2.7,0.2,0.2), mgp=c(1.7, 0.7, 0), mfrow=c(2,3))
+res <- postBinom(6, 27, c(16,11), cex.leg=0.6, ylim=c(0,25))
+text(0.8, 18, "n=27 e y=7")
+res <- postBinom(9, 40, c(16,11), cex.leg=0.6, ylim=c(0,25))
+text(0.8, 18, "n=40 e y=9")
+res <- postBinom(19, 80, c(16,11), cex.leg=0.6, ylim=c(0,25))
+text(0.8, 18, "n=80 e y=19")
+res <- postBinom(38, 160, c(16,11), cex.leg=0.6, ylim=c(0,25))
+text(0.8, 18, "n=160 e y=38")
+res <- postBinom(95, 400, c(16,11), cex.leg=0.6, ylim=c(0,25))
+text(0.8, 18, "n=400 e y=95")
+res <- postBinom(190, 800, c(16,11), cex.leg=0.6, ylim=c(0,25))
+text(0.8, 18, "n=800 e y=190")
+@
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Comentários}
+  \begin{itemize}
+  \itemsep 2ex
+\item Expressão da opinião ``a priori'' é necessária e sua especificação é um desafio,
+\item as interpretações de intervalo de confiança são agora probabilísticas,
+  por exemplo pode-se falar em:
+  \[ P[a < \theta < b] = 0.95 \]
+\item bem como, no contexto do exemplo,  pode-se falar em
+  \[ P[\theta \geq 0,20] \]
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Comparando paradigmas}
+
+  \red{Qual o valor de $\theta$?} (\blue{estimação pontual}):
+  \begin{itemize}
+  \item{Frequentista: }{fornecido por algum método de estimação}
+  \item{Verossimilhança: }{máximo (supremo) da função de verossimilhança}
+  \item{Bayesiana: }{alguma medida resumo da posteriori (média, moda, mediana, \ldots}
+  \end{itemize}
+  \vspace{0.5cm}
+  \red{Expressão da incerteza sobre $\theta$} (\blue{estimação intervalar}):
+  \begin{itemize}
+  \item{Frequentista: }{variabilidade na distribuição amostral} (intervalo de confiança)
+  \item{Verossimilhança: }{faixa de valores dentro de um limite de compatibilidade com a amostra, curvatura da função}
+  \item{Bayesiana: }{variabilidade na distribuição posteriori} (intervalo de credibilidade)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Comparando paradigmas}
+  \vspace{0.5cm}
+  \red{opinião em relação a valor de interesse $\theta_0 = 0,20$} (\blue{teste de hipótese}):
+  \begin{itemize}
+  \item{Frequentista: }{probabilidade na distribuição amostral}  (p-valor)
+  \item{Verossimilhança: }{comparação da verossimilhança deste valor com a do máximo}
+  \item{Bayesiana: }{probabilidade na posteriori}
+  \end{itemize}
+\end{frame}
+
+%\begin{frame}[fragile]
+%\frametitle{Referência bibliográfica}
+
+%\bibliography{references.bib}
+
+%\end{frame}
+
+%------------------------------------------------
+
+
+\end{document}
+
+
+\begin{frame}
+
+  \frametitle{Exemplo 2: Comparando dois grupos}
+
+  Questões de inferência:
+  \begin{itemize}
+  \item Quais são os \red{parâmetros} (quantidades de interesse na população)
+    a serem estimados a partir dos dados?
+  \item Qual a \red{incerteza} associada ao(aos) parâmetro(s) de interesse?
+  \item \red{Pode-se afirmar} que os grupos diferem quanto ao peso e/ou altura?
+  \end{itemize}
+
+  As questões podem ser endereçadas pelos paradigmas
+  frequentista, de verosimilhança e bayesiano. \\
+  \textbf{OBS}: pode-se adotar o ainda algum métodos não paramétrico
+  mas este é, tipicamente, ainda um método frequentista.
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Exemplo 2: Comparando dois grupos (cont)}
+
+  Uma possível formatação do problema:
+  \begin{align*}
+  {Grupo 1: } & Y_1 \sim {\rm N}(\mu_1, \sigma^2)\\
+  {Grupo 2: } & Y_2 \sim {\rm N}(\mu_2, \sigma^2)\\
+  \end{align*}
+  \pause
+  Reexpressão alternativa (e conveniente)
+  \begin{align*}
+    {Grupo 1: } & Y_1 \sim {\rm N}(\mu, \sigma^2)\\
+    {Grupo 2: } & Y_2 \sim {\rm N}(\mu +  \theta, \sigma^2)\\
+  \end{align*}
+ Parâmetros: $\mu$, \blue{$\theta$} e $\sigma^2$
+  \begin{itemize}
+  \item Quais são os \red{parâmetros} (quantidades desconhecidas na população)
+    a serem estimados a partir dos dados?
+  \item Qual a \red{incerteza} associada ao(aos) parâmetro(s) de interesse?
+  \item \red{Pode-se afirmar} que os grupos diferem quanto ao peso e/ou altura?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Exemplo 2: Comparando dois grupos (cont)}
+
+Sob os paradigmas discutidos aqui baseia-se a inferência em:
+
+\begin{itemize}
+\item{frequentista: }{distribuição amostral da $\hat{\theta}$}
+\item{verossimilhança: }{na função de verossimilhança (perfilhada) para  $\hat{\theta}$}
+\item{bayesiano: }{na distribuição à posteriori para $\theta$}
+\end{itemize}
+
+Procedimentos frequentistas incluem testes e procedimentos
+alternativos tais como não paramétricos, aleatorizados, {\it bootstrap}.
+
+\end{frame}
+
+<<>>=
+source("../dados/mandible.R")
+mand <- reshape(mandible, varying=list(1:2), direction="long")[,-3]
+names(mand) <- c("sex","mandible")
+rownames(mand) <- 1:20
+mand$sex <- factor(mand$sex, labels=c("female","male"))
+@
+
+\begin{frame}[fragile]
+  \frametitle{Um outro exemplo}
+
+    Comparando dois grupos: comprimento da mandíbula (chacal dourado)
+
+<<echo=F>>=
+mandible
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Um outro exemplo}
+
+<<fig.width=10, fig.height=5, out.width = "0.7\\textwidth">>=
+par(mfrow=c(1,2), mar=c(3,2.5, 1, 0), mgp=c(1.8, 0.8, 0))
+with(mand, {
+    hist(mandible, prob=T, main="", xlab="altura")
+    lines(density(mandible))
+})
+    rug(jitter(mandible$females), col=2, lwd=2)
+    rug(jitter(mandible$male), col=4, lwd=2)
+    boxplot(mandible)
+    stripchart(mandible, vertical=T, add=T, method="jitter", pch=19, cex=0.5, jitter=0.15, col=4)
+#    MASS:::boxcox(mandible~sex, data=mand)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Um outro exemplo}
+
+  \begin{itemize}
+    \itemsep 2ex
+  \item Frequentista:
+    \begin{itemize}
+    \item analítica: teste-$t$, opções  e limitações (formulário)
+    \item computacional: teste aleatorizado -- algorítmo
+  \end{itemize}
+  \item Verossimilhança (perfilhada) para quantidade de interesse
+  \item Bayesiana -- distribuição marginal para parâmetro de interesse
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Inferência frequentista}
+
+  \begin{align*}
+    \blue{{\rm Estimativa}}: \hat{\theta} &= \overline{y_2} - \overline{y_1} \\
+    \hat{\theta} &\sim {\rm t}_{\nu}(\cdot)
+                   (\mbox{\red{distribuição amostral}}) \\
+    \blue{{\rm IC}}: & \hat{\theta} \pm t_{1-\alpha/2}(\nu) S \sqrt{\frac{1}{n_1}+\frac{1}{n_2}}  \\
+    \blue{{\rm TH}}: (H_1: \theta \neq \theta_0=0): & \;
+%    \hat{\theta} \sim{\rm t}(\nu) \\
+%    \mbox{}  & \;
+    t = \frac{\overline{y_2}-\overline{y_1}}{S \sqrt{\frac{1}{n_1}+\frac{1}{n_2}}} \sim{\rm t}(\nu)
+  \end{align*}
+
+\[ \nu = n1+n2-2 \;\;{\rm e}\;\; S =\hat{\sigma}^2= \sqrt{\frac{(n_1-1)S_1^2 + (n_2-1)S_2^2}{n_1 + n_2 - 2}} \]
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{O teste-$t$ (1)}
+
+  \blue{teste-t} para duas amostras supondo variâncias
+  desconhecidas iguais entre os grupos.
+
+<<echo=TRUE>>=
+with(mandible, t.test(females, male, var.equal=TRUE))
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{O teste-$t$ - opções}
+
+  Diferentes ``cenários'' para o \blue{teste-t}:
+  \begin{itemize}
+    \item Amostras independentes
+  \begin{itemize}
+    \item Variâncias iguais
+    \item Variâncias diferentes
+  \end{itemize}
+ \item Amostras pareadas (dependentes)
+  \end{itemize}
+
+  Opções na função para definições do teste-t do \textsl{R}:
+\begin{verbatim}
+     t.test(x, y = NULL,
+            alternative = c("two.sided", "less", "greater"),
+            mu = 0, paired = FALSE, var.equal = FALSE,
+            conf.level = 0.95, ...)
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{O teste-$t$ (2)}
+
+<<echo=TRUE>>=
+with(mandible, t.test(females, male, var.equal=FALSE))
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{O teste-$t$ (3)}
+
+<<echo=TRUE>>=
+with(mandible, t.test(females, male, paired=TRUE))
+@
+\end{frame}
+
+
+<<>>=
+d.obs <- with(mandible, mean(females) - mean(male))
+source("../scripts/mctest.R")
+@
+
+
+\begin{frame}[fragile]
+  \frametitle{Um outro exemplo}
+<<echo=F,fig.width=5, fig.height=4, out.width = "0.5\\textwidth">>=
+mctest(mandible$f, mandible$m, paired=T)
+@
+\end{frame}
+
+\begin{frame}
+  \frametitle{Inferência pela verossimilhança}
+
+  Princípios e procedimentos {\it gerais}:
+  \begin{itemize}
+  \item Adotar um modelo para os dados
+  \item Notar os \blue{parâmetros} do modelo
+  \item Obter a função de verossimilhança para os dados obtidos\\
+    (função dos \blue{parâmetros})
+  \item Maximizar a função de verossimilhança
+     (estimativas são os valores dos \blue{parâmetros} que maximizam a função)
+  \item Obter inferências de interesse sobre parâmetros de interesse
+  \end{itemize}
+
+Procedimentos podem ser \red{analíticos} (matemáticos)
+ou \red{numéricos} (computacional).
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Inferência pela verossimilhança}
+
+  Sob modelo adotado:
+\vspace{0.5cm}
+  \red{Função de verossimilhança:}
+<<echo=TRUE>>=
+require(stats4)
+ll <- function(mu, theta, lsigma, am1, am2){
+    sigma <- exp(lsigma)
+    l1 <- sum(dnorm(am1, m=mu, sd=sigma, log=T))
+    l2 <- sum(dnorm(am2, m=mu+theta, sd=sigma, log=T))
+    return(-(l1+l2))
+}
+@
+\vspace{0.5cm}
+\red{Maximização:}
+<<echo=TRUE>>=
+fit <- mle(ll, start=list(mu=110, theta=0, lsigma=log(10)),
+           fixed=list(am1 = mandible$fem, am2 = mandible$male))
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Inferência pela verossimilhança}
+\red{Inferências sobre parâmetro de interesse:}
+<<echo=TRUE>>=
+summary(fit)
+confint(fit, level=0.95)
+prof <- profile(fit)
+@
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Inferência pela verossimilhança}
+\red{Inferências sobre parâmetro de interesse:}
+<<results="hide",fig.width=7, fig.height=3, out.width = "0.99\\textwidth">>=
+par(mfrow=c(1,3), mar=c(2.5,2.5,0.3, 0.3), mgp=c(1.7, 0.7, 0))
+plot(prof, level=c(0.5, 0.8, 0.95, 0.99))
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Comparando modelos e verossimilhanças}
+
+  Comparando modelos para os dados (revisitando AULA 07)
+  \begin{align*}
+    Y_{ij} &\sim {\rm N}(\mu, \sigma^2) \\
+    Y_{ij} &\sim {\rm N}(\mu_i, \sigma^2) \\
+    Y_{ij} &\sim {\rm N}(\mu_i, \sigma_i^2)
+  \end{align*}
+
+<<echo=TRUE>>=
+L1 <- lm(mandible~1, data=mand)
+L2 <- lm(mandible~sex, data=mand)
+c(logLik(L1), logLik(L2))
+anova(L1, L2)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Verossimilhanças penalizadas para comparação}
+
+  \[ - 2 \log(Lik) + k * \#{\rm par} \]
+<<echo=TRUE>>=
+logLik(L1)
+logLik(L2)
+##
+-2 * logLik(L1) + 2 * 2
+-2 * logLik(L2) + 2 * 3
+c(AIC(L1), AIC(L2))
+##
+-2 * logLik(L1) + log(20) * 2
+-2 * logLik(L2) + log(20) * 3
+c(BIC(L1), BIC(L2))
+@
+\end{frame}
+
+<<>>=
+require(MCMCpack)
+@
+
+\begin{frame}[fragile]
+  \frametitle{Inferência Bayesiana}
+
+Obtenção de distribuição \red{posteriori} para a diferença de médias
+
+<<echo=TRUE>>=
+require(MCMCpack)
+Btt <- MCMCregress(mandible ~ sex, dat=mand)
+summary(Btt)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Inferência Bayesiana}
+
+Obtenção de distribuição \red{posteriori} para a diferença de médias
+\vspace{0.5cm}
+<<results="hide",fig.width=7, fig.height=4, out.width = "0.99\\textwidth">>=
+par(mfrow=c(1,3), mar=c(2.5,2.5,0.3, 0.3), mgp=c(1.7, 0.7, 0))
+plot(Btt, trace=F)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Abordagem geral e generalizando}
+  Generalizações \ldots muitas possíveis
+
+  Vamos começar reescrevendo
+  \begin{align*}
+    Y_{ij}^{(\lambda)} &\sim {\rm N}(\mu_{ij}, \sigma_{ij}^2) \\
+    g(\mu_{ij})  & = f(x_{ij}, \beta) \\
+    g(\sigma_{ij}^2)  & = f(z_{ij}, \varphi)
+  \end{align*}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Abordagem geral e generalizando}
+
+  \begin{itemize}
+  \item Expecificação do modelo associado ao teste-$t$ (amostras independentes, variâncias iguais)
+    \begin{align*}
+      Y_{ij} &\sim {\rm N}(\mu_{ij}, \sigma_{ij}^2) \\
+      \mu_{ij}  & = \beta_o + \beta_1 x_{sex} \\
+      \sigma_{ij}^2  & = \sigma^2
+    \end{align*}
+  \item Mudando a distribuição
+    \begin{align*}
+      Y_{ij} &\sim {\rm G}(\mu_{ij}, \phi_{ij}) \\
+      \log(\mu_{ij})  & = \beta_o + \beta_1 x_{sex} \\
+      \phi_{ij}  & = \phi
+    \end{align*}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Abordagem geral e generalizando}
+
+  Modelos de regressão (linear) : exemplo do início do curso:\\
+  $Y = t$ (tempo) e $x = \sqrt{d}$ (distância)
+    \begin{align*}
+      Y_{ij} &\sim {\rm N}(\mu_{ij}, \sigma_{ij}^2) \\
+      \mu_{ij}  & = \beta_o + \beta_1 x   \;\;\; (\rm{ou } X \beta) \\
+      \sigma_{ij}^2  & = \sigma^2
+    \end{align*}
+
+    Generalizações
+    \begin{itemize}
+    \item Regressão linear múltipla
+    \item Regressão para variável transformada
+    \item Regressão heterocedástica
+    \item Modelo linear generalizado
+    \item \textit{splines}
+    \item Regressão não linear
+    \item Modelo aditivo generalizado
+    \item \ldots
+    \end{itemize}
+\end{frame}
+
+
+
+<<>>=
+rm(list=ls())
+#quest <- read.csv("http://www.leg.ufpr.br/~paulojus/dados/alturapeso.csv")
+quest <- read.csv("../dados/alturapeso.csv")
+@
+
+<<alturafit, echo=FALSE, results="hide">>=
+(alt.n <- with(quest, MASS:::fitdistr(altura, densfun="normal")))
+(alt.ln <- with(quest, MASS:::fitdistr(altura, densfun="lognormal")))
+(alt.g <- with(quest, MASS:::fitdistr(altura, densfun="gamma")))
+(alt.bc <- with(quest, MASS:::fitdistr(-((1/altura)-1), densfun="normal")))
+@
+
+<<pesofit, echo=FALSE, results="hide">>=
+(peso.n <- with(quest, MASS:::fitdistr(peso, densfun="normal")))
+(peso.ln <- with(quest, MASS:::fitdistr(peso, densfun="lognormal")))
+(peso.g <- with(quest, MASS:::fitdistr(peso, densfun="gamma")))
+(peso.bc <- with(quest, MASS:::fitdistr(-((1/peso)-1), densfun="normal")))
+@
+
+<<>>=
+attach(quest)
+@
+
+\begin{frame}
+  \frametitle{Juntando dados  e probabilidades}
+<<fig.width=8, fig.height=5.5, out.width = "0.9\\textwidth">>=
+par(mfrow=c(2,2), mar=c(3,3, 1, 0), mgp=c(1.8, 0.8, 0))
+hist(altura, prob=T, main=""); lines(density(altura))
+curve(dnorm(x, m=mean(altura), sd=sd(altura)), from=140, to=200, col=2, add=T)
+plot(ecdf(altura))
+curve(pnorm(x, m=mean(altura), sd=sd(altura)), from=140, to=200, col=2, add=T)
+#MASS:::boxcox(altura~1, lambda=seq(-3.5, 1, 1/10))
+hist(peso, prob=T, main="", ylim=c(0,0.035)); lines(density(peso))
+curve(dnorm(x, m=mean(peso), sd=sd(peso)), from=40, to=140, col=2, add=T)
+plot(ecdf(peso))
+curve(pnorm(x, m=mean(peso), sd=sd(peso)), from=40, to=140, col=2, add=T)
+#MASS:::boxcox(peso~1, lambda=seq(-3, 1, 1/10))
+@
+\pause
+\red{Distribuição normal não parece se ajustar muito bem aos dados.}\\
+\red{O que fazer?}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Opção 1: transformação de dados}
+
+  Box-Cox : $Y^{*} = \frac{Y^{\lambda}-1}{\lambda}$
+<<fig.width=8, fig.height=5.5, out.width = "0.9\\textwidth">>=
+alturaBC <- -((1/altura)-1)
+pesoBC <- -((1/peso)-1)
+par(mfrow=c(2,3), mar=c(3,3, 1, 0), mgp=c(1.8, 0.8, 0))
+MASS:::boxcox(altura~1, lambda=seq(-3.5, 1, 1/10))
+hist(alturaBC, prob=T, main="", ylim=c(0,1150)); lines(density(-((1/altura)-1)))
+curve(dnorm(x, m=mean(alturaBC), sd=sd(alturaBC)), from=0.9930,
+      to=0.9960, col=2, add=T)
+plot(ecdf(alturaBC))
+curve(pnorm(x, m=mean(alturaBC), sd=sd(alturaBC)), from=0.9930, to=0.9960, col=2, add=T)
+MASS:::boxcox(peso~1, lambda=seq(-3, 1, 1/10))
+hist(pesoBC, prob=T, main="", ylim=c(0, 130)); lines(density(-((1/peso)-1)))
+curve(dnorm(x, m=mean(pesoBC), sd=sd(pesoBC)), from=0.970, to=1, col=2, add=T, n=1000)
+plot(ecdf(pesoBC))
+curve(pnorm(x, m=mean(pesoBC), sd=sd(pesoBC)), from=0.970, to=1, col=2, add=T)
+@
+\end{frame}
+
+\begin{frame}
+  \frametitle{Opção 2: mudando a distribuição}
+<<fig.width=8, fig.height=6, out.width = "0.9\\textwidth">>=
+par(mfrow=c(2,2), mar=c(3,3, 1, 0), mgp=c(1.8, 0.8, 0))
+plot(density(altura), main="altura", ylim=c(0, 0.045), xlab="")
+curve(dnorm(x, mean=alt.n$est[1], sd=alt.n$est[2]), from=140, to=200, col=2, add=T)
+curve(dlnorm(x, meanlog=alt.ln$est[1], sdlog=alt.ln$est[2]), from=140, to=200, col=3, add=T)
+curve(dgamma(x, shape=alt.g$est[1], rate=alt.g$est[2]), from=140, to=200, col=4, add=T)
+legend("topright", c("Normal","LogNormal","Gamma"), col=2:4, lty=1, cex=0.8)
+##
+plot(density(peso), main="peso", ylim=c(0, 0.035), xlab="")
+curve(dnorm(x, mean=peso.n$est[1], sd=peso.n$est[2]), from=30, to=150, col=2, add=T)
+curve(dlnorm(x, meanlog=peso.ln$est[1], sdlog=peso.ln$est[2]), from=30, to=150, col=3, add=T)
+curve(dgamma(x, shape=peso.g$est[1], rate=peso.g$est[2]), from=30, to=140, col=4, add=T)
+legend("topright", c("Normal","LogNormal","Gamma"), col=2:4, lty=1, cex=0.8)
+##
+plot(ecdf(altura))
+curve(pnorm(x, mean=alt.n$est[1], sd=alt.n$est[2]), from=140, to=200, col=2, add=T)
+curve(plnorm(x, meanlog=alt.ln$est[1], sdlog=alt.ln$est[2]), from=140, to=200, col=3, add=T)
+curve(pgamma(x, shape=alt.g$est[1], rate=alt.g$est[2]), from=140, to=200, col=4, add=T)
+legend("topleft", c("Normal","LogNormal","Gamma"), col=2:4, lty=1, cex=0.8)
+plot(ecdf(peso))
+curve(pnorm(x, mean=peso.n$est[1], sd=peso.n$est[2]), from=30, to=150, col=2, add=T)
+curve(plnorm(x, meanlog=peso.ln$est[1], sdlog=peso.ln$est[2]), from=30, to=150, col=3, add=T)
+curve(pgamma(x, shape=peso.g$est[1], rate=peso.g$est[2]), from=30, to=140, col=4, add=T)
+legend("topleft", c("Normal","LogNormal","Gamma"), col=2:4, lty=1, cex=0.8)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Ajustes de distribuições para \blue{altura}}
+%\begin{tiny}
+<<echo=TRUE,results="markup">>=
+(alt.n <- MASS:::fitdistr(altura, densfun="normal"))
+(alt.ln <- MASS:::fitdistr(altura, densfun="lognormal"))
+(alt.g <- MASS:::fitdistr(altura, densfun="gamma"))
+(alt.bc <- MASS:::fitdistr(-((1/altura)-1), densfun="normal"))
+@
+%\end{tiny}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Comparando distribuições para \blue{altura}}
+%\begin{tiny}
+<<echo=TRUE,results="markup">>=
+(altlL <- c(logLik(alt.n), logLik(alt.ln), logLik(alt.g),
+            (-1-1)*sum(log(altura)) + logLik(alt.bc)))
+max(altlL) - altlL
+@
+%\end{tiny}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Ajustes de distribuições para \blue{peso}}
+
+<<echo=TRUE,results="markup">>=
+(peso.n <- MASS:::fitdistr(peso, densfun="normal"))
+(peso.ln <- MASS:::fitdistr(peso, densfun="lognormal"))
+(peso.g <- MASS:::fitdistr(peso, densfun="gamma"))
+(peso.bc <- MASS:::fitdistr(-((1/peso)-1), densfun="normal"))
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Comparando distribuições para \blue{peso}}
+
+<<echo=TRUE,results="markup">>=
+(pesolL <- c(logLik(peso.n), logLik(peso.ln), logLik(peso.g),
+             (-1-1)*sum(log(peso))+logLik(peso.bc)))
+max(pesolL) - pesolL
+@
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Opção 3: incluindo variáveis explicativas}
+
+Uma notação razoavelmente geral
+
+\begin{align*}
+Y^{\lambda} : \mbox{altura (ou peso)} &\sim {\rm Dist.}(\mu = {\rm E}[Y], \sigma^2 = {\rm  Var}[Y]) \\
+\mbox{Modelo 1: }& {\rm E}[Y] = \mu \\
+\mbox{Modelo 2: }& {\rm E}[Y] = \mu_i , i=1,2 (\mbox{M/F)}
+\end{align*}
+
+Distribuições:
+\begin{itemize}
+\item Normal
+\item Gama
+\item Transformação Box-Cox ($\lambda=-1$)
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Revendo Box-Cox: com covariável}
+<<fig.width=8, fig.height=6, out.width = "0.9\\textwidth">>=
+par(mfrow=c(2,3), mar=c(3,3, 1, 0), mgp=c(1.8, 0.8, 0))
+hist(altura, prob=T, main=""); lines(density(altura))
+MASS:::boxcox(altura~1, lambda=seq(-3.5, 1, 1/10))
+MASS:::boxcox(altura~sexo, lambda=seq(-3.5, 1, 1/10))
+hist(peso, prob=T, main=""); lines(density(peso))
+MASS:::boxcox(peso~1, lambda=seq(-3, 1, 1/10))
+MASS:::boxcox(peso~sexo, lambda=seq(-3, 1, 1/10))
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Modelos para \code{altura}}
+
+  \red{Mas será apenas uma questão de escolher a distribuição?}
+
+<<echo=TRUE,results="markup">>=
+## Ajustando distribuições
+alt.n <- glm(altura ~ 1, family="gaussian", data=quest)
+alt.g <- glm(altura ~ 1, family=Gamma(), data=quest)
+alt.bc <- glm(-((1/altura)-1) ~ 1, family="gaussian", data=quest)
+## Ajustando distribuições com médias diferentes para  masculino e feminino
+alt.n1 <- glm(altura ~ sexo, family="gaussian", data=quest)
+alt.g1 <- glm(altura ~ sexo, family=Gamma(), data=quest)
+alt.bc1 <- glm(-((1/altura)-1) ~ sexo, family="gaussian", data=quest)
+## Verossimilhanças dos ajustes
+fits <- rbind(c(logLik(alt.n), logLik(alt.g),
+                (-1-1)*sum(log(altura)) + logLik(alt.bc), 2),
+              c(logLik(alt.n1), logLik(alt.g1),
+                (-1-1)*sum(log(altura)) + logLik(alt.bc1), 3)
+              )
+dimnames(fits) <- list(c("Modelo 1","Modelo 2"),
+                       c("Normal","Gamma","Box-Cox","npar"))
+fits
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Comparando ajustes para modelos normal e gama}
+<<results="hide",echo=FALSE,fig.width=8,fig.height=6,out.width="0.98\\textwidth">>=
+par(mfrow=c(2,2), mar=c(3,3, 1, 0), mgp=c(1.8, 0.8, 0))
+#names(summary(alt.n1))
+#coef(alt.n1)
+alt.n1.med <- cumsum(coef(alt.n1))
+alt.n1.sd <- with(summary(alt.n1), sqrt(deviance/df.residual))
+#altlm1 <- lm(altura ~sexo)
+#names(summary(altlm1))
+#summary(altlm1)$sigma
+propFM <- prop.table(table(sexo))
+plot(density(altura), main="altura", ylim=c(0, 0.045), xlab="")
+curve(0.6*dnorm(x, m=alt.n1.med[1], sd=alt.n1.sd), from=140, to=200, col=4, add=T, lwd=1, lty=2)
+curve(0.4*dnorm(x, m=alt.n1.med[2], sd=alt.n1.sd), from=140, to=200, col=4, add=T, lwd=1, lty=2)
+dalt.n1 <- function(x){
+    propFM[1] * dnorm(x, m=alt.n1.med[1], sd=alt.n1.sd) +
+        propFM[2] * dnorm(x, m=alt.n1.med[2], sd=alt.n1.sd)
+}
+curve(dnorm(x, mean=coef(alt.n), sd=with(summary(alt.n), sqrt(deviance/df.residual))),
+      from=140, to=200, col=2, add=T, lwd=2)
+curve(dalt.n1(x), from=140, to=210, add=T, col=4, lwd=2)
+legend("topright", c("Normal 1","Normal 2"), lty=1, col=c(2,4), lwd=2)
+
+plot(ecdf(altura))
+palt.n1 <- function(x){
+    propFM[1] * pnorm(x, m=alt.n1.med[1], sd=alt.n1.sd) +
+        propFM[2] * pnorm(x, m=alt.n1.med[2], sd=alt.n1.sd)
+}
+curve(pnorm(x, mean=coef(alt.n), sd=with(summary(alt.n), sqrt(deviance/df.residual))),
+      from=140, to=200, col=2, add=T, lwd=2)
+curve(palt.n1(x), from=140, to=210, add=T, col=4, lwd=2)
+legend("topleft", c("Normal 1","Normal 2"), lty=1, col=c(2,4), lwd=2)
+#@
+#\end{frame}
+#
+#
+#\begin{frame}[fragile]
+#  \frametitle{Modelos para \code{altura}}
+#
+#  \red{Comparando ajustes para o modelo com distribuição Gama}
+#<<results="hide",echo=FALSE,fig.width=8,fig.height=4,out.width="0.9\\textwidth"#>>=
+##
+## Distribuição Y ~Gama(shape = alpha, rate = beta)
+## Ajuste Gama GLM (link = "inverse")
+## Y ~Gama (\mu, \phi)
+## Para y ~1:
+## \mu = 1/beta_0
+## alpha = 1/phi = 1/summary(fit)$dispersion
+## beta = beta_0/phi = coef(fit)/summary(fit)$dispersion
+## Modelo 1 ~1
+alphaG <- 1/summary(alt.g)$dispersion
+betaG <- coef(alt.g) * alphaG
+## Modelo 2 ~ sexo
+alphaG1 <- 1/summary(alt.g1)$dispersion
+betaGF <- coef(alt.g1)[1] * alphaG1
+betaGM <- sum(coef(alt.g1)) * alphaG1
+
+propFM <- prop.table(table(sexo))
+#par(mfrow=c(1,2), mar=c(3,3, 1, 0), mgp=c(1.8, 0.8, 0))
+plot(density(altura), main="altura", ylim=c(0, 0.045), xlab="")
+curve(0.6*dgamma(x, sh=alphaG1, rate=betaGF), from=140, to=200, col=4, add=T, lwd=1, lty=2)
+curve(0.4*dgamma(x, sh=alphaG1, rate=betaGM), from=140, to=200, col=4, add=T, lwd=1, lty=2)
+dalt.g1 <- function(x){
+    propFM[1] * dgamma(x, sh=alphaG1, rate=betaGF) +
+        propFM[2] * dgamma(x, sh=alphaG1, rate=betaGM)
+}
+curve(dgamma(x,sh=alphaG, rate=betaG), from=140, to=200, col=2, add=T, lwd=2)
+curve(dalt.g1(x), from=140, to=210, add=T, col=4, lwd=2)
+legend("topright", c("Gama 1","Gama 2"), lty=1, col=c(2,4), lwd=2)
+##
+plot(ecdf(altura))
+palt.g1 <- function(x){
+    propFM[1] * pgamma(x, sh=alphaG1, rate=betaGF) +
+        propFM[2] * pgamma(x, sh=alphaG1, rate=betaGM)
+}
+curve(pgamma(x,sh=alphaG, rate=betaG), from=140, to=200, col=2, add=T, lwd=2)
+curve(palt.g1(x), from=140, to=210, add=T, col=4, lwd=2)
+legend("topleft", c("Gama 1","Gama 2"), lty=1, col=c(2,4), lwd=2)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Modelos para \code{peso}}
+
+  \red{Mas será apenas uma questão de escolher a distribuição?}
+
+<<echo=TRUE,results="markup">>=
+## Ajustando distribuições
+peso.n <- glm(peso ~ 1, family="gaussian", data=quest)
+peso.g <- glm(peso ~ 1, family=Gamma(), data=quest)
+peso.bc <- glm(-((1/peso)-1) ~ 1, family="gaussian", data=quest)
+## Ajustando distribuições com médias diferentes para  masculino e feminino
+peso.n1 <- glm(peso ~ sexo, family="gaussian", data=quest)
+peso.g1 <- glm(peso ~ sexo, family=Gamma(), data=quest)
+peso.bc1 <- glm(-((1/peso)-1) ~ sexo, family="gaussian", data=quest)
+## Verossimilhanças dos ajustes
+fits.peso <- rbind(c(logLik(peso.n), logLik(peso.g),
+                     (-1-1)*sum(log(peso)) + logLik(peso.bc), 2),
+                   c(logLik(peso.n1), logLik(peso.g1),
+                     (-1-1)*sum(log(peso)) + logLik(peso.bc1), 3))
+dimnames(fits.peso) <- list(c("Modelo 1","Modelo2"),
+                            c("Normal","Gamma","Box-Cox","npar"))
+fits.peso
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Comparando ajustes para modelos normal e gama}
+<<results="hide",echo=FALSE,fig.width=8,fig.height=6,out.width="0.98\\textwidth">>=
+par(mfrow=c(2,2), mar=c(3,3, 1, 0), mgp=c(1.8, 0.8, 0))
+#names(summary(peso.n1))
+#coef(peso.n1)
+peso.n1.med <- cumsum(coef(peso.n1))
+peso.n1.sd <- with(summary(peso.n1), sqrt(deviance/df.residual))
+#altlm1 <- lm(altura ~sexo)
+#names(summary(altlm1))
+#summary(altlm1)$sigma
+propFM <- prop.table(table(sexo))
+plot(density(peso), main="peso", ylim=c(0, 0.03), xlab="")
+curve(0.6*dnorm(x, m=peso.n1.med[1], sd=peso.n1.sd), from=35, to=150, col=4, add=T, lwd=1, lty=2)
+curve(0.4*dnorm(x, m=peso.n1.med[2], sd=peso.n1.sd), from=35, to=150, col=4, add=T, lwd=1, lty=2)
+dpeso.n1 <- function(x){
+    propFM[1] * dnorm(x, m=peso.n1.med[1], sd=peso.n1.sd) +
+        propFM[2] * dnorm(x, m=peso.n1.med[2], sd=peso.n1.sd)
+}
+curve(dnorm(x, mean=coef(peso.n), sd=with(summary(peso.n), sqrt(deviance/df.residual))),
+      from=35, to=150, col=2, add=T, lwd=2)
+curve(dpeso.n1(x), from=35, to=150, add=T, col=4, lwd=2)
+legend("topright", c("Normal 1","Normal 2"), lty=1, col=c(2,4), lwd=2)
+
+plot(ecdf(peso))
+ppeso.n1 <- function(x){
+    propFM[1] * pnorm(x, m=peso.n1.med[1], sd=peso.n1.sd) +
+        propFM[2] * pnorm(x, m=peso.n1.med[2], sd=peso.n1.sd)
+}
+curve(pnorm(x, mean=coef(peso.n), sd=with(summary(peso.n), sqrt(deviance/df.residual))),
+      from=35, to=150, col=2, add=T, lwd=2)
+curve(ppeso.n1(x), from=35, to=150, add=T, col=4, lwd=2)
+legend("topleft", c("Normal 1","Normal 2"), lty=1, col=c(2,4), lwd=2)
+#@
+#\end{frame}
+#
+#
+#\begin{frame}[fragile]
+#  \frametitle{Modelos para \code{altura}}
+#
+#  \red{Comparando ajustes para o modelo com distribuição Gama}
+#<<results="hide",echo=FALSE,fig.width=8,fig.height=4,out.width="0.9\\textwidth"#>>=
+##
+## Distribuição Y ~Gama(shape = alpha, rate = beta)
+## Ajuste Gama GLM (link = "inverse")
+## Y ~Gama (\mu, \phi)
+## Para y ~1:
+## \mu = 1/beta_0
+## alpha = 1/phi = 1/summary(fit)$dispersion
+## beta = beta_0/phi = coef(fit)/summary(fit)$dispersion
+## Modelo 1 ~1
+alphaG <- 1/summary(peso.g)$dispersion
+betaG <- coef(peso.g) * alphaG
+## Modelo 2 ~ sexo
+alphaG1 <- 1/summary(peso.g1)$dispersion
+betaGF <- coef(peso.g1)[1] * alphaG1
+betaGM <- sum(coef(peso.g1)) * alphaG1
+
+propFM <- prop.table(table(sexo))
+#par(mfrow=c(1,2), mar=c(3,3, 1, 0), mgp=c(1.8, 0.8, 0))
+plot(density(peso), main="peso", ylim=c(0, 0.03), xlab="")
+curve(0.6*dgamma(x, sh=alphaG1, rate=betaGF), from=35, to=150, col=4, add=T, lwd=1, lty=2)
+curve(0.4*dgamma(x, sh=alphaG1, rate=betaGM), from=35, to=150, col=4, add=T, lwd=1, lty=2)
+dpeso.g1 <- function(x){
+    propFM[1] * dgamma(x, sh=alphaG1, rate=betaGF) +
+        propFM[2] * dgamma(x, sh=alphaG1, rate=betaGM)
+}
+curve(dgamma(x,sh=alphaG, rate=betaG), from=35, to=150, col=2, add=T, lwd=2)
+curve(dpeso.g1(x), from=35, to=150, add=T, col=4, lwd=2)
+legend("topright", c("Gama 1","Gama 2"), lty=1, col=c(2,4), lwd=2)
+##
+plot(ecdf(peso))
+ppeso.g1 <- function(x){
+    propFM[1] * pgamma(x, sh=alphaG1, rate=betaGF) +
+        propFM[2] * pgamma(x, sh=alphaG1, rate=betaGM)
+}
+curve(pgamma(x,sh=alphaG, rate=betaG), from=35, to=150, col=2, add=T, lwd=2)
+curve(ppeso.g1(x), from=35, to=140, add=T, col=4, lwd=2)
+legend("topleft", c("Gama 1","Gama 2"), lty=1, col=c(2,4), lwd=2)
+@
+\end{frame}
+
+
+%\begin{frame}
+%<<fig.width=10, fig.height=5, out.width = "0.9\\textwidth">>=
+%addFitN <- function(obj){
+%    mu <- c(coef(obj)[1], coef(obj)[1]+coef(obj)[2])
+%    sd <- sqrt(obj$deviance/obj$df.residual)
+%    curve(dnorm(x, m=mu[1], sd=sd), add=T)
+%    curve(dnorm(x, m=mu[2], sd=sd), add=T)
+%    return(invisible())
+%}
+%par(mfrow=c(1,2), mar=c(3,2.5, 1, 0), mgp=c(1.8, 0.8, 0))
+%plot(density(altura), main="altura", ylim=c(0, 0.045), xlab="")
+%addFitN(peso.n1)
+%@
+%\end{frame}
+
+\begin{frame}
+  \frametitle{Probabilidade e modelagem}
+  \begin{itemize}
+    \itemsep 2ex
+  \item Descrever distribuições de probabilidades e seus parâmetros
+  \item Escolher melhor(es) ajustes
+  \item Respostas a questões práticas
+  \item Modelagem paramétrica como referência
+  \item Verossimilhança como princípio básico
+  \item Outras abordagens e paradigmas
+  \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{\textbf{Expressão da Verossimilhança I}}
+
+\tcDB{\textbf{V.A. observável discreta (não há ambiguidade)}}
+\[ L(\theta) \equiv P_{\theta}[\underline{Y}=\underline{y}]
+= P_{\theta}[Y_1=y_1, \ldots, Y_n=y_n]\]
+Sob independência
+\[ L(\theta) \equiv \prod_{i=1}^n P_{\theta}[Y_i=y_i] \]
+
+\textbf{Exemplo: }
+\begin{align*}
+Y &\sim P(\theta)  \\
+\mbox{Dados: } & (y_1 , \ldots, y_n) , \mbox{ amostra aleatória}\\
+  L(\theta) &= \prod_{i=1}^n \frac{\exp\{-\theta\} \theta^{y_i}}{y_i!} =
+                \frac{\exp\{-n \theta\} \theta^{\sum_{i=1}^n y_i}}{\prod_{i=1}^n y_i !}
+   \propto \exp\{-n \theta\} \theta^{\sum_{i=1}^n y_i}
+\end{align*}
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{\textbf{Expressão da Verossimilhança II}}
+
+\tcDB{\textbf{V.A. contínua: medição à certa precisão $(y_{iI} \leq y_i \leq y_{iS} )$}}
+  \begin{itemize}
+\itemsep -0.5ex
+  \item Forma mais geral (densidade multivariada)
+    \[ L(\theta) =
+      P_{\theta}[y_{1I} \leq Y_1 \leq y_{1S}, \ldots, y_{nI} \leq Y_n \leq y_{nS} ]
+%      = f(\underline{y}, \underline{\theta})
+    \]
+  \item Sob independência
+\begin{align*}
+L(\theta) &= P_{\theta}[y_{1I} \leq Y_1 \leq y_{1S} ] \cdot
+ P_{\theta}[y_{2I} \leq Y_2 \leq y_{2S}] \ldots
+ P_{\theta}[y_{nI} \leq Y_n \leq y_{nS}] \\
+& = \prod_{i=1}^n P_{\theta}[y_{iI} \leq Y_i \leq y_{iS} ]
+\end{align*}
+\pause
+  \item Se grau de precisão comum, $(y_i - \delta/2 \leq Y_i \leq y_i + \delta/2)$;
+\[
+L(\theta) = \prod_{i=1}^n P_{\theta}[y_i - \delta/2 \leq Y_i \leq y_i + \delta/2]
+= \prod_{i=1}^n \int_{y_i - \delta/2}^{y_i + \delta/2} f(y_i , \underline{\theta}) d(y_i).
+\]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{\textbf{Expressão da Verossimilhança II (cont)}}
+  \begin{itemize}
+  \item alto grau de precisão ($\delta$ é pequeno em relação a variabilidade dos dados)
+\[ L(\theta) \approx \left(\prod_{i=1}^n f(y_i, \underline{\theta}) \right) \delta^n  , \]
+  \pause
+  \item e se $\delta$ não depende dos valores dos parâmetros
+\[ L(\theta) \approx \prod_{i=1}^n f(y_i, \underline{\theta}) \]
+  \pause
+  \item observações não independentes - densidade multivariada:
+\[ L(\theta) \approx f(\underline{y}, \underline{\theta}) \]
+  \end{itemize}
+\end{frame}
+
+%% Vetor com obs que fazem média 2.45
+%%c(2.45, 3.1, 3.5, 1.9, 1.5, 3.1, 2.8, 1.25)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{frame}[fragile]
+\frametitle{Referência bibliográfica}
+
+\bibliography{references.bib}
+
+\end{frame}
+
+%------------------------------------------------
+
+
+\end{document}
+
+
+
+%--------------------------------------------
+
+\begin{frame}
+\frametitle{Lista de disciplinas da especialização}
+
+
+\begin{block}{Abreviaturas}
+  \begin{itemize}
+  \item Fundamentos para DSBD
+    \begin{itemize}
+    \item \textbf{ICP} Infraestrutura computational
+    \item \textbf{IES} Inferência estatística para ciência de dados
+    \item \textbf{LPG} Linguagens de programação para ciência de dados
+    \end{itemize}
+  \item Métodos contemporâneos em DSBD
+    \begin{itemize}
+    \item \textbf{PBD} Processamento de Big Data
+    \item \textbf{MES} Modelos estatísticos
+    \item \textbf{MML} Mineração de dados e aprendizagem de máquina
+    \item \textbf{MPQ} Métodos de pesquisa
+    \end{itemize}
+  \end{itemize}
+ \end{block}
+
+\end{frame}
+
+%--------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Fragmento que exibe input/output}
+
+<<>>=
+# Um laço qualquer.
+x <- 0
+for (i in 1:5) {
+    x <- x + i^2
+}
+x
+
+# Usando `Reduce`.
+Reduce(f = function(x, y) { x + y^2 },
+       x = 0:5)
+
+# Operando vetorialmente.
+sum((0:5)^2)
+@
+
+\end{frame}
+
+%--------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Fragmento que produz tabela}
+
+<<echo = FALSE, results = "asis">>=
+library(xtable)
+
+xt <- xtable(head(iris)[, 1:3],
+             caption = "Legenda para a tabela.")
+
+print(xt,
+      caption.placement = "top",
+      comment = FALSE)
+@
+
+\end{frame}
+
+%--------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Fragmento que produz figura}
+
+<<echo = FALSE, fig.cap = "Caption da figura.">>=
+plot(dist ~ speed, data = cars)
+@
+
+\end{frame}
+
+%--------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Fazendo citações}
+
+\begin{itemize}
+\item Citação em explícita: ``Conforme \citeonline{banzatto}, a unidade
+  experimental ...''
+\item Citação em implicita: ``... a importância da blocagem no
+  experimento \cite{banzatto}.''
+\end{itemize}
+
+Para as referências aparecerem é necessário executar \texttt{bibtex}.
+
+\begin{verbatim}
+pdflatex slides.tex
+bibtex slides
+bibtex slides
+bibtex slides
+pdflatex slides.tex
+\end{verbatim}
+
+\end{frame}
+
+%--------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Referências bibliográficas}
+
+\bibliography{references.bib}
+
+\end{frame}
+
+%------------------------------------------------
+
+\end{document}
