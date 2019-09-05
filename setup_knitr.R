@@ -3,10 +3,11 @@ library(knitr)
 opts_chunk$set(
     ## cache = TRUE,
     tidy = FALSE,
-    comment = NA,
+    comment = "#",
     collapse = TRUE, ## colapsa chunks em R Markdown
-    ## fig.width = 10,
-    ## fig.height = 8,
+    fig.width = 8,
+    fig.height = 6,
+    out.width = "70%",
     fig.align = "center",
     ## dpi = 80, ## aumentar o dpi para exibir maior.
     ## dev = "png",
