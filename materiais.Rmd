@@ -23,7 +23,8 @@ output:
 ## Slides utilizados nas aulas
 
 - [Slides iniciais](oferta201902/CE227-Slides01.pdf)
-- [Slides](slides/CE227-Slides02.html)
+- Slides sobre prioris e resumos da posteriori.
+  [HTML](slides/CE227-Slides02.html). [PDF](slides/CE227-Slides02.pdf).
 
 ## Arquivos de comandos
 
