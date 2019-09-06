@@ -30,13 +30,15 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
   estatística.
   - [Slides](oferta201902/CE227-Slides01.pdf) de aula.
   - [Script](scripts/script_proporcao.R) feito em sala.
-- **20/08 (Ter)**: (PJ) Comparação de duas amostras sob diferentes paradigmas (ver materiais para scripts) 
+- **20/08 (Ter)**: (PJ) Comparação de duas amostras sob diferentes paradigmas (ver materiais para scripts)
 - **22/08 (Qui)**: (PJ) Expecificação de priori e exemplo de Poisson com priori (conjugada) Gama
 - **27/08 (Ter)**: (PJ) Discussão e resolução de exercícios do Capítulo 2
   - [Script](oferta201902/codigos/ExerciciosCap2.R)
-- **29/08 (Qui)**: (PJ) Avaliação intermediária
-- **03/09 (Ter)**:
-- **05/09 (Qui)**:
+- **29/08 (Qui)**: (PJ) Avaliação intermediária.
+- **03/09 (Ter)**: (PJ) Comentários sobre a avaliação.
+- **05/09 (Qui)**: (FM) Definição de prioris e resumo da posteriori.
+  Slides: [HTML](slides/CE227-Slides02.html).
+  [PDF](slides/CE227-Slides02.pdf).
 - **10/09 (Ter)**:
 - **12/09 (Qui)**:
 - **17/09 (Ter)**:
