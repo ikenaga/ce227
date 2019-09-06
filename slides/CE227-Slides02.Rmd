@@ -1,5 +1,5 @@
 ---
-title: "Inferência bayesiana"
+title: "Definição de prioris e resumo da posteriori"
 author: Fernando Mayer
 date: 2019-09-05
 output:
@@ -38,7 +38,7 @@ h1, h2, h3, h4 {
 source("../setup_knitr.R")
 ```
 
-# Análise Bayesiana de dados
+# Análise bayesiana de dados
 
 A análise de dados sob a perspectiva Bayesiana resume-se à 3 etapas:
 1. Definir a distribuição *à priori*
@@ -226,7 +226,7 @@ que $\theta$ pertence a esse intervalo.
 ---
 # Estimação por intervalo
 
-### Exemplo
+### Exemplo (Kinas e Andrade, 2010)
 
 **Interesse**: média de baleias avistadas em 10 milhas
 náuticas (MN)
@@ -317,7 +317,9 @@ post.ni <- dgamma(teta, alfa.star, beta.star)
 plot(teta, post.ni, type = "l", xlab = expression(theta),
      ylab = "Densidade de probabilidade")
 lines(teta, priori.ni, lty = 2)
-legend("topright", legend = c("Posterior", "Priori"), lty = c(1,2))
+lines(teta, dgamma(teta, 1 + x, n), col = 2, lty = 2)
+legend("topright",  lty = c(1, 2, 2), col = c(1, 1, 2),
+       legend = c("Posterior", "Priori", "Verossimilhança"))
 ```
 
 ---
@@ -387,7 +389,9 @@ post.i <- dgamma(teta, alfa.star.i, beta.star.i)
 plot(teta, post.i, type = "l", xlab = expression(theta),
      ylab = "Densidade de probabilidade")
 lines(teta, priori.i, lty = 2)
-legend("topright", legend = c("Posterior", "Priori"), lty = c(1,2))
+lines(teta, dgamma(teta, 1 + x, n), col = 2, lty = 2)
+legend("topright",  lty = c(1, 2, 2), col = c(1, 1, 2),
+       legend = c("Posterior", "Priori", "Verossimilhança"))
 ```
 
 ---
@@ -420,7 +424,7 @@ qgamma(c(.025, .5, .975), alfa.star.i, beta.star.i)
 
 Comparação das duas posteriores
 
-```{r, out.width="70%"}
+```{r, out.width="60%"}
 plot(teta, post.i, type = "l", xlab = expression(theta),
      ylab = expression(pi(paste(theta, "|", bold(x)))))
 lines(teta, post.ni, lty = 2)
@@ -454,13 +458,25 @@ obtidos para fins de inferência
 
 O que significa $[\sigma^2] \propto 1/\sigma^2$?
 
-```{r}
-x <- seq(0, 1, 0.01)
+.pull-left[
+```{r, out.width="100%"}
+x <- seq(0, 10, 0.01)
 fx <- 1/x
 plot(x, fx, type = "l",
      xlab = expression(sigma^2),
      ylab = expression(group("[", paste(sigma^2), "]")))
 ```
+]
+.pull-right[
+```{r, out.width="100%"}
+x <- seq(0, 10, 0.01)
+fx <- 1/x
+plot(x, fx, type = "l",
+     xlab = expression(sigma^2),
+     ylim = c(0,  0.7), #<<
+     ylab = expression(group("[", paste(sigma^2), "]")))
+```
+]
 
 ---
 # 1. Expressão da verossimilhança
