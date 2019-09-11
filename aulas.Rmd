@@ -39,9 +39,9 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **05/09 (Qui)**: (FM) Definição de prioris e resumo da posteriori.
   Slides: [HTML](slides/CE227-Slides02.html).
   [PDF](slides/CE227-Slides02.pdf).
-- **10/09 (Ter)**:
-- **12/09 (Qui)**:
-- **17/09 (Ter)**:
+- **10/09 (Ter)**: (PJ) Média (esperança) da posteriori como média ponderada entre a amostrar e da priori. Obtenção da posteriori da média da normal (e verificação da relação da esperança). Priori de Jefreys. Exercícios recomendados: Caps 2 e 3 da apostila. 
+- **12/09 (Qui)**: (PJ)
+- **17/09 (Ter)**: (PJ) Avaliação intermediária (Caps 2 e 3)
 - **19/09 (Qui)**:
 - **24/09 (Ter)**: **Prova 1.**
 - **26/09 (Qui)**:
