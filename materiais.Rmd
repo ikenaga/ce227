@@ -35,3 +35,8 @@ output:
   - [dados altura e peso](oferta201902/dados/alturapeso.csv)
   - [codigo para teste aleatorizado](oferta201902/codigos/mctest.R)
 - [codigo aula 28/08 Exercício 2.1 a)](oferta201902/codigos/ExerciciosCap2.R)
+
+## Provas
+
+- [1a avaliação intermediária](provas/ce227-av01-2019.pdf)
+- [2a avaliação intermediária](provas/ce227-av02-2019.pdf)
