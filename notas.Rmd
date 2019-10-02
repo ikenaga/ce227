@@ -9,4 +9,13 @@ output:
 source("setup_knitr.R")
 ```
 
-Em breve.
+```{r, include=FALSE}
+da <- read.table("misc/notas.csv", header = TRUE, sep = ";")
+str(da)
+da <- da[order(da$Matrícula), ]
+row.names(da) <- NULL
+```
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(da)
+```
