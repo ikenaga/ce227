@@ -49,7 +49,7 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **26/09 (Qui)**: Não haverá aula devido ao SIEPE.
 [Resolução 64/18 - CEPE][].
 - **01/10 (Ter)**: (PJ) 1a prova
-- **03/10 (Qui)**:
+- **03/10 (Qui)**: (PJ) Revisão e discussão da 1a prova
 - **08/10 (Ter)**:
 - **10/10 (Qui)**:
 - **15/10 (Ter)**:
