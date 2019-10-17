@@ -50,9 +50,9 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 [Resolução 64/18 - CEPE][].
 - **01/10 (Ter)**: (PJ) 1a prova
 - **03/10 (Qui)**: (PJ) Revisão e discussão da 1a prova
-- **08/10 (Ter)**:
-- **10/10 (Qui)**:
-- **15/10 (Ter)**:
+- **08/10 (Ter)**: (PJ) Após obter a posteriori: introdução à decisão, preditiva e aproximação quadrática
+- **10/10 (Qui)**: (PJ) Decisão bayesiana. Resumos da posteriori. (Cap 5)
+- **15/10 (Ter)**: (PJ) Predição - obtenção da distribuição preditiva (Cap 6)
 - **17/10 (Qui)**:
 - **22/10 (Ter)**:
 - **24/10 (Qui)**:
@@ -65,7 +65,7 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **19/11 (Ter)**:
 - **21/11 (Qui)**:
 - **26/11 (Ter)**: **Prova 2.**
-- **28/11 (Qui)**:
-- **03/12 (Ter)**:
+- **28/11 (Qui)**: CH já integralizada
+- **03/12 (Ter)**: CH já integralizada
 
 [Resolução 64/18 - CEPE]: http://www.soc.ufpr.br/portal/wp-content/uploads/2018/11/cepe-64-18-atualizada.pdf
