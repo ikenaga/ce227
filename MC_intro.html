@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Fernando P. Mayer" />
+
+
+<title>Métodos de Monte Carlo</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-66454501-14"></script>
+<script>
+ window.dataLayer = window.dataLayer || [];
+ function gtag(){dataLayer.push(arguments);}
+ gtag('js', new Date());
+
+ gtag('config', 'UA-66454501-14');
+</script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">CE227</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="aulas.html">Aulas</a>
+</li>
+<li>
+  <a href="referencias.html">Referências</a>
+</li>
+<li>
+  <a href="notas.html">Notas</a>
+</li>
+<li>
+  <a href="materiais.html">Materiais</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/leg-ufpr/ce227">
+    <span class="fa fa-github fa-lg"></span>
+     
+    GitHub
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Métodos de Monte Carlo</h1>
+<h4 class="author">Fernando P. Mayer</h4>
+
+</div>
+
+
+<blockquote>
+<p><em>Monte Carlo methods are experiments.</em></p>
+</blockquote>
+<blockquote>
+<p>Gentle, J. (2009)</p>
+</blockquote>
+<div id="introdução" class="section level1">
+<h1><span class="header-section-number">1</span> Introdução</h1>
+<p>Duas grandes classes de problemas numéricos que surgem na inferência estatística são: problemas de <strong>otimização</strong>, e problemas de <strong>integração</strong>. De fato, diversos exemplos mostram que nem sempre é possível calcular analiticamente os estimadores associados à um determinado paradigma (máxima verossimilhança, bayesiano, método dos momentos, etc).</p>
+<p>Experimentação de Monte Carlo significa o uso de valores aleatórios para a estimação de alguma função de uma distribuição de probabilidade. Um problema que não possui um componente estocástico pode ser colocado como um problema com um componente que pode ser identificado como a esperança de uma função de uma variável aleatória (VA). Isso pode ser feito através da decomposição de uma função densidade de probabilidade. O problema é então resolvido pela estimação do valor esperado por meio do uso de uma amostra aleatória da distribuição da VA.</p>
+<p>O termo “Método de Monte Carlo” surgiu no laboratório nacional de Los Alamos (EUA), no final dos anos 1940, durante o desenvolvimento de uma bomba atômica (Metropolis e Ulam, 1949). O termo “Monte Carlo” faz referência à cidade famosa por seus cassinos, que fazem uso de mecanismos “aleatórios” para jogos. O desenvolvimento destes métodos também contribuíram fortemente para o desenvolvimento dos primeiros computadores eletrônicos, acelarando a computação de tarefas numéricas repetitivas.</p>
+<p>Não existe um consenso em como os métodos de Monte Carlo poderiam ser definidos, mas algumas distinções podem ser feitas:</p>
+<ul>
+<li><strong>Simulação</strong>: Sortear <strong>um</strong> valor de uma <span class="math inline">\(U(0,1)\)</span> pode simular o lançamento de uma moeda: se for menor do que 0.5, atribua cara, caso contrário, coroa.</li>
+<li><strong>Método de Monte Carlo</strong>: Derramar uma caixa de moedas em uma mesa e calcular a proporção de moedas que caem cara ou coroa.</li>
+<li><strong>Simulação de Monte Carlo</strong>: Sortear um grande número de valores de uma <span class="math inline">\(U(0,1)\)</span> e atribuir cara (menor que 0.5) ou coroa.</li>
+</ul>
+<p>Os métodos de Monte Carlo também podem ser divididos em duas categorias:</p>
+<ul>
+<li><strong>Integração</strong> de Monte Carlo: quando utilizado para resolver problemas de integração numérica</li>
+<li><strong>Simulação</strong> de Monte Carlo: quando utilizado para resolver problemas mais gerais através de simulação</li>
+</ul>
+</div>
+<div id="integração-de-monte-carlo" class="section level1">
+<h1><span class="header-section-number">2</span> Integração de Monte Carlo</h1>
+<p>A integração de Monte Carlo é uma técnica numérica que se baseia em amostragem aleatória para <strong>aproximar</strong> um resultado, aplicando esse processo para a estimação numérica de integrais.</p>
+<p>De maneira geral, um probelma de inferência estatística pode ser formulado como a estimação de uma integral do tipo <span class="math display">\[
+\theta = \int_{D} h(x) \text{d}x
+\]</span> Se a integral possui forma fechada, então não há necessidade de qualquer método de aproximação. Caso não seja possível resolver a integral de forma analítica, e se <span class="math inline">\(D\)</span> for de uma ou duas dimensões, então existem diversos métodos de <strong>quadratura</strong> para aproximar o valor dessa integral. Por exemplo:</p>
+<ul>
+<li>Método trapezoidal</li>
+<li>Método de Simpson 1/3</li>
+<li>Quadratura de Gauss-Hermite</li>
+<li>Aproximação de Laplace</li>
+</ul>
+<p>No entanto, quando a dimensão em <span class="math inline">\(D\)</span> for alta, a integração de Monte Carlo é uma alternativa mais viável (que pode ser usada em problemas de baixa dimensão também).</p>
+<p>Se a gunção <span class="math inline">\(h\)</span> for decomposta de forma a ter um componente que é uma densidade de probabilidade, ou seja, <span class="math display">\[
+h(x) = g(x)f(x)
+\]</span> onde <span class="math inline">\(\int_{D} f(x) dx = 1\)</span> e <span class="math inline">\(f(x) \geq 0\)</span>, então a integral <span class="math inline">\(\theta\)</span> pode ser vista como a esperança da VA <span class="math inline">\(Y = g(x)\)</span>, onde <span class="math inline">\(X\)</span> tem distribuição <span class="math inline">\(f(x)\)</span>, ou seja, <span class="math display">\[
+\theta = \text{E}[g(X)] = \int_{D} g(x)f(x) dx.
+\]</span> Com uma amostra aleatória <span class="math inline">\(x_1, \ldots, x_m\)</span> da distribuição <span class="math inline">\(f(x)\)</span> da VA <span class="math inline">\(X\)</span>, então uma estimativa <strong>não viesada</strong> de <span class="math inline">\(\theta\)</span> é a média amostral <span class="math display">\[
+\hat\theta = \frac{1}{m} \sum_{i=1}^{m} g(x_i)
+\]</span></p>
+<p>Essa tecnica é usada em muitas situações em estatística. Resumindo, temos os seguintes passos:</p>
+<ol style="list-style-type: decimal">
+<li>Decomponha a função de interesse para incluir uma função densidade de probabilidade.</li>
+<li>Identifique o valor esperado.</li>
+<li>Use uma amostra aleatória para estimar o valor esperado.</li>
+</ol>
+<p><strong>Note então que, na integração de Monte Carlo, trocamos um problema de resolver uma integral por um problema de calcular uma média (por simulação).</strong></p>
+<div id="integração-simples-de-monte-carlo" class="section level2">
+<h2><span class="header-section-number">2.1</span> Integração simples de Monte Carlo</h2>
+<p>Considere o problema de estimar <span class="math display">\[
+\theta = \int_0^1 g(x) dx.
+\]</span> Se <span class="math inline">\(X_1, \ldots, X_m\)</span> é uma amostra aleatória de <span class="math inline">\(U(0,1)\)</span>, então <span class="math display">\[
+\hat\theta = \frac{1}{m} \sum_{i=1}^{m} g(x_i)
+\]</span> Pode-se mostrar que <span class="math inline">\(\hat\theta\)</span> converge para <span class="math inline">\(\text{E}[\hat\theta] = \theta\)</span> quando <span class="math inline">\(m \to \infty\)</span> com probabilidade 1, pela <strong>Lei Forte dos Grandes Números</strong>.</p>
+<div class="panel panel-primary">
+<div class="panel-heading">
+Lei forte dos grandes números
+</div>
+<div class="panel-body">
+<p>Sejam <span class="math inline">\(X_1, \ldots, X_n\)</span> VAs iid com <span class="math inline">\(\text{E}[X] = \mu\)</span> e <span class="math inline">\(\text{Var}[X] = \sigma^2\)</span>, e definimos <span class="math inline">\(\bar{X}_n = \frac{1}{n}\sum_{i=1}^n X_i\)</span>. Então, para cada <span class="math inline">\(\epsilon &gt; 0\)</span>, <span class="math display">\[
+P(\lim_{n \to \infty} |\bar{X}_n - \mu| &lt; \epsilon) = 1
+\]</span> isto é, converge quase certamente para <span class="math inline">\(\mu\)</span>.</p>
+</div>
+</div>
+<p>Por exemplo, obtenha uma estimativa de <span class="math display">\[
+\theta = \int_0^1 e^{-x} dx
+\]</span></p>
+<pre class="r"><code>## Obtem m valores da U(0,1)
+m &lt;- 10000
+x &lt;- runif(m)
+## Calcula g(x)
+theta.hat &lt;- exp(-x)
+## Calcula a média
+(m.theta.hat &lt;- sum(theta.hat)/m)
+# [1] 0.6324091</code></pre>
+<p>Nesse caso, podemos obter a solução analítica e integração numérica no R para comparar as estimativas</p>
+<pre class="r"><code>## Solução analítica
+(theta &lt;- 1 - exp(-1))
+# [1] 0.6321206
+## Integração numérica no R
+integrate(function(x) exp(-x), lower = 0, upper = 1)
+# 0.6321206 with absolute error &lt; 7e-15</code></pre>
+<p>Um caso mais geral é estimar a integral do tipo <span class="math display">\[
+\theta = \int_a^b g(x) dx
+\]</span> Nesse caso, temos que substituir a <span class="math inline">\(U(0,1)\)</span> por alguma outra densidade com suporte no intervalo dos limites de integração. Por exemplo, se <span class="math inline">\(X \sim U(a,b)\)</span>, então <span class="math inline">\(f(x) = \frac{1}{b-a}\)</span> e</p>
+<p><span class="math display">\[\begin{align*}
+\theta &amp;= \int_a^b g(x) f(x) dx \\
+  &amp;= (b-a) \int_a^b g(x) \frac{1}{b-a} dx \\
+  &amp;= (b-a) \text{E}[g(X)]
+\end{align*}\]</span></p>
+<p>Visualmente, temos a seguinte situação:</p>
+<p><img width="40%" src="img/MCIntegration01.png"/> <img width="40%" src="img/MCIntegration02.png"/></p>
+<p>O que temos, na verdade, é a soma de <span class="math inline">\(m\)</span> áreas de retângulos, que no final, tendem a reproduzir a área da função desejada.</p>
+<p><img src="img/MCIntegration03.png" width="90%" style="display: block; margin: auto;" /> (Figuras extraídas de <a href="https://www.scratchapixel.com" class="uri">https://www.scratchapixel.com</a>).</p>
+<p>De maneira geral, para calcular <span class="math inline">\(\theta = \int_a^b g(x) dx\)</span>:</p>
+<ol style="list-style-type: decimal">
+<li>Gere <span class="math inline">\(X_1, \ldots, X_m\)</span> de <span class="math inline">\(U(a,b)\)</span></li>
+<li>Calcule <span class="math inline">\(\overline{g(x)} = \frac{1}{m}\sum_{i=1}^{m} g(x_i)\)</span></li>
+<li><span class="math inline">\(\hat\theta = (b-a)\overline{g(x)}\)</span></li>
+</ol>
+<p>Por exemplo, obtenha uma estimativa de <span class="math display">\[
+\theta = \int_2^4 e^{-x} dx
+\]</span></p>
+<pre class="r"><code>## Obtem m valores da U(2,4)
+m &lt;- 10000
+a &lt;- 2; b &lt;- 4
+x &lt;- runif(m, min = a, max = b)
+## Calcula g(x)
+theta.hat &lt;- exp(-x)
+## Calcula a média * (b - a)
+(m.theta.hat &lt;- (sum(theta.hat)/m) * (b - a))
+# [1] 0.1161121</code></pre>
+<p>Nesse caso, podemos obter a solução analítica e integração numérica no R para comparar as estimativas</p>
+<pre class="r"><code>## Solução analítica
+(theta &lt;- exp(-2) - exp(-4))
+# [1] 0.1170196
+## Integração numérica no R
+integrate(function(x) exp(-x), lower = 2, upper = 4)
+# 0.1170196 with absolute error &lt; 1.3e-15</code></pre>
+</div>
+<div id="variância-do-estimador-de-monte-carlo" class="section level2">
+<h2><span class="header-section-number">2.2</span> Variância do estimador de Monte Carlo</h2>
+<p>Como <span class="math inline">\(\hat\theta\)</span> é resultado de uma amostra aleatória de <span class="math inline">\(m\)</span> valores, naturalmente, cada amostra poderá gerar uma estimativa (razoavelmente) diferente, e sempre existirá uma variabilidade dos valores amostrados ao redor da média, que é o <span class="math inline">\(\hat\theta\)</span>.</p>
+<p>A variância de <span class="math inline">\(\hat\theta\)</span> é <span class="math display">\[
+\hat{V}(\hat\theta) = \frac{\sigma^2}{m} =
+\frac{\sum_{i=1}^m [g(x_i) - \overline{g(x)}]^2}{m^2}
+\]</span> Portanto, o erro padrão da estimativa será <span class="math display">\[
+\hat{EP}(\hat\theta) = \frac{\hat\sigma}{\sqrt{m}} =
+\frac{\sqrt{\sum_{i=1}^m [g(x_i) - \overline{g(x)}]^2}}{m}
+\]</span></p>
+<p>Seguindo o exemplo anterior, vimos que a estimativa da integral é</p>
+<pre class="r"><code>m.theta.hat
+# [1] 0.1161121</code></pre>
+<p>Mas veja que existe uma distribuição de valores para compor esta estimativa média</p>
+<pre class="r"><code>hist(theta.hat); abline(v = theta, col = 2)</code></pre>
+<p><img src="figures/MC_intro/unnamed-chunk-8-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>A variância relacionada ao estimador pode então ser calculada como</p>
+<pre class="r"><code>## Variancia
+(v.theta.hat &lt;- sum((theta.hat - m.theta.hat)^2)/m^2)
+# [1] 4.4318e-07
+## Erro padrão
+(se.theta.hat &lt;- sqrt(v.theta.hat))
+# [1] 0.0006657177</code></pre>
+<p>Pelo Teorema do Limite Central, temos que</p>
+<p><span class="math display">\[
+\frac{\hat\theta - \text{E}(\hat\theta)}{\sqrt{\hat{V}(\hat\theta)}}
+\]</span> converge em distribuição para <span class="math inline">\(N(0,1)\)</span> quando <span class="math inline">\(m \to \infty\)</span>. Portanto, para <span class="math inline">\(m\)</span> suficientemente grande, <span class="math inline">\(\hat\theta\)</span> é aproximadamente Normal com média <span class="math inline">\(\theta\)</span>.</p>
+<pre class="r"><code>## Simula 1000 médias
+r &lt;- 1000
+res &lt;- matrix(runif(m * r, a, b), nrow = m, ncol = r)
+m.theta.sim &lt;- apply(res, 2, function(x) mean(exp(-x)) * (b - a))
+hist(m.theta.sim); abline(v = theta, col = 2)</code></pre>
+<p><img src="figures/MC_intro/unnamed-chunk-10-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Com esse resultado, podemos inclusive fornecer um intervalo de confiança associado à nossa estimativa</p>
+<pre class="r"><code>## Media e veriancia
+c(m.theta.hat, v.theta.hat)
+# [1] 1.161121e-01 4.431800e-07
+## Intervalo de confiança (95%)
+c(m.theta.hat - 1.96 * se.theta.hat, m.theta.hat + 1.96 * se.theta.hat)
+# [1] 0.1148073 0.1174169</code></pre>
+<p>Veja que assintoticamente, i.e., conforme aumentamos o tamanho da amostra, o valor da integral se aproxima cada vez mais do valor verdadeiro (que nesse caso sabemos calcular analiticamente, apenas para comparação).</p>
+<pre class="r"><code>## Simula a convergência para o verdadeiro valor conforme aumenta o
+## tamanho da amostra
+nsamp &lt;- 1e4
+set.seed(19)
+x &lt;- exp(-runif(nsamp, a, b))
+estint &lt;- (cumsum(x) * (b - a))/(1:nsamp)
+esterr &lt;- sqrt(cumsum((x - estint)^2))/(1:nsamp)
+plot(estint, ylim = c(.05, .15), type = &quot;l&quot;,
+     xlab = &quot;Tamanho da amostra&quot;, ylab = &quot;Estimativa&quot;)
+abline(h = theta, col = 2)
+lines(estint - 1.96 * esterr, lty = 2)
+lines(estint + 1.96 * esterr, lty = 2)</code></pre>
+<p><img src="figures/MC_intro/unnamed-chunk-12-1.png" width="80%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="redução-da-variância" class="section level2">
+<h2><span class="header-section-number">2.3</span> Redução da variância</h2>
+<p>Note que, embora a variância do estimador do exemplo anterior pareça pequena, o método simples de Monte Carlo não é o método mais eficiente, ou seja, aquele que provê estimativas com a menor variância possível. Isso porque, como vimos, estamos supondo uma distribuição Uniforme no intervalo <span class="math inline">\((a,b)\)</span>, para qualquer que seja o formato da função que temos interesse em integrar.</p>
+<p>A redução da variância é importante pois sempre estamos interessados em obter estimativas que sejam mais precisas possíveis, evitando erros numéricos ou de aproximações.</p>
+<p>Existem várias adaptações para o método simples de Monte Carlo, com a intenção de se obter estimativas mais precisas, i.e., com menor variância. Alguns deles são:</p>
+<ul>
+<li>Variáveis antitéticas</li>
+<li>Variáveis de controle</li>
+<li>Amostragem por importância</li>
+</ul>
+</div>
+<div id="amostragem-por-importância" class="section level2">
+<h2><span class="header-section-number">2.4</span> Amostragem por importância</h2>
+<p>Limitações do método simples de Monte Carlo:</p>
+<ol style="list-style-type: decimal">
+<li>Não se aplica para intervalos não definidos</li>
+<li>É ineficiente quando a função <span class="math inline">\(g(x)\)</span> não é uniforme</li>
+</ol>
+<p>Quando consideramos um problema de integração como um problema de valor esperado, é netural que consideremos outras funções de densidade além da Uniforme. Isso leva à um método mais geral chamdo de <strong>amostragem por importância</strong>.</p>
+<p>A amostragem por importância reduz a variância pelo fato de podermos escolher uma densidade <span class="math inline">\(f(x)\)</span> mais parecida com com a função <span class="math inline">\(g(x)\)</span> sendo integrada. Ao escolher uma densidade mais parecida, a variância é reduzida. Intuitivamente, a amostragem por importância tende a gerar mais amostra onde a contribuição para a integral é maior, ou “importante”. Se pudermos determinar as regiões mais importantes para a integração, a variância do estimador de Monte Carlo pode ser significativamente reduzida.</p>
+<p><img src="img/importancesampling.png" width="50%" style="display: block; margin: auto;" /> (Figura extraída de <a href="https://www.scratchapixel.com" class="uri">https://www.scratchapixel.com</a>).</p>
+<p>Suponha que <span class="math inline">\(X\)</span> seja uma VA com densidade <span class="math inline">\(f(x)\)</span>. Seja <span class="math inline">\(Y\)</span> a VA <span class="math inline">\(g(X)/f(X)\)</span>, então <span class="math display">\[
+\int g(x) dx = \int \frac{g(x)}{f(x)} f(x) dx = \text{E}[Y]
+\]</span> Com isso, podemos estimar <span class="math inline">\(\text{E}[Y]\)</span> como uma integração simples de Monte Carlo, ou seja, <span class="math display">\[
+\frac{1}{m}\sum_{i=1}^{m} Y_i = \frac{1}{m}\sum_{i=1}^{m}
+\frac{g(X_i)}{f(X_i)}
+\]</span> onde as VAs <span class="math inline">\(X_1, \ldots, X_m\)</span> são geradas a partir da distribuição de <span class="math inline">\(f(x)\)</span>. A função <span class="math inline">\(f(x)\)</span> é chamada de <strong>função de importância</strong>.</p>
+<p>No método de amostragem por importância, a variância do estimador baseado em <span class="math inline">\(Y= g(X)/f(X)\)</span> é <span class="math inline">\(\text{Var}(Y)/m\)</span>, então a variância de <span class="math inline">\(Y\)</span> deve ser pequena.</p>
+<p>Na verdade, a variância de <span class="math inline">\(Y\)</span> é pequena, se <span class="math inline">\(Y\)</span> for aproximadamente constante, o que significa que a densidade <span class="math inline">\(f(x)\)</span> deve estar “próxima” da densidade de <span class="math inline">\(g(x)\)</span>. Também é importante que a função <span class="math inline">\(f(x)\)</span> seja fácil de simular.</p>
+<p><strong>Exemplo:</strong> Considere estimar a integral <span class="math display">\[
+\theta = \int_0^1 \frac{e^{-x}}{1+x^2} dx
+\]</span> pelo método de amostragem por importância. Diversas funções de importância podem ser propostas para esse caso:</p>
+<p><span class="math display">\[\begin{align*}
+f_0(x) &amp;= 1, \quad 0&lt;x&lt;1 \\
+f_1(x) &amp;= e^{-x}, \quad 0&lt;x&lt;\infty \\
+f_2(x) &amp;= (1+x^2)^{-1}/\pi, \quad -\infty&lt;x&lt;\infty \\
+f_3(x) &amp;= e^{-x}/(1-e^{-1}), \quad 0&lt;x&lt;1 \\
+f_4(x) &amp;= 4(1-x^2)^{-1}/\pi, \quad 0&lt;x&lt;1 \\
+\end{align*}\]</span></p>
+<p>Alguns detalhes:</p>
+<ul>
+<li><span class="math inline">\(f_1\)</span> e <span class="math inline">\(f_2\)</span> possuem domínio maior, o que irá contribuir com muitos zeros (ineficientes)</li>
+<li><span class="math inline">\(f_1\)</span> é uma Exponencial com <span class="math inline">\(\lambda = 1\)</span></li>
+<li><span class="math inline">\(f_2\)</span> é uma Cauchy padrão</li>
+<li><span class="math inline">\(f_3\)</span> e <span class="math inline">\(f_4\)</span> não são funções conhecidas, por isso precisamos usar o método da transformação integral de probabilidade para gerar números destas distribuições</li>
+</ul>
+<p>Graficamente temos o seguinte cenário:</p>
+<pre class="r"><code>x &lt;- seq(0, 1, .01)
+w &lt;- 2
+f1 &lt;- exp(-x)
+f2 &lt;- (1 / pi) / (1 + x^2)
+f3 &lt;- exp(-x) / (1 - exp(-1))
+f4 &lt;- 4 / ((1 + x^2) * pi)
+g &lt;- exp(-x) / (1 + x^2)
+par(mfrow = c(1, 2))
+plot(x, g, type = &quot;l&quot;, main = &quot;&quot;, ylab = &quot;g(x)&quot;,
+     ylim = c(0,2), lwd = 2)
+lines(x, g/g, col = 2, lwd = w)
+lines(x, f1, col = 3, lwd = w)
+lines(x, f2, col = 4, lwd = w)
+lines(x, f3, col = 5, lwd = w)
+lines(x, f4, col = 6, lwd = w)
+legend(&quot;topright&quot;, legend = c(&quot;g&quot;, 0:4),
+       col = 1:6, lwd = w, inset = 0.02)
+plot(x, g, type = &quot;l&quot;, main = &quot;&quot;, ylab = &quot;g(x)/f(x)&quot;,
+     ylim = c(0,3.2), lwd = w)
+lines(x, g/f1, col = 3, lwd = w)
+lines(x, g/f2, col = 4, lwd = w)
+lines(x, g/f3, col = 5, lwd = w)
+lines(x, g/f4, col = 6, lwd = w)
+legend(&quot;topright&quot;, legend = c(0:4),
+       col = 2:6, lwd = w, inset = 0.02)
+par(mfrow = c(1, 1))</code></pre>
+<p><img src="figures/MC_intro/unnamed-chunk-14-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>m &lt;- 10000
+theta.hat &lt;- se &lt;- numeric(5)
+g &lt;- function(x) {
+    ## exp(-x - log(1+x^2)) * (x &gt; 0) * (x &lt; 1)
+    exp(-x)/(1 + x^2) * (x &gt; 0) * (x &lt; 1)
+}
+
+x &lt;- runif(m)     # usando f0
+fg &lt;- g(x)
+theta.hat[1] &lt;- mean(fg)
+se[1] &lt;- sd(fg)
+
+x &lt;- rexp(m, 1)   # usando f1
+fg &lt;- g(x) / exp(-x)
+theta.hat[2] &lt;- mean(fg)
+se[2] &lt;- sd(fg)
+
+x &lt;- rcauchy(m)   # usando f2
+i &lt;- c(which(x &gt; 1), which(x &lt; 0))
+x[i] &lt;- 2  # para evitar erros em g(x)
+fg &lt;- g(x) / dcauchy(x)
+theta.hat[3] &lt;- mean(fg)
+se[3] &lt;- sd(fg)
+
+u &lt;- runif(m)     # f3, pelo método da inversa
+x &lt;- - log(1 - u * (1 - exp(-1)))
+fg &lt;- g(x) / (exp(-x) / (1 - exp(-1)))
+theta.hat[4] &lt;- mean(fg)
+se[4] &lt;- sd(fg)
+
+u &lt;- runif(m)    # f4, pelo método da inversa
+x &lt;- tan(pi * u / 4)
+fg &lt;- g(x) / (4 / ((1 + x^2) * pi))
+theta.hat[5] &lt;- mean(fg)
+se[5] &lt;- sd(fg)</code></pre>
+<p>Os resultados das estimativas com seus erros-padrões são</p>
+<pre class="r"><code>rbind(theta.hat, se/sqrt(m))
+#                  [,1]       [,2]        [,3]         [,4]        [,5]
+# theta.hat 0.525261009 0.52980810 0.539874509 0.5250382027 0.525325250
+#           0.002447843 0.00418581 0.009629678 0.0009686918 0.001408793</code></pre>
+<p>Os resultados indicam que <span class="math inline">\(f_3\)</span>, e possivelmente <span class="math inline">\(f_4\)</span> produzem as menores variâncias entre as funções propostas, enquanto que <span class="math inline">\(f_2\)</span> possui a maior variância. Note que <span class="math inline">\(f_0\)</span>, a uniforme, possui erro padrão maior.</p>
+<p>Esse exemplo mostra que a função de importância que resulta na menor variância de <span class="math inline">\(Y = g(X)/f(X)\)</span> deve ser escolhida com cuidado.</p>
+</div>
+</div>
+
+<center>
+  <hr width="100%" size="3px">
+  <p> <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt_BR">
+      <img src="https://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" alt="Licença Creative Commons 4.0"> </a>
+  </p>
+  <p> <font size="2"> Este conteúdo
+      está disponível por meio da Licença Creative Commons 4.0 </font>
+  </p>
+</center>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = false;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
