@@ -4,8 +4,8 @@ exclude: ["README.md", "\\.sh", "cache"]
 output:
   html_document:
     theme: flatly
-    highlight: default
-    code_folding: hide
+    highlight: haddock
+    # code_folding: show
     number_sections: false
     toc: true
     toc_depth: 4
