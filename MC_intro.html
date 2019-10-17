@@ -25,9 +25,6 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<script src="site_libs/navigation-1.1/codefolding.js"></script>
-<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -40,22 +37,93 @@
  gtag('config', 'UA-66454501-14');
 </script>
 
+
 <style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; } /* Alert */
+code span.an { color: #008000; } /* Annotation */
+code span.at { } /* Attribute */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #0000ff; } /* ControlFlow */
+code span.ch { color: #008080; } /* Char */
+code span.cn { } /* Constant */
+code span.co { color: #008000; } /* Comment */
+code span.cv { color: #008000; } /* CommentVar */
+code span.do { color: #008000; } /* Documentation */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.im { } /* Import */
+code span.in { color: #008000; } /* Information */
+code span.kw { color: #0000ff; } /* Keyword */
+code span.op { } /* Operator */
+code span.ot { color: #ff4000; } /* Other */
+code span.pp { color: #ff4000; } /* Preprocessor */
+code span.sc { color: #008080; } /* SpecialChar */
+code span.ss { color: #008080; } /* SpecialString */
+code span.st { color: #008080; } /* String */
+code span.va { } /* Variable */
+code span.vs { color: #008080; } /* VerbatimString */
+code span.wa { color: #008000; font-weight: bold; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 <style type="text/css">
   pre:not([class]) {
     background-color: white;
   }
 </style>
-<script type="text/javascript">
-if (window.hljs) {
-  hljs.configure({languages: []});
-  hljs.initHighlightingOnLoad();
-  if (document.readyState && document.readyState === "complete") {
-    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
-  }
-}
-</script>
-
 
 
 <style type="text/css">
@@ -261,9 +329,6 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
-<style type="text/css">
-.code-folding-btn { margin-bottom: 4px; }
-</style>
 
 
 
@@ -394,14 +459,6 @@ div.tocify {
 
 <div class="fluid-row" id="header">
 
-<div class="btn-group pull-right">
-<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
-<ul class="dropdown-menu" style="min-width: 50px;">
-<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
-<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
-</ul>
-</div>
-
 
 
 <h1 class="title toc-ignore">Métodos de Monte Carlo</h1>
@@ -446,14 +503,14 @@ div.tocify {
 <li>Aproximação de Laplace</li>
 </ul>
 <p>No entanto, quando a dimensão em <span class="math inline">\(D\)</span> for alta, a integração de Monte Carlo é uma alternativa mais viável (que pode ser usada em problemas de baixa dimensão também).</p>
-<p>Se a gunção <span class="math inline">\(h\)</span> for decomposta de forma a ter um componente que é uma densidade de probabilidade, ou seja, <span class="math display">\[
+<p>Se a função <span class="math inline">\(h\)</span> for decomposta de forma a ter um componente que é uma densidade de probabilidade, ou seja, <span class="math display">\[
 h(x) = g(x)f(x)
 \]</span> onde <span class="math inline">\(\int_{D} f(x) dx = 1\)</span> e <span class="math inline">\(f(x) \geq 0\)</span>, então a integral <span class="math inline">\(\theta\)</span> pode ser vista como a esperança da VA <span class="math inline">\(Y = g(x)\)</span>, onde <span class="math inline">\(X\)</span> tem distribuição <span class="math inline">\(f(x)\)</span>, ou seja, <span class="math display">\[
 \theta = \text{E}[g(X)] = \int_{D} g(x)f(x) dx.
 \]</span> Com uma amostra aleatória <span class="math inline">\(x_1, \ldots, x_m\)</span> da distribuição <span class="math inline">\(f(x)\)</span> da VA <span class="math inline">\(X\)</span>, então uma estimativa <strong>não viesada</strong> de <span class="math inline">\(\theta\)</span> é a média amostral <span class="math display">\[
 \hat\theta = \frac{1}{m} \sum_{i=1}^{m} g(x_i)
 \]</span></p>
-<p>Essa tecnica é usada em muitas situações em estatística. Resumindo, temos os seguintes passos:</p>
+<p>Essa técnica é usada em muitas situações em estatística. Resumindo, temos os seguintes passos:</p>
 <ol style="list-style-type: decimal">
 <li>Decomponha a função de interesse para incluir uma função densidade de probabilidade.</li>
 <li>Identifique o valor esperado.</li>
@@ -480,21 +537,21 @@ P(\lim_{n \to \infty} |\bar{X}_n - \mu| &lt; \epsilon) = 1
 <p>Por exemplo, obtenha uma estimativa de <span class="math display">\[
 \theta = \int_0^1 e^{-x} dx
 \]</span></p>
-<pre class="r"><code>## Obtem m valores da U(0,1)
-m &lt;- 10000
-x &lt;- runif(m)
-## Calcula g(x)
-theta.hat &lt;- exp(-x)
-## Calcula a média
-(m.theta.hat &lt;- sum(theta.hat)/m)
-# [1] 0.6324091</code></pre>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co">## Obtem m valores da U(0,1)</span></a>
+<a class="sourceLine" id="cb1-2" title="2">m &lt;-<span class="st"> </span><span class="dv">10000</span></a>
+<a class="sourceLine" id="cb1-3" title="3">x &lt;-<span class="st"> </span><span class="kw">runif</span>(m)</a>
+<a class="sourceLine" id="cb1-4" title="4"><span class="co">## Calcula g(x)</span></a>
+<a class="sourceLine" id="cb1-5" title="5">theta.hat &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x)</a>
+<a class="sourceLine" id="cb1-6" title="6"><span class="co">## Calcula a média</span></a>
+<a class="sourceLine" id="cb1-7" title="7">(m.theta.hat &lt;-<span class="st"> </span><span class="kw">sum</span>(theta.hat)<span class="op">/</span>m)</a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="co"># [1] 0.6321115</span></a></code></pre></div>
 <p>Nesse caso, podemos obter a solução analítica e integração numérica no R para comparar as estimativas</p>
-<pre class="r"><code>## Solução analítica
-(theta &lt;- 1 - exp(-1))
-# [1] 0.6321206
-## Integração numérica no R
-integrate(function(x) exp(-x), lower = 0, upper = 1)
-# 0.6321206 with absolute error &lt; 7e-15</code></pre>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co">## Solução analítica</span></a>
+<a class="sourceLine" id="cb2-2" title="2">(theta &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb2-3" title="3"><span class="co"># [1] 0.6321206</span></a>
+<a class="sourceLine" id="cb2-4" title="4"><span class="co">## Integração numérica no R</span></a>
+<a class="sourceLine" id="cb2-5" title="5"><span class="kw">integrate</span>(<span class="cf">function</span>(x) <span class="kw">exp</span>(<span class="op">-</span>x), <span class="dt">lower =</span> <span class="dv">0</span>, <span class="dt">upper =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb2-6" title="6"><span class="co"># 0.6321206 with absolute error &lt; 7e-15</span></a></code></pre></div>
 <p>Um caso mais geral é estimar a integral do tipo <span class="math display">\[
 \theta = \int_a^b g(x) dx
 \]</span> Nesse caso, temos que substituir a <span class="math inline">\(U(0,1)\)</span> por alguma outra densidade com suporte no intervalo dos limites de integração. Por exemplo, se <span class="math inline">\(X \sim U(a,b)\)</span>, então <span class="math inline">\(f(x) = \frac{1}{b-a}\)</span> e</p>
@@ -516,22 +573,43 @@ integrate(function(x) exp(-x), lower = 0, upper = 1)
 <p>Por exemplo, obtenha uma estimativa de <span class="math display">\[
 \theta = \int_2^4 e^{-x} dx
 \]</span></p>
-<pre class="r"><code>## Obtem m valores da U(2,4)
-m &lt;- 10000
-a &lt;- 2; b &lt;- 4
-x &lt;- runif(m, min = a, max = b)
-## Calcula g(x)
-theta.hat &lt;- exp(-x)
-## Calcula a média * (b - a)
-(m.theta.hat &lt;- (sum(theta.hat)/m) * (b - a))
-# [1] 0.1161121</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co">## Obtem m valores da U(2,4)</span></a>
+<a class="sourceLine" id="cb3-2" title="2">m &lt;-<span class="st"> </span><span class="dv">10000</span></a>
+<a class="sourceLine" id="cb3-3" title="3">a &lt;-<span class="st"> </span><span class="dv">2</span>; b &lt;-<span class="st"> </span><span class="dv">4</span></a>
+<a class="sourceLine" id="cb3-4" title="4">x &lt;-<span class="st"> </span><span class="kw">runif</span>(m, <span class="dt">min =</span> a, <span class="dt">max =</span> b)</a>
+<a class="sourceLine" id="cb3-5" title="5"><span class="co">## Calcula g(x)</span></a>
+<a class="sourceLine" id="cb3-6" title="6">theta.hat &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x)</a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="co">## Calcula a média * (b - a)</span></a>
+<a class="sourceLine" id="cb3-8" title="8">(m.theta.hat &lt;-<span class="st"> </span>(<span class="kw">sum</span>(theta.hat)<span class="op">/</span>m) <span class="op">*</span><span class="st"> </span>(b <span class="op">-</span><span class="st"> </span>a))</a>
+<a class="sourceLine" id="cb3-9" title="9"><span class="co"># [1] 0.1164106</span></a></code></pre></div>
 <p>Nesse caso, podemos obter a solução analítica e integração numérica no R para comparar as estimativas</p>
-<pre class="r"><code>## Solução analítica
-(theta &lt;- exp(-2) - exp(-4))
-# [1] 0.1170196
-## Integração numérica no R
-integrate(function(x) exp(-x), lower = 2, upper = 4)
-# 0.1170196 with absolute error &lt; 1.3e-15</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co">## Solução analítica</span></a>
+<a class="sourceLine" id="cb4-2" title="2">(theta &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">2</span>) <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">4</span>))</a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="co"># [1] 0.1170196</span></a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="co">## Integração numérica no R</span></a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="kw">integrate</span>(<span class="cf">function</span>(x) <span class="kw">exp</span>(<span class="op">-</span>x), <span class="dt">lower =</span> <span class="dv">2</span>, <span class="dt">upper =</span> <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co"># 0.1170196 with absolute error &lt; 1.3e-15</span></a></code></pre></div>
+<p>Vemos que, nos dois casos acima, estamos na verdade obtendo uma estimativa das probabilidades <span class="math inline">\(P[0&lt;X&lt;1]\)</span> e <span class="math inline">\(P[2&lt;X&lt;4]\)</span>, respectivamente.</p>
+<p>No entanto, se quisermos calcular a seguinte probabilidade <span class="math display">\[
+P[X&gt;2] = \int_2^{\infty} e^{-x} dx
+\]</span></p>
+<p>Nesse caso, a integração simples de Monte Carlo não é útil, pois não é possível que o limite de integração seja indefinido.</p>
+<p>Na verdade, podemos pensar em uma aproximação <strong>grosseira</strong>, supondo que vamos amostrar de <span class="math inline">\(X \sim \text{U}(2, \infty)\)</span>, onde podemos aproximar o valor de <span class="math inline">\(\infty\)</span> por um número grande. Por exemplo:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="co">## Obtem m valores da U(2,Inf)</span></a>
+<a class="sourceLine" id="cb5-2" title="2">m &lt;-<span class="st"> </span><span class="dv">10000</span></a>
+<a class="sourceLine" id="cb5-3" title="3">x2 &lt;-<span class="st"> </span><span class="kw">runif</span>(m, <span class="dt">min =</span> <span class="dv">2</span>, <span class="dt">max =</span> <span class="fl">1e5</span>)</a>
+<a class="sourceLine" id="cb5-4" title="4"><span class="co">## Calcula g(x)</span></a>
+<a class="sourceLine" id="cb5-5" title="5">theta.hat2 &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x2)</a>
+<a class="sourceLine" id="cb5-6" title="6"><span class="co">## Calcula a média * (b - a)</span></a>
+<a class="sourceLine" id="cb5-7" title="7">(m.theta.hat2 &lt;-<span class="st"> </span>(<span class="kw">sum</span>(theta.hat2)<span class="op">/</span>m) <span class="op">*</span><span class="st"> </span>(<span class="fl">1e5</span> <span class="op">-</span><span class="st"> </span><span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb5-8" title="8"><span class="co"># [1] 0.6221564</span></a>
+<a class="sourceLine" id="cb5-9" title="9"><span class="co">## Solução analítica</span></a>
+<a class="sourceLine" id="cb5-10" title="10">(theta2 &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">2</span>) <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="fl">1e5</span>))</a>
+<a class="sourceLine" id="cb5-11" title="11"><span class="co"># [1] 0.1353353</span></a>
+<a class="sourceLine" id="cb5-12" title="12"><span class="co">## Usando a exponencial</span></a>
+<a class="sourceLine" id="cb5-13" title="13"><span class="kw">pexp</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb5-14" title="14"><span class="co"># [1] 0.1353353</span></a></code></pre></div>
+<p>Note que o valor estimado nesse caso está longe do velor correto, pois estamos adotando um procedimento completamente arbitrário.</p>
 </div>
 <div id="variância-do-estimador-de-monte-carlo" class="section level2">
 <h2><span class="header-section-number">2.2</span> Variância do estimador de Monte Carlo</h2>
@@ -544,49 +622,49 @@ integrate(function(x) exp(-x), lower = 2, upper = 4)
 \frac{\sqrt{\sum_{i=1}^m [g(x_i) - \overline{g(x)}]^2}}{m}
 \]</span></p>
 <p>Seguindo o exemplo anterior, vimos que a estimativa da integral é</p>
-<pre class="r"><code>m.theta.hat
-# [1] 0.1161121</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">m.theta.hat</a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="co"># [1] 0.1164106</span></a></code></pre></div>
 <p>Mas veja que existe uma distribuição de valores para compor esta estimativa média</p>
-<pre class="r"><code>hist(theta.hat); abline(v = theta, col = 2)</code></pre>
-<p><img src="figures/MC_intro/unnamed-chunk-8-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">hist</span>(theta.hat); <span class="kw">abline</span>(<span class="dt">v =</span> theta, <span class="dt">col =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="figures/MC_intro/unnamed-chunk-9-1.png" width="80%" style="display: block; margin: auto;" /></p>
 <p>A variância relacionada ao estimador pode então ser calculada como</p>
-<pre class="r"><code>## Variancia
-(v.theta.hat &lt;- sum((theta.hat - m.theta.hat)^2)/m^2)
-# [1] 4.4318e-07
-## Erro padrão
-(se.theta.hat &lt;- sqrt(v.theta.hat))
-# [1] 0.0006657177</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="co">## Variancia</span></a>
+<a class="sourceLine" id="cb8-2" title="2">(v.theta.hat &lt;-<span class="st"> </span><span class="kw">sum</span>((theta.hat <span class="op">-</span><span class="st"> </span>m.theta.hat)<span class="op">^</span><span class="dv">2</span>)<span class="op">/</span>m<span class="op">^</span><span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co"># [1] 4.440372e-07</span></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="co">## Erro padrão</span></a>
+<a class="sourceLine" id="cb8-5" title="5">(se.theta.hat &lt;-<span class="st"> </span><span class="kw">sqrt</span>(v.theta.hat))</a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co"># [1] 0.0006663611</span></a></code></pre></div>
 <p>Pelo Teorema do Limite Central, temos que</p>
 <p><span class="math display">\[
 \frac{\hat\theta - \text{E}(\hat\theta)}{\sqrt{\hat{V}(\hat\theta)}}
 \]</span> converge em distribuição para <span class="math inline">\(N(0,1)\)</span> quando <span class="math inline">\(m \to \infty\)</span>. Portanto, para <span class="math inline">\(m\)</span> suficientemente grande, <span class="math inline">\(\hat\theta\)</span> é aproximadamente Normal com média <span class="math inline">\(\theta\)</span>.</p>
-<pre class="r"><code>## Simula 1000 médias
-r &lt;- 1000
-res &lt;- matrix(runif(m * r, a, b), nrow = m, ncol = r)
-m.theta.sim &lt;- apply(res, 2, function(x) mean(exp(-x)) * (b - a))
-hist(m.theta.sim); abline(v = theta, col = 2)</code></pre>
-<p><img src="figures/MC_intro/unnamed-chunk-10-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="co">## Simula 1000 médias</span></a>
+<a class="sourceLine" id="cb9-2" title="2">r &lt;-<span class="st"> </span><span class="dv">1000</span></a>
+<a class="sourceLine" id="cb9-3" title="3">res &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">runif</span>(m <span class="op">*</span><span class="st"> </span>r, a, b), <span class="dt">nrow =</span> m, <span class="dt">ncol =</span> r)</a>
+<a class="sourceLine" id="cb9-4" title="4">m.theta.sim &lt;-<span class="st"> </span><span class="kw">apply</span>(res, <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="kw">mean</span>(<span class="kw">exp</span>(<span class="op">-</span>x)) <span class="op">*</span><span class="st"> </span>(b <span class="op">-</span><span class="st"> </span>a))</a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="kw">hist</span>(m.theta.sim); <span class="kw">abline</span>(<span class="dt">v =</span> theta, <span class="dt">col =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="figures/MC_intro/unnamed-chunk-11-1.png" width="80%" style="display: block; margin: auto;" /></p>
 <p>Com esse resultado, podemos inclusive fornecer um intervalo de confiança associado à nossa estimativa</p>
-<pre class="r"><code>## Media e veriancia
-c(m.theta.hat, v.theta.hat)
-# [1] 1.161121e-01 4.431800e-07
-## Intervalo de confiança (95%)
-c(m.theta.hat - 1.96 * se.theta.hat, m.theta.hat + 1.96 * se.theta.hat)
-# [1] 0.1148073 0.1174169</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="co">## Media e veriancia</span></a>
+<a class="sourceLine" id="cb10-2" title="2"><span class="kw">c</span>(m.theta.hat, v.theta.hat)</a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="co"># [1] 1.164106e-01 4.440372e-07</span></a>
+<a class="sourceLine" id="cb10-4" title="4"><span class="co">## Intervalo de confiança (95%)</span></a>
+<a class="sourceLine" id="cb10-5" title="5"><span class="kw">c</span>(m.theta.hat <span class="op">-</span><span class="st"> </span><span class="fl">1.96</span> <span class="op">*</span><span class="st"> </span>se.theta.hat, m.theta.hat <span class="op">+</span><span class="st"> </span><span class="fl">1.96</span> <span class="op">*</span><span class="st"> </span>se.theta.hat)</a>
+<a class="sourceLine" id="cb10-6" title="6"><span class="co"># [1] 0.1151046 0.1177167</span></a></code></pre></div>
 <p>Veja que assintoticamente, i.e., conforme aumentamos o tamanho da amostra, o valor da integral se aproxima cada vez mais do valor verdadeiro (que nesse caso sabemos calcular analiticamente, apenas para comparação).</p>
-<pre class="r"><code>## Simula a convergência para o verdadeiro valor conforme aumenta o
-## tamanho da amostra
-nsamp &lt;- 1e4
-set.seed(19)
-x &lt;- exp(-runif(nsamp, a, b))
-estint &lt;- (cumsum(x) * (b - a))/(1:nsamp)
-esterr &lt;- sqrt(cumsum((x - estint)^2))/(1:nsamp)
-plot(estint, ylim = c(.05, .15), type = &quot;l&quot;,
-     xlab = &quot;Tamanho da amostra&quot;, ylab = &quot;Estimativa&quot;)
-abline(h = theta, col = 2)
-lines(estint - 1.96 * esterr, lty = 2)
-lines(estint + 1.96 * esterr, lty = 2)</code></pre>
-<p><img src="figures/MC_intro/unnamed-chunk-12-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="co">## Simula a convergência para o verdadeiro valor conforme aumenta o</span></a>
+<a class="sourceLine" id="cb11-2" title="2"><span class="co">## tamanho da amostra</span></a>
+<a class="sourceLine" id="cb11-3" title="3">nsamp &lt;-<span class="st"> </span><span class="fl">1e4</span></a>
+<a class="sourceLine" id="cb11-4" title="4"><span class="kw">set.seed</span>(<span class="dv">19</span>)</a>
+<a class="sourceLine" id="cb11-5" title="5">x &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="kw">runif</span>(nsamp, a, b))</a>
+<a class="sourceLine" id="cb11-6" title="6">estint &lt;-<span class="st"> </span>(<span class="kw">cumsum</span>(x) <span class="op">*</span><span class="st"> </span>(b <span class="op">-</span><span class="st"> </span>a))<span class="op">/</span>(<span class="dv">1</span><span class="op">:</span>nsamp)</a>
+<a class="sourceLine" id="cb11-7" title="7">esterr &lt;-<span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">cumsum</span>((x <span class="op">-</span><span class="st"> </span>estint)<span class="op">^</span><span class="dv">2</span>))<span class="op">/</span>(<span class="dv">1</span><span class="op">:</span>nsamp)</a>
+<a class="sourceLine" id="cb11-8" title="8"><span class="kw">plot</span>(estint, <span class="dt">ylim =</span> <span class="kw">c</span>(.<span class="dv">05</span>, <span class="fl">.15</span>), <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>,</a>
+<a class="sourceLine" id="cb11-9" title="9">     <span class="dt">xlab =</span> <span class="st">&quot;Tamanho da amostra&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;Estimativa&quot;</span>)</a>
+<a class="sourceLine" id="cb11-10" title="10"><span class="kw">abline</span>(<span class="dt">h =</span> theta, <span class="dt">col =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb11-11" title="11"><span class="kw">lines</span>(estint <span class="op">-</span><span class="st"> </span><span class="fl">1.96</span> <span class="op">*</span><span class="st"> </span>esterr, <span class="dt">lty =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb11-12" title="12"><span class="kw">lines</span>(estint <span class="op">+</span><span class="st"> </span><span class="fl">1.96</span> <span class="op">*</span><span class="st"> </span>esterr, <span class="dt">lty =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="figures/MC_intro/unnamed-chunk-13-1.png" width="80%" style="display: block; margin: auto;" /></p>
 </div>
 <div id="redução-da-variância" class="section level2">
 <h2><span class="header-section-number">2.3</span> Redução da variância</h2>
@@ -606,17 +684,17 @@ lines(estint + 1.96 * esterr, lty = 2)</code></pre>
 <li>Não se aplica para intervalos não definidos</li>
 <li>É ineficiente quando a função <span class="math inline">\(g(x)\)</span> não é uniforme</li>
 </ol>
-<p>Quando consideramos um problema de integração como um problema de valor esperado, é netural que consideremos outras funções de densidade além da Uniforme. Isso leva à um método mais geral chamdo de <strong>amostragem por importância</strong>.</p>
+<p>Quando consideramos um problema de integração como um problema de valor esperado, é natural que consideremos outras funções de densidade além da Uniforme. Isso leva à um método mais geral chamdo de <strong>amostragem por importância</strong>.</p>
 <p>A amostragem por importância reduz a variância pelo fato de podermos escolher uma densidade <span class="math inline">\(f(x)\)</span> mais parecida com com a função <span class="math inline">\(g(x)\)</span> sendo integrada. Ao escolher uma densidade mais parecida, a variância é reduzida. Intuitivamente, a amostragem por importância tende a gerar mais amostra onde a contribuição para a integral é maior, ou “importante”. Se pudermos determinar as regiões mais importantes para a integração, a variância do estimador de Monte Carlo pode ser significativamente reduzida.</p>
 <p><img src="img/importancesampling.png" width="50%" style="display: block; margin: auto;" /> (Figura extraída de <a href="https://www.scratchapixel.com" class="uri">https://www.scratchapixel.com</a>).</p>
-<p>Suponha que <span class="math inline">\(X\)</span> seja uma VA com densidade <span class="math inline">\(f(x)\)</span>. Seja <span class="math inline">\(Y\)</span> a VA <span class="math inline">\(g(X)/f(X)\)</span>, então <span class="math display">\[
+<p>Suponha que <span class="math inline">\(X\)</span> seja uma VA com densidade <span class="math inline">\(f(x)\)</span>. Seja <span class="math inline">\(Y = g(X)/f(X)\)</span>, então <span class="math display">\[
 \int g(x) dx = \int \frac{g(x)}{f(x)} f(x) dx = \text{E}[Y]
 \]</span> Com isso, podemos estimar <span class="math inline">\(\text{E}[Y]\)</span> como uma integração simples de Monte Carlo, ou seja, <span class="math display">\[
 \frac{1}{m}\sum_{i=1}^{m} Y_i = \frac{1}{m}\sum_{i=1}^{m}
 \frac{g(X_i)}{f(X_i)}
 \]</span> onde as VAs <span class="math inline">\(X_1, \ldots, X_m\)</span> são geradas a partir da distribuição de <span class="math inline">\(f(x)\)</span>. A função <span class="math inline">\(f(x)\)</span> é chamada de <strong>função de importância</strong>.</p>
-<p>No método de amostragem por importância, a variância do estimador baseado em <span class="math inline">\(Y= g(X)/f(X)\)</span> é <span class="math inline">\(\text{Var}(Y)/m\)</span>, então a variância de <span class="math inline">\(Y\)</span> deve ser pequena.</p>
-<p>Na verdade, a variância de <span class="math inline">\(Y\)</span> é pequena, se <span class="math inline">\(Y\)</span> for aproximadamente constante, o que significa que a densidade <span class="math inline">\(f(x)\)</span> deve estar “próxima” da densidade de <span class="math inline">\(g(x)\)</span>. Também é importante que a função <span class="math inline">\(f(x)\)</span> seja fácil de simular.</p>
+<p>No método de amostragem por importância, a variância do estimador baseado em <span class="math inline">\(Y= g(X)/f(X)\)</span> é <span class="math inline">\(\text{Var}(Y)/m\)</span>, então a variância de <span class="math inline">\(Y\)</span> deve ser pequena, conforme <span class="math inline">\(m\)</span> aumenta.</p>
+<p>Na verdade, <strong>a variância de <span class="math inline">\(Y\)</span> é pequena, se <span class="math inline">\(Y\)</span> for aproximadamente constante</strong>, o que significa que a densidade <span class="math inline">\(f(x)\)</span> deve estar “próxima” da densidade de <span class="math inline">\(g(x)\)</span>. Também é importante que a função <span class="math inline">\(f(x)\)</span> seja fácil de simular.</p>
 <p><strong>Exemplo:</strong> Considere estimar a integral <span class="math display">\[
 \theta = \int_0^1 \frac{e^{-x}}{1+x^2} dx
 \]</span> pelo método de amostragem por importância. Diversas funções de importância podem ser propostas para esse caso:</p>
@@ -635,75 +713,95 @@ f_4(x) &amp;= 4(1-x^2)^{-1}/\pi, \quad 0&lt;x&lt;1 \\
 <li><span class="math inline">\(f_3\)</span> e <span class="math inline">\(f_4\)</span> não são funções conhecidas, por isso precisamos usar o método da transformação integral de probabilidade para gerar números destas distribuições</li>
 </ul>
 <p>Graficamente temos o seguinte cenário:</p>
-<pre class="r"><code>x &lt;- seq(0, 1, .01)
-w &lt;- 2
-f1 &lt;- exp(-x)
-f2 &lt;- (1 / pi) / (1 + x^2)
-f3 &lt;- exp(-x) / (1 - exp(-1))
-f4 &lt;- 4 / ((1 + x^2) * pi)
-g &lt;- exp(-x) / (1 + x^2)
-par(mfrow = c(1, 2))
-plot(x, g, type = &quot;l&quot;, main = &quot;&quot;, ylab = &quot;g(x)&quot;,
-     ylim = c(0,2), lwd = 2)
-lines(x, g/g, col = 2, lwd = w)
-lines(x, f1, col = 3, lwd = w)
-lines(x, f2, col = 4, lwd = w)
-lines(x, f3, col = 5, lwd = w)
-lines(x, f4, col = 6, lwd = w)
-legend(&quot;topright&quot;, legend = c(&quot;g&quot;, 0:4),
-       col = 1:6, lwd = w, inset = 0.02)
-plot(x, g, type = &quot;l&quot;, main = &quot;&quot;, ylab = &quot;g(x)/f(x)&quot;,
-     ylim = c(0,3.2), lwd = w)
-lines(x, g/f1, col = 3, lwd = w)
-lines(x, g/f2, col = 4, lwd = w)
-lines(x, g/f3, col = 5, lwd = w)
-lines(x, g/f4, col = 6, lwd = w)
-legend(&quot;topright&quot;, legend = c(0:4),
-       col = 2:6, lwd = w, inset = 0.02)
-par(mfrow = c(1, 1))</code></pre>
-<p><img src="figures/MC_intro/unnamed-chunk-14-1.png" width="100%" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>m &lt;- 10000
-theta.hat &lt;- se &lt;- numeric(5)
-g &lt;- function(x) {
-    ## exp(-x - log(1+x^2)) * (x &gt; 0) * (x &lt; 1)
-    exp(-x)/(1 + x^2) * (x &gt; 0) * (x &lt; 1)
-}
-
-x &lt;- runif(m)     # usando f0
-fg &lt;- g(x)
-theta.hat[1] &lt;- mean(fg)
-se[1] &lt;- sd(fg)
-
-x &lt;- rexp(m, 1)   # usando f1
-fg &lt;- g(x) / exp(-x)
-theta.hat[2] &lt;- mean(fg)
-se[2] &lt;- sd(fg)
-
-x &lt;- rcauchy(m)   # usando f2
-i &lt;- c(which(x &gt; 1), which(x &lt; 0))
-x[i] &lt;- 2  # para evitar erros em g(x)
-fg &lt;- g(x) / dcauchy(x)
-theta.hat[3] &lt;- mean(fg)
-se[3] &lt;- sd(fg)
-
-u &lt;- runif(m)     # f3, pelo método da inversa
-x &lt;- - log(1 - u * (1 - exp(-1)))
-fg &lt;- g(x) / (exp(-x) / (1 - exp(-1)))
-theta.hat[4] &lt;- mean(fg)
-se[4] &lt;- sd(fg)
-
-u &lt;- runif(m)    # f4, pelo método da inversa
-x &lt;- tan(pi * u / 4)
-fg &lt;- g(x) / (4 / ((1 + x^2) * pi))
-theta.hat[5] &lt;- mean(fg)
-se[5] &lt;- sd(fg)</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">x &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">.01</span>)</a>
+<a class="sourceLine" id="cb12-2" title="2">w &lt;-<span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb12-3" title="3">f1 &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x)</a>
+<a class="sourceLine" id="cb12-4" title="4">f2 &lt;-<span class="st"> </span>(<span class="dv">1</span> <span class="op">/</span><span class="st"> </span>pi) <span class="op">/</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span>x<span class="op">^</span><span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb12-5" title="5">f3 &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x) <span class="op">/</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb12-6" title="6">f4 &lt;-<span class="st"> </span><span class="dv">4</span> <span class="op">/</span><span class="st"> </span>((<span class="dv">1</span> <span class="op">+</span><span class="st"> </span>x<span class="op">^</span><span class="dv">2</span>) <span class="op">*</span><span class="st"> </span>pi)</a>
+<a class="sourceLine" id="cb12-7" title="7">g &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x) <span class="op">/</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span>x<span class="op">^</span><span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb12-8" title="8"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb12-9" title="9"><span class="kw">plot</span>(x, g, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">main =</span> <span class="st">&quot;&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;g(x)&quot;</span>,</a>
+<a class="sourceLine" id="cb12-10" title="10">     <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">2</span>), <span class="dt">lwd =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb12-11" title="11"><span class="kw">lines</span>(x, g<span class="op">/</span>g, <span class="dt">col =</span> <span class="dv">2</span>, <span class="dt">lwd =</span> w)</a>
+<a class="sourceLine" id="cb12-12" title="12"><span class="kw">lines</span>(x, f1, <span class="dt">col =</span> <span class="dv">3</span>, <span class="dt">lwd =</span> w)</a>
+<a class="sourceLine" id="cb12-13" title="13"><span class="kw">lines</span>(x, f2, <span class="dt">col =</span> <span class="dv">4</span>, <span class="dt">lwd =</span> w)</a>
+<a class="sourceLine" id="cb12-14" title="14"><span class="kw">lines</span>(x, f3, <span class="dt">col =</span> <span class="dv">5</span>, <span class="dt">lwd =</span> w)</a>
+<a class="sourceLine" id="cb12-15" title="15"><span class="kw">lines</span>(x, f4, <span class="dt">col =</span> <span class="dv">6</span>, <span class="dt">lwd =</span> w)</a>
+<a class="sourceLine" id="cb12-16" title="16"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;g&quot;</span>, <span class="dv">0</span><span class="op">:</span><span class="dv">4</span>),</a>
+<a class="sourceLine" id="cb12-17" title="17">       <span class="dt">col =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">6</span>, <span class="dt">lwd =</span> w, <span class="dt">inset =</span> <span class="fl">0.02</span>)</a>
+<a class="sourceLine" id="cb12-18" title="18"><span class="kw">plot</span>(x, g, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">main =</span> <span class="st">&quot;&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;g(x)/f(x)&quot;</span>,</a>
+<a class="sourceLine" id="cb12-19" title="19">     <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="fl">3.2</span>), <span class="dt">lwd =</span> w)</a>
+<a class="sourceLine" id="cb12-20" title="20"><span class="kw">lines</span>(x, g<span class="op">/</span>f1, <span class="dt">col =</span> <span class="dv">3</span>, <span class="dt">lwd =</span> w)</a>
+<a class="sourceLine" id="cb12-21" title="21"><span class="kw">lines</span>(x, g<span class="op">/</span>f2, <span class="dt">col =</span> <span class="dv">4</span>, <span class="dt">lwd =</span> w)</a>
+<a class="sourceLine" id="cb12-22" title="22"><span class="kw">lines</span>(x, g<span class="op">/</span>f3, <span class="dt">col =</span> <span class="dv">5</span>, <span class="dt">lwd =</span> w)</a>
+<a class="sourceLine" id="cb12-23" title="23"><span class="kw">lines</span>(x, g<span class="op">/</span>f4, <span class="dt">col =</span> <span class="dv">6</span>, <span class="dt">lwd =</span> w)</a>
+<a class="sourceLine" id="cb12-24" title="24"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="dv">0</span><span class="op">:</span><span class="dv">4</span>),</a>
+<a class="sourceLine" id="cb12-25" title="25">       <span class="dt">col =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">6</span>, <span class="dt">lwd =</span> w, <span class="dt">inset =</span> <span class="fl">0.02</span>)</a>
+<a class="sourceLine" id="cb12-26" title="26"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</a></code></pre></div>
+<p><img src="figures/MC_intro/unnamed-chunk-15-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1">m &lt;-<span class="st"> </span><span class="dv">10000</span></a>
+<a class="sourceLine" id="cb13-2" title="2">theta.hat &lt;-<span class="st"> </span>se &lt;-<span class="st"> </span><span class="kw">numeric</span>(<span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb13-3" title="3">g &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb13-4" title="4">    <span class="co">## exp(-x - log(1+x^2)) * (x &gt; 0) * (x &lt; 1)</span></a>
+<a class="sourceLine" id="cb13-5" title="5">    <span class="kw">exp</span>(<span class="op">-</span>x)<span class="op">/</span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span>x<span class="op">^</span><span class="dv">2</span>) <span class="op">*</span><span class="st"> </span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) <span class="op">*</span><span class="st"> </span>(x <span class="op">&lt;</span><span class="st"> </span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb13-6" title="6">}</a>
+<a class="sourceLine" id="cb13-7" title="7"></a>
+<a class="sourceLine" id="cb13-8" title="8">x &lt;-<span class="st"> </span><span class="kw">runif</span>(m)     <span class="co"># usando f0</span></a>
+<a class="sourceLine" id="cb13-9" title="9">fg &lt;-<span class="st"> </span><span class="kw">g</span>(x)</a>
+<a class="sourceLine" id="cb13-10" title="10">theta.hat[<span class="dv">1</span>] &lt;-<span class="st"> </span><span class="kw">mean</span>(fg)</a>
+<a class="sourceLine" id="cb13-11" title="11">se[<span class="dv">1</span>] &lt;-<span class="st"> </span><span class="kw">sd</span>(fg)</a>
+<a class="sourceLine" id="cb13-12" title="12"></a>
+<a class="sourceLine" id="cb13-13" title="13">x &lt;-<span class="st"> </span><span class="kw">rexp</span>(m, <span class="dv">1</span>)   <span class="co"># usando f1</span></a>
+<a class="sourceLine" id="cb13-14" title="14">fg &lt;-<span class="st"> </span><span class="kw">g</span>(x) <span class="op">/</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x)</a>
+<a class="sourceLine" id="cb13-15" title="15">theta.hat[<span class="dv">2</span>] &lt;-<span class="st"> </span><span class="kw">mean</span>(fg)</a>
+<a class="sourceLine" id="cb13-16" title="16">se[<span class="dv">2</span>] &lt;-<span class="st"> </span><span class="kw">sd</span>(fg)</a>
+<a class="sourceLine" id="cb13-17" title="17"></a>
+<a class="sourceLine" id="cb13-18" title="18">x &lt;-<span class="st"> </span><span class="kw">rcauchy</span>(m)   <span class="co"># usando f2</span></a>
+<a class="sourceLine" id="cb13-19" title="19">i &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">which</span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">1</span>), <span class="kw">which</span>(x <span class="op">&lt;</span><span class="st"> </span><span class="dv">0</span>))</a>
+<a class="sourceLine" id="cb13-20" title="20">x[i] &lt;-<span class="st"> </span><span class="dv">2</span>  <span class="co"># para evitar erros em g(x)</span></a>
+<a class="sourceLine" id="cb13-21" title="21">fg &lt;-<span class="st"> </span><span class="kw">g</span>(x) <span class="op">/</span><span class="st"> </span><span class="kw">dcauchy</span>(x)</a>
+<a class="sourceLine" id="cb13-22" title="22">theta.hat[<span class="dv">3</span>] &lt;-<span class="st"> </span><span class="kw">mean</span>(fg)</a>
+<a class="sourceLine" id="cb13-23" title="23">se[<span class="dv">3</span>] &lt;-<span class="st"> </span><span class="kw">sd</span>(fg)</a>
+<a class="sourceLine" id="cb13-24" title="24"></a>
+<a class="sourceLine" id="cb13-25" title="25">u &lt;-<span class="st"> </span><span class="kw">runif</span>(m)     <span class="co"># f3, pelo método da inversa</span></a>
+<a class="sourceLine" id="cb13-26" title="26">x &lt;-<span class="st"> </span><span class="op">-</span><span class="st"> </span><span class="kw">log</span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>u <span class="op">*</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span>)))</a>
+<a class="sourceLine" id="cb13-27" title="27">fg &lt;-<span class="st"> </span><span class="kw">g</span>(x) <span class="op">/</span><span class="st"> </span>(<span class="kw">exp</span>(<span class="op">-</span>x) <span class="op">/</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span>)))</a>
+<a class="sourceLine" id="cb13-28" title="28">theta.hat[<span class="dv">4</span>] &lt;-<span class="st"> </span><span class="kw">mean</span>(fg)</a>
+<a class="sourceLine" id="cb13-29" title="29">se[<span class="dv">4</span>] &lt;-<span class="st"> </span><span class="kw">sd</span>(fg)</a>
+<a class="sourceLine" id="cb13-30" title="30"></a>
+<a class="sourceLine" id="cb13-31" title="31">u &lt;-<span class="st"> </span><span class="kw">runif</span>(m)    <span class="co"># f4, pelo método da inversa</span></a>
+<a class="sourceLine" id="cb13-32" title="32">x &lt;-<span class="st"> </span><span class="kw">tan</span>(pi <span class="op">*</span><span class="st"> </span>u <span class="op">/</span><span class="st"> </span><span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb13-33" title="33">fg &lt;-<span class="st"> </span><span class="kw">g</span>(x) <span class="op">/</span><span class="st"> </span>(<span class="dv">4</span> <span class="op">/</span><span class="st"> </span>((<span class="dv">1</span> <span class="op">+</span><span class="st"> </span>x<span class="op">^</span><span class="dv">2</span>) <span class="op">*</span><span class="st"> </span>pi))</a>
+<a class="sourceLine" id="cb13-34" title="34">theta.hat[<span class="dv">5</span>] &lt;-<span class="st"> </span><span class="kw">mean</span>(fg)</a>
+<a class="sourceLine" id="cb13-35" title="35">se[<span class="dv">5</span>] &lt;-<span class="st"> </span><span class="kw">sd</span>(fg)</a></code></pre></div>
 <p>Os resultados das estimativas com seus erros-padrões são</p>
-<pre class="r"><code>rbind(theta.hat, se/sqrt(m))
-#                  [,1]       [,2]        [,3]         [,4]        [,5]
-# theta.hat 0.525261009 0.52980810 0.539874509 0.5250382027 0.525325250
-#           0.002447843 0.00418581 0.009629678 0.0009686918 0.001408793</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">rbind</span>(theta.hat, se<span class="op">/</span><span class="kw">sqrt</span>(m))</a>
+<a class="sourceLine" id="cb14-2" title="2"><span class="co">#                  [,1]       [,2]        [,3]         [,4]        [,5]</span></a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="co"># theta.hat 0.525261009 0.52980810 0.539874509 0.5250382027 0.525325250</span></a>
+<a class="sourceLine" id="cb14-4" title="4"><span class="co">#           0.002447843 0.00418581 0.009629678 0.0009686918 0.001408793</span></a></code></pre></div>
 <p>Os resultados indicam que <span class="math inline">\(f_3\)</span>, e possivelmente <span class="math inline">\(f_4\)</span> produzem as menores variâncias entre as funções propostas, enquanto que <span class="math inline">\(f_2\)</span> possui a maior variância. Note que <span class="math inline">\(f_0\)</span>, a uniforme, possui erro padrão maior.</p>
 <p>Esse exemplo mostra que a função de importância que resulta na menor variância de <span class="math inline">\(Y = g(X)/f(X)\)</span> deve ser escolhida com cuidado.</p>
+<p>Voltando brevemente ao caso da exponencial, pela amostragem por importância, podemos agora obter uma estimativa de <span class="math inline">\(P[X &gt; 2]\)</span>, <span class="math display">\[
+P[X&gt;2] = \int_2^{\infty} e^{-x} dx
+\]</span> caso que não conseguimos usando a integração simples de Monte Carlo.</p>
+<p>Suponha que a função de importância é uma <span class="math inline">\(\text{Exp}(0.5)\)</span>. Portanto, temos o seguinte cenário</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">curve</span>(dexp, <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb15-2" title="2"><span class="kw">curve</span>(<span class="kw">dexp</span>(x, <span class="fl">0.5</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">10</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="figures/MC_intro/unnamed-chunk-18-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Assim, podemos calcular a integral indefinida da seguinte forma:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="co">## Define funções</span></a>
+<a class="sourceLine" id="cb16-2" title="2">g &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">exp</span>(<span class="op">-</span>x) <span class="op">*</span><span class="st"> </span>(x <span class="op">&gt;=</span><span class="st"> </span><span class="dv">2</span>) <span class="co"># </span><span class="al">NOTE</span><span class="co"> o domínio aqui</span></a>
+<a class="sourceLine" id="cb16-3" title="3">f &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dexp</span>(x, <span class="fl">0.5</span>) <span class="co"># Proposta é Exp(0.5)</span></a>
+<a class="sourceLine" id="cb16-4" title="4"><span class="co">## 1. Amostra da proposta</span></a>
+<a class="sourceLine" id="cb16-5" title="5">m &lt;-<span class="st"> </span><span class="fl">1e5</span></a>
+<a class="sourceLine" id="cb16-6" title="6">x &lt;-<span class="st"> </span><span class="kw">rexp</span>(m, <span class="fl">0.5</span>)</a>
+<a class="sourceLine" id="cb16-7" title="7"><span class="co">## 2. Calcula a média da razão</span></a>
+<a class="sourceLine" id="cb16-8" title="8"><span class="kw">mean</span>(<span class="kw">g</span>(x)<span class="op">/</span><span class="kw">f</span>(x))</a>
+<a class="sourceLine" id="cb16-9" title="9"><span class="co"># [1] 0.1348286</span></a>
+<a class="sourceLine" id="cb16-10" title="10"><span class="co">## Teórico</span></a>
+<a class="sourceLine" id="cb16-11" title="11"><span class="kw">pexp</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb16-12" title="12"><span class="co"># [1] 0.1353353</span></a></code></pre></div>
 </div>
 </div>
 
@@ -751,11 +849,6 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
-<script>
-$(document).ready(function () {
-  window.initializeCodeFolding("hide" === "show");
-});
-</script>
 
 <script>
 $(document).ready(function ()  {
