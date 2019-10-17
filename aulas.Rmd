@@ -42,7 +42,7 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **10/09 (Ter)**: (PJ) Média (esperança) da posteriori como média ponderada entre a amostrar e da priori. Obtenção da posteriori da média da normal (e verificação da relação da esperança). Priori de Jefreys. Exercícios recomendados: Caps 2 e 3 da apostila.
 - **12/09 (Qui)**: (PJ) Examinando prioris por simulação e prioris de Jeffreys
   - [Script](oferta201902/codigos/priori-simula.R)
-- **17/09 (Ter)**: (PJ) 
+- **17/09 (Ter)**: (PJ)
 - **19/09 (Qui)**: (PJ) Avaliação intermediária (Cap 3)
 - **24/09 (Ter)**: Não haverá aula devido ao SIEPE.
 [Resolução 64/18 - CEPE][].
@@ -53,7 +53,7 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **08/10 (Ter)**:
 - **10/10 (Qui)**:
 - **15/10 (Ter)**:
-- **17/10 (Qui)**:
+- **17/10 (Qui)**: [HTML](MC_intro.html)
 - **22/10 (Ter)**:
 - **24/10 (Qui)**:
 - **29/10 (Ter)**:
