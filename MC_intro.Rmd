@@ -89,7 +89,7 @@ No entanto, quando a dimensão em $D$ for alta, a integração de Monte
 Carlo é uma alternativa mais viável (que pode ser usada em problemas de
 baixa dimensão também).
 
-Se a gunção $h$ for decomposta de forma a ter um componente que é uma
+Se a função $h$ for decomposta de forma a ter um componente que é uma
 densidade de probabilidade, ou seja,
 $$
 h(x) = g(x)f(x)
@@ -107,7 +107,7 @@ $$
 \hat\theta = \frac{1}{m} \sum_{i=1}^{m} g(x_i)
 $$
 
-Essa tecnica é usada em muitas situações em estatística. Resumindo,
+Essa técnica é usada em muitas situações em estatística. Resumindo,
 temos os seguintes passos:
 
 1. Decomponha a função de interesse para incluir uma função densidade de
@@ -230,6 +230,38 @@ para comparar as estimativas
 integrate(function(x) exp(-x), lower = 2, upper = 4)
 ```
 
+Vemos que, nos dois casos acima, estamos na verdade obtendo uma
+estimativa das probabilidades $P[0<X<1]$ e $P[2<X<4]$, respectivamente.
+
+No entanto, se quisermos calcular a seguinte probabilidade
+$$
+P[X>2] = \int_2^{\infty} e^{-x} dx
+$$
+
+Nesse caso, a integração simples de Monte Carlo não é útil, pois não é
+possível que o limite de integração seja indefinido.
+
+Na verdade, podemos pensar em uma aproximação **grosseira**, supondo que
+vamos amostrar de $X \sim \text{U}(2, \infty)$, onde podemos aproximar o
+valor de $\infty$ por um número grande. Por exemplo:
+
+```{r}
+## Obtem m valores da U(2,Inf)
+m <- 10000
+x2 <- runif(m, min = 2, max = 1e5)
+## Calcula g(x)
+theta.hat2 <- exp(-x2)
+## Calcula a média * (b - a)
+(m.theta.hat2 <- (sum(theta.hat2)/m) * (1e5 - 2))
+## Solução analítica
+(theta2 <- exp(-2) - exp(-1e5))
+## Usando a exponencial
+pexp(2, 1, lower.tail = FALSE)
+```
+
+Note que o valor estimado nesse caso está longe do velor correto, pois
+estamos adotando um procedimento completamente arbitrário.
+
 ## Variância do estimador de Monte Carlo
 
 Como $\hat\theta$ é resultado de uma amostra aleatória de $m$ valores,
@@ -346,7 +378,7 @@ Limitações do método simples de Monte Carlo:
 2. É ineficiente quando a função $g(x)$ não é uniforme
 
 Quando consideramos um problema de integração como um problema de valor
-esperado, é netural que consideremos outras funções de densidade além da
+esperado, é natural que consideremos outras funções de densidade além da
 Uniforme. Isso leva à um método mais geral chamdo de **amostragem por
 importância**.
 
@@ -364,8 +396,8 @@ knitr::include_graphics("img/importancesampling.png")
 ```
 (Figura extraída de https://www.scratchapixel.com).
 
-Suponha que $X$ seja uma VA com densidade $f(x)$. Seja $Y$ a VA
-$g(X)/f(X)$, então
+Suponha que $X$ seja uma VA com densidade $f(x)$. Seja $Y = g(X)/f(X)$,
+então
 $$
 \int g(x) dx = \int \frac{g(x)}{f(x)} f(x) dx = \text{E}[Y]
 $$
@@ -380,10 +412,10 @@ $f(x)$. A função $f(x)$ é chamada de **função de importância**.
 
 No método de amostragem por importância, a variância do estimador
 baseado em $Y= g(X)/f(X)$ é $\text{Var}(Y)/m$, então a variância de $Y$
-deve ser pequena.
+deve ser pequena, conforme $m$ aumenta.
 
-Na verdade, a variância de $Y$ é pequena, se $Y$ for aproximadamente
-constante, o que significa que a densidade $f(x)$ deve estar "próxima"
+Na verdade, **a variância de $Y$ é pequena, se $Y$ for aproximadamente
+constante**, o que significa que a densidade $f(x)$ deve estar "próxima"
 da densidade de $g(x)$. Também é importante que a função $f(x)$ seja
 fácil de simular.
 
@@ -493,6 +525,74 @@ a maior variância. Note que $f_0$, a uniforme, possui erro padrão maior.
 
 Esse exemplo mostra que a função de importância que resulta na menor
 variância de $Y = g(X)/f(X)$ deve ser escolhida com cuidado.
+
+
+Voltando brevemente ao caso da exponencial, pela amostragem por
+importância, podemos agora obter uma estimativa de $P[X > 2]$,
+$$
+P[X>2] = \int_2^{\infty} e^{-x} dx
+$$
+caso que não conseguimos usando a integração simples de Monte Carlo.
+
+Suponha que a função de importância é uma $\text{Exp}(0.5)$. Portanto,
+temos o seguinte cenário
+
+```{r}
+curve(dexp, from = 0, to = 10)
+curve(dexp(x, 0.5), from = 0, to = 10, add = TRUE, col = 2)
+```
+
+Assim, podemos calcular a integral indefinida da seguinte forma:
+
+```{r}
+## Define funções
+g <- function(x) exp(-x) * (x >= 2) # NOTE o domínio aqui
+f <- function(x) dexp(x, 0.5) # Proposta é Exp(0.5)
+## 1. Amostra da proposta
+m <- 1e5
+x <- rexp(m, 0.5)
+## 2. Calcula a média da razão
+mean(g(x)/f(x))
+## Teórico
+pexp(2, 1, lower.tail = FALSE)
+```
+
+```{r, eval=FALSE, include=FALSE}
+teste <- contour(x = seq(0,3, length.out = 100),
+                 y = seq(0,3, length.out = 100),
+                 z = z1)
+plot(teste)
+image(teste)
+contour(x = seq(0,3, length.out = 100),
+                    y = seq(0,3, length.out = 100),
+        z = z1)
+image(x = seq(0,3, length.out = 100),
+        y = seq(0,3, length.out = 100),
+      z = z1)
+cloud(x = seq(0,3, length.out = 100),
+      y = seq(0,3, length.out = 100),
+      z = z1)
+
+z1 <- outer(seq(0,3, length.out = 100), seq(0,3, length.out = 100), g)
+
+plot(g(seq(0,3, length.out = 100), seq(0,3, length.out = 100)))
+
+## Integral em duas dimensões, usando integrais iteradas
+g <- function(x, y) x^2 * y
+## \int^0_3 \int^1_2 g(x,y) dy dx
+integrate( function(y) {
+    sapply(y, function(y) {
+        integrate(function(x) g(x,y), 0, 3)$value
+    })
+}, 1, 2)
+
+## Mesma integração por MC
+ux <- runif(1e4, 0, 3)
+uy <- runif(1e4, 1, 2)
+## Aqui multiplica pela área do retângulo formado pelos limites
+((3 - 0) * (2 - 1)) * mean(g(ux, uy))
+```
+
 
 ```{r, eval=FALSE, include=FALSE}
 ## Rizzo, pg. 148
@@ -630,7 +730,4 @@ var(theta.hat)
 sum(theta.hat < 0.5)/m
 pexp(0.5)
 ## Nao bate porque o dominio nao é o mesmo
-
-
-
 ```
