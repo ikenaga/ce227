@@ -122,8 +122,15 @@ simulação).**
 ## Integração simples de Monte Carlo
 
 Considere o problema de estimar
+\begin{align*}
+\theta &= \int_0^1 h(x) dx \\
+  &= \int_0^1 g(x)f(x) dx
+\end{align*}
+Nesse caso, podemos assumir que $f(x)$ é a densidade de uma distribuição
+uniforme $\text{U}(0,1)$, portanto $f(x) = 1$, e consequentemente a
+integral simplifica para
 $$
-\theta = \int_0^1 g(x) dx.
+\theta = \int_0^1 g(x) dx
 $$
 Se $X_1, \ldots, X_m$ é uma amostra aleatória de $U(0,1)$, então
 $$
@@ -172,12 +179,16 @@ integrate(function(x) exp(-x), lower = 0, upper = 1)
 ```
 
 Um caso mais geral é estimar a integral do tipo
-$$
-\theta = \int_a^b g(x) dx
-$$
-Nesse caso, temos que substituir a $U(0,1)$ por alguma outra densidade
-com suporte no intervalo dos limites de integração. Por exemplo, se $X
-\sim U(a,b)$, então $f(x) = \frac{1}{b-a}$ e
+
+\begin{align*}
+\theta &= \int_a^b h(x) dx \\
+  &= \int_a^b g(x)f(x) dx
+\end{align*}
+
+Nesse caso, temos que substituir a $U(0,1)$, assumida incialmente para
+$f(x)$, por alguma outra densidade com suporte no intervalo dos limites
+de integração. Por exemplo, se $X \sim U(a,b)$, então $f(x) =
+\frac{1}{b-a}$ e
 
 \begin{align*}
 \theta &= \int_a^b g(x) f(x) dx \\
@@ -516,16 +527,18 @@ se[5] <- sd(fg)
 Os resultados das estimativas com seus erros-padrões são
 
 ```{r}
-rbind(theta.hat, se/sqrt(m))
+matrix(rbind(theta.hat, se/sqrt(m)), nrow = 2,
+       dimnames = list(c("theta", "se(theta)"), paste0("f", 0:4)))
 ```
 
 Os resultados indicam que $f_3$, e possivelmente $f_4$ produzem as
 menores variâncias entre as funções propostas, enquanto que $f_2$ possui
-a maior variância. Note que $f_0$, a uniforme, possui erro padrão maior.
+a maior variância. Note que $f_0$, a uniforme, possui erro padrão maior
+do que $f_3$, por exemplo, o que indica que a variância do estimador foi
+reduzida em relação ao método simples de Monte Carlo.
 
 Esse exemplo mostra que a função de importância que resulta na menor
 variância de $Y = g(X)/f(X)$ deve ser escolhida com cuidado.
-
 
 Voltando brevemente ao caso da exponencial, pela amostragem por
 importância, podemos agora obter uma estimativa de $P[X > 2]$,
@@ -540,6 +553,7 @@ temos o seguinte cenário
 ```{r}
 curve(dexp, from = 0, to = 10)
 curve(dexp(x, 0.5), from = 0, to = 10, add = TRUE, col = 2)
+legend("topright", c("g", "f"), lty = 1, col = 1:2, bty = "n")
 ```
 
 Assim, podemos calcular a integral indefinida da seguinte forma:
@@ -555,6 +569,7 @@ x <- rexp(m, 0.5)
 mean(g(x)/f(x))
 ## Teórico
 pexp(2, 1, lower.tail = FALSE)
+integrate(function(x) exp(-x), 2, Inf)
 ```
 
 ```{r, eval=FALSE, include=FALSE}
@@ -573,9 +588,16 @@ cloud(x = seq(0,3, length.out = 100),
       y = seq(0,3, length.out = 100),
       z = z1)
 
-z1 <- outer(seq(0,3, length.out = 100), seq(0,3, length.out = 100), g)
+x = seq(0,5, length.out = 100)
+y = seq(0,5, length.out = 100)
+z1 <- outer(x, y, g)
 
-plot(g(seq(0,3, length.out = 100), seq(0,3, length.out = 100)))
+contourplot(z1)
+par(mfrow = c(1, 2))
+persp(x, y, z1)
+image(x, y, z1, asp = 1)
+rect(0, 1, 3, 2, density = 10)
+par(mfrow = c(1, 1))
 
 ## Integral em duas dimensões, usando integrais iteradas
 g <- function(x, y) x^2 * y
