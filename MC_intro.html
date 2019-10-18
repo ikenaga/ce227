@@ -519,8 +519,11 @@ h(x) = g(x)f(x)
 <p><strong>Note então que, na integração de Monte Carlo, trocamos um problema de resolver uma integral por um problema de calcular uma média (por simulação).</strong></p>
 <div id="integração-simples-de-monte-carlo" class="section level2">
 <h2><span class="header-section-number">2.1</span> Integração simples de Monte Carlo</h2>
-<p>Considere o problema de estimar <span class="math display">\[
-\theta = \int_0^1 g(x) dx.
+<p>Considere o problema de estimar <span class="math display">\[\begin{align*}
+\theta &amp;= \int_0^1 h(x) dx \\
+  &amp;= \int_0^1 g(x)f(x) dx
+\end{align*}\]</span> Nesse caso, podemos assumir que <span class="math inline">\(f(x)\)</span> é a densidade de uma distribuição uniforme <span class="math inline">\(\text{U}(0,1)\)</span>, portanto <span class="math inline">\(f(x) = 1\)</span>, e consequentemente a integral simplifica para <span class="math display">\[
+\theta = \int_0^1 g(x) dx
 \]</span> Se <span class="math inline">\(X_1, \ldots, X_m\)</span> é uma amostra aleatória de <span class="math inline">\(U(0,1)\)</span>, então <span class="math display">\[
 \hat\theta = \frac{1}{m} \sum_{i=1}^{m} g(x_i)
 \]</span> Pode-se mostrar que <span class="math inline">\(\hat\theta\)</span> converge para <span class="math inline">\(\text{E}[\hat\theta] = \theta\)</span> quando <span class="math inline">\(m \to \infty\)</span> com probabilidade 1, pela <strong>Lei Forte dos Grandes Números</strong>.</p>
@@ -544,7 +547,7 @@ P(\lim_{n \to \infty} |\bar{X}_n - \mu| &lt; \epsilon) = 1
 <a class="sourceLine" id="cb1-5" title="5">theta.hat &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x)</a>
 <a class="sourceLine" id="cb1-6" title="6"><span class="co">## Calcula a média</span></a>
 <a class="sourceLine" id="cb1-7" title="7">(m.theta.hat &lt;-<span class="st"> </span><span class="kw">sum</span>(theta.hat)<span class="op">/</span>m)</a>
-<a class="sourceLine" id="cb1-8" title="8"><span class="co"># [1] 0.6299673</span></a></code></pre></div>
+<a class="sourceLine" id="cb1-8" title="8"><span class="co"># [1] 0.6326337</span></a></code></pre></div>
 <p>Nesse caso, podemos obter a solução analítica e integração numérica no R para comparar as estimativas</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co">## Solução analítica</span></a>
 <a class="sourceLine" id="cb2-2" title="2">(theta &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span>))</a>
@@ -552,9 +555,12 @@ P(\lim_{n \to \infty} |\bar{X}_n - \mu| &lt; \epsilon) = 1
 <a class="sourceLine" id="cb2-4" title="4"><span class="co">## Integração numérica no R</span></a>
 <a class="sourceLine" id="cb2-5" title="5"><span class="kw">integrate</span>(<span class="cf">function</span>(x) <span class="kw">exp</span>(<span class="op">-</span>x), <span class="dt">lower =</span> <span class="dv">0</span>, <span class="dt">upper =</span> <span class="dv">1</span>)</a>
 <a class="sourceLine" id="cb2-6" title="6"><span class="co"># 0.6321206 with absolute error &lt; 7e-15</span></a></code></pre></div>
-<p>Um caso mais geral é estimar a integral do tipo <span class="math display">\[
-\theta = \int_a^b g(x) dx
-\]</span> Nesse caso, temos que substituir a <span class="math inline">\(U(0,1)\)</span> por alguma outra densidade com suporte no intervalo dos limites de integração. Por exemplo, se <span class="math inline">\(X \sim U(a,b)\)</span>, então <span class="math inline">\(f(x) = \frac{1}{b-a}\)</span> e</p>
+<p>Um caso mais geral é estimar a integral do tipo</p>
+<p><span class="math display">\[\begin{align*}
+\theta &amp;= \int_a^b h(x) dx \\
+  &amp;= \int_a^b g(x)f(x) dx
+\end{align*}\]</span></p>
+<p>Nesse caso, temos que substituir a <span class="math inline">\(U(0,1)\)</span>, assumida incialmente para <span class="math inline">\(f(x)\)</span>, por alguma outra densidade com suporte no intervalo dos limites de integração. Por exemplo, se <span class="math inline">\(X \sim U(a,b)\)</span>, então <span class="math inline">\(f(x) = \frac{1}{b-a}\)</span> e</p>
 <p><span class="math display">\[\begin{align*}
 \theta &amp;= \int_a^b g(x) f(x) dx \\
   &amp;= (b-a) \int_a^b g(x) \frac{1}{b-a} dx \\
@@ -581,7 +587,7 @@ P(\lim_{n \to \infty} |\bar{X}_n - \mu| &lt; \epsilon) = 1
 <a class="sourceLine" id="cb3-6" title="6">theta.hat &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x)</a>
 <a class="sourceLine" id="cb3-7" title="7"><span class="co">## Calcula a média * (b - a)</span></a>
 <a class="sourceLine" id="cb3-8" title="8">(m.theta.hat &lt;-<span class="st"> </span>(<span class="kw">sum</span>(theta.hat)<span class="op">/</span>m) <span class="op">*</span><span class="st"> </span>(b <span class="op">-</span><span class="st"> </span>a))</a>
-<a class="sourceLine" id="cb3-9" title="9"><span class="co"># [1] 0.117643</span></a></code></pre></div>
+<a class="sourceLine" id="cb3-9" title="9"><span class="co"># [1] 0.1169386</span></a></code></pre></div>
 <p>Nesse caso, podemos obter a solução analítica e integração numérica no R para comparar as estimativas</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co">## Solução analítica</span></a>
 <a class="sourceLine" id="cb4-2" title="2">(theta &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">2</span>) <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">4</span>))</a>
@@ -602,7 +608,7 @@ P[X&gt;2] = \int_2^{\infty} e^{-x} dx
 <a class="sourceLine" id="cb5-5" title="5">theta.hat2 &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x2)</a>
 <a class="sourceLine" id="cb5-6" title="6"><span class="co">## Calcula a média * (b - a)</span></a>
 <a class="sourceLine" id="cb5-7" title="7">(m.theta.hat2 &lt;-<span class="st"> </span>(<span class="kw">sum</span>(theta.hat2)<span class="op">/</span>m) <span class="op">*</span><span class="st"> </span>(<span class="fl">1e5</span> <span class="op">-</span><span class="st"> </span><span class="dv">2</span>))</a>
-<a class="sourceLine" id="cb5-8" title="8"><span class="co"># [1] 2.13334e-11</span></a>
+<a class="sourceLine" id="cb5-8" title="8"><span class="co"># [1] 1.8783e-08</span></a>
 <a class="sourceLine" id="cb5-9" title="9"><span class="co">## Solução analítica</span></a>
 <a class="sourceLine" id="cb5-10" title="10">(theta2 &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">2</span>) <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="fl">1e5</span>))</a>
 <a class="sourceLine" id="cb5-11" title="11"><span class="co"># [1] 0.1353353</span></a>
@@ -623,17 +629,17 @@ P[X&gt;2] = \int_2^{\infty} e^{-x} dx
 \]</span></p>
 <p>Seguindo o exemplo anterior, vimos que a estimativa da integral é</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">m.theta.hat</a>
-<a class="sourceLine" id="cb6-2" title="2"><span class="co"># [1] 0.117643</span></a></code></pre></div>
+<a class="sourceLine" id="cb6-2" title="2"><span class="co"># [1] 0.1169386</span></a></code></pre></div>
 <p>Mas veja que existe uma distribuição de valores para compor esta estimativa média</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">hist</span>(theta.hat); <span class="kw">abline</span>(<span class="dt">v =</span> theta, <span class="dt">col =</span> <span class="dv">2</span>)</a></code></pre></div>
 <p><img src="figures/MC_intro/unnamed-chunk-9-1.png" width="80%" style="display: block; margin: auto;" /></p>
 <p>A variância relacionada ao estimador pode então ser calculada como</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="co">## Variancia</span></a>
 <a class="sourceLine" id="cb8-2" title="2">(v.theta.hat &lt;-<span class="st"> </span><span class="kw">sum</span>((theta.hat <span class="op">-</span><span class="st"> </span>m.theta.hat)<span class="op">^</span><span class="dv">2</span>)<span class="op">/</span>m<span class="op">^</span><span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb8-3" title="3"><span class="co"># [1] 4.537298e-07</span></a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co"># [1] 4.490695e-07</span></a>
 <a class="sourceLine" id="cb8-4" title="4"><span class="co">## Erro padrão</span></a>
 <a class="sourceLine" id="cb8-5" title="5">(se.theta.hat &lt;-<span class="st"> </span><span class="kw">sqrt</span>(v.theta.hat))</a>
-<a class="sourceLine" id="cb8-6" title="6"><span class="co"># [1] 0.0006735946</span></a></code></pre></div>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co"># [1] 0.0006701265</span></a></code></pre></div>
 <p>Pelo Teorema do Limite Central, temos que</p>
 <p><span class="math display">\[
 \frac{\hat\theta - \text{E}(\hat\theta)}{\sqrt{\hat{V}(\hat\theta)}}
@@ -647,10 +653,10 @@ P[X&gt;2] = \int_2^{\infty} e^{-x} dx
 <p>Com esse resultado, podemos inclusive fornecer um intervalo de confiança associado à nossa estimativa</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="co">## Media e veriancia</span></a>
 <a class="sourceLine" id="cb10-2" title="2"><span class="kw">c</span>(m.theta.hat, v.theta.hat)</a>
-<a class="sourceLine" id="cb10-3" title="3"><span class="co"># [1] 1.176430e-01 4.537298e-07</span></a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="co"># [1] 1.169386e-01 4.490695e-07</span></a>
 <a class="sourceLine" id="cb10-4" title="4"><span class="co">## Intervalo de confiança (95%)</span></a>
 <a class="sourceLine" id="cb10-5" title="5"><span class="kw">c</span>(m.theta.hat <span class="op">-</span><span class="st"> </span><span class="fl">1.96</span> <span class="op">*</span><span class="st"> </span>se.theta.hat, m.theta.hat <span class="op">+</span><span class="st"> </span><span class="fl">1.96</span> <span class="op">*</span><span class="st"> </span>se.theta.hat)</a>
-<a class="sourceLine" id="cb10-6" title="6"><span class="co"># [1] 0.1163228 0.1189633</span></a></code></pre></div>
+<a class="sourceLine" id="cb10-6" title="6"><span class="co"># [1] 0.1156251 0.1182520</span></a></code></pre></div>
 <p>Veja que assintoticamente, i.e., conforme aumentamos o tamanho da amostra, o valor da integral se aproxima cada vez mais do valor verdadeiro (que nesse caso sabemos calcular analiticamente, apenas para comparação).</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="co">## Simula a convergência para o verdadeiro valor conforme aumenta o</span></a>
 <a class="sourceLine" id="cb11-2" title="2"><span class="co">## tamanho da amostra</span></a>
@@ -776,18 +782,20 @@ f_4(x) &amp;= 4(1-x^2)^{-1}/\pi, \quad 0&lt;x&lt;1 \\
 <a class="sourceLine" id="cb13-34" title="34">theta.hat[<span class="dv">5</span>] &lt;-<span class="st"> </span><span class="kw">mean</span>(fg)</a>
 <a class="sourceLine" id="cb13-35" title="35">se[<span class="dv">5</span>] &lt;-<span class="st"> </span><span class="kw">sd</span>(fg)</a></code></pre></div>
 <p>Os resultados das estimativas com seus erros-padrões são</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">rbind</span>(theta.hat, se<span class="op">/</span><span class="kw">sqrt</span>(m))</a>
-<a class="sourceLine" id="cb14-2" title="2"><span class="co">#                  [,1]       [,2]        [,3]         [,4]        [,5]</span></a>
-<a class="sourceLine" id="cb14-3" title="3"><span class="co"># theta.hat 0.525261009 0.52980810 0.539874509 0.5250382027 0.525325250</span></a>
-<a class="sourceLine" id="cb14-4" title="4"><span class="co">#           0.002447843 0.00418581 0.009629678 0.0009686918 0.001408793</span></a></code></pre></div>
-<p>Os resultados indicam que <span class="math inline">\(f_3\)</span>, e possivelmente <span class="math inline">\(f_4\)</span> produzem as menores variâncias entre as funções propostas, enquanto que <span class="math inline">\(f_2\)</span> possui a maior variância. Note que <span class="math inline">\(f_0\)</span>, a uniforme, possui erro padrão maior.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">matrix</span>(<span class="kw">rbind</span>(theta.hat, se<span class="op">/</span><span class="kw">sqrt</span>(m)), <span class="dt">nrow =</span> <span class="dv">2</span>,</a>
+<a class="sourceLine" id="cb14-2" title="2">       <span class="dt">dimnames =</span> <span class="kw">list</span>(<span class="kw">c</span>(<span class="st">&quot;theta&quot;</span>, <span class="st">&quot;se(theta)&quot;</span>), <span class="kw">paste0</span>(<span class="st">&quot;f&quot;</span>, <span class="dv">0</span><span class="op">:</span><span class="dv">4</span>)))</a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="co">#                    f0         f1          f2           f3          f4</span></a>
+<a class="sourceLine" id="cb14-4" title="4"><span class="co"># theta     0.525261009 0.52980810 0.539874509 0.5250382027 0.525325250</span></a>
+<a class="sourceLine" id="cb14-5" title="5"><span class="co"># se(theta) 0.002447843 0.00418581 0.009629678 0.0009686918 0.001408793</span></a></code></pre></div>
+<p>Os resultados indicam que <span class="math inline">\(f_3\)</span>, e possivelmente <span class="math inline">\(f_4\)</span> produzem as menores variâncias entre as funções propostas, enquanto que <span class="math inline">\(f_2\)</span> possui a maior variância. Note que <span class="math inline">\(f_0\)</span>, a uniforme, possui erro padrão maior do que <span class="math inline">\(f_3\)</span>, por exemplo, o que indica que a variância do estimador foi reduzida em relação ao método simples de Monte Carlo.</p>
 <p>Esse exemplo mostra que a função de importância que resulta na menor variância de <span class="math inline">\(Y = g(X)/f(X)\)</span> deve ser escolhida com cuidado.</p>
 <p>Voltando brevemente ao caso da exponencial, pela amostragem por importância, podemos agora obter uma estimativa de <span class="math inline">\(P[X &gt; 2]\)</span>, <span class="math display">\[
 P[X&gt;2] = \int_2^{\infty} e^{-x} dx
 \]</span> caso que não conseguimos usando a integração simples de Monte Carlo.</p>
 <p>Suponha que a função de importância é uma <span class="math inline">\(\text{Exp}(0.5)\)</span>. Portanto, temos o seguinte cenário</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">curve</span>(dexp, <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb15-2" title="2"><span class="kw">curve</span>(<span class="kw">dexp</span>(x, <span class="fl">0.5</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">10</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">2</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb15-2" title="2"><span class="kw">curve</span>(<span class="kw">dexp</span>(x, <span class="fl">0.5</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">10</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb15-3" title="3"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="kw">c</span>(<span class="st">&quot;g&quot;</span>, <span class="st">&quot;f&quot;</span>), <span class="dt">lty =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>)</a></code></pre></div>
 <p><img src="figures/MC_intro/unnamed-chunk-18-1.png" width="80%" style="display: block; margin: auto;" /></p>
 <p>Assim, podemos calcular a integral indefinida da seguinte forma:</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="co">## Define funções</span></a>
@@ -801,7 +809,9 @@ P[X&gt;2] = \int_2^{\infty} e^{-x} dx
 <a class="sourceLine" id="cb16-9" title="9"><span class="co"># [1] 0.1348286</span></a>
 <a class="sourceLine" id="cb16-10" title="10"><span class="co">## Teórico</span></a>
 <a class="sourceLine" id="cb16-11" title="11"><span class="kw">pexp</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb16-12" title="12"><span class="co"># [1] 0.1353353</span></a></code></pre></div>
+<a class="sourceLine" id="cb16-12" title="12"><span class="co"># [1] 0.1353353</span></a>
+<a class="sourceLine" id="cb16-13" title="13"><span class="kw">integrate</span>(<span class="cf">function</span>(x) <span class="kw">exp</span>(<span class="op">-</span>x), <span class="dv">2</span>, <span class="ot">Inf</span>)</a>
+<a class="sourceLine" id="cb16-14" title="14"><span class="co"># 0.1353353 with absolute error &lt; 7.7e-06</span></a></code></pre></div>
 </div>
 </div>
 
