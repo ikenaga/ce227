@@ -53,7 +53,8 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **08/10 (Ter)**: (PJ) Após obter a posteriori: introdução à decisão, preditiva e aproximação quadrática
 - **10/10 (Qui)**: (PJ) Decisão bayesiana. Resumos da posteriori. (Cap 5)
 - **15/10 (Ter)**: (PJ) Predição - obtenção da distribuição preditiva (Cap 6)
-- **17/10 (Qui)**: [HTML](MC_intro.html)
+- **17/10 (Qui)**: (FM) Integração de Monte Carlo: método simples e
+  amostragem por importância. [HTML](MC_intro.html).
 - **22/10 (Ter)**:
 - **24/10 (Qui)**:
 - **29/10 (Ter)**:
