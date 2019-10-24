@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Fernando P. Mayer" />
+
+
+<title>Métodos de Monte Carlo via Cadeias de Markov</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-66454501-14"></script>
+<script>
+ window.dataLayer = window.dataLayer || [];
+ function gtag(){dataLayer.push(arguments);}
+ gtag('js', new Date());
+
+ gtag('config', 'UA-66454501-14');
+</script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; } /* Alert */
+code span.an { color: #008000; } /* Annotation */
+code span.at { } /* Attribute */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #0000ff; } /* ControlFlow */
+code span.ch { color: #008080; } /* Char */
+code span.cn { } /* Constant */
+code span.co { color: #008000; } /* Comment */
+code span.cv { color: #008000; } /* CommentVar */
+code span.do { color: #008000; } /* Documentation */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.im { } /* Import */
+code span.in { color: #008000; } /* Information */
+code span.kw { color: #0000ff; } /* Keyword */
+code span.op { } /* Operator */
+code span.ot { color: #ff4000; } /* Other */
+code span.pp { color: #ff4000; } /* Preprocessor */
+code span.sc { color: #008080; } /* SpecialChar */
+code span.ss { color: #008080; } /* SpecialString */
+code span.st { color: #008080; } /* String */
+code span.va { } /* Variable */
+code span.vs { color: #008080; } /* VerbatimString */
+code span.wa { color: #008000; font-weight: bold; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">CE227</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="aulas.html">Aulas</a>
+</li>
+<li>
+  <a href="referencias.html">Referências</a>
+</li>
+<li>
+  <a href="notas.html">Notas</a>
+</li>
+<li>
+  <a href="materiais.html">Materiais</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/leg-ufpr/ce227">
+    <span class="fa fa-github fa-lg"></span>
+     
+    GitHub
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Métodos de Monte Carlo via Cadeias de Markov</h1>
+<h4 class="author">Fernando P. Mayer</h4>
+
+</div>
+
+
+<div id="introdução" class="section level1">
+<h1><span class="header-section-number">1</span> Introdução</h1>
+<p>Já vimos que a integração de Monte Carlo serve para aproximar integrais de alta dimensão ou que não possuem solução fechada (analítica).</p>
+<p>Agora veremos que a integração de Monte Carlo, naturalmente serve também para o cáculo de probabilidades entre algum intervalo, e.g., <span class="math inline">\(P[a &lt; X &lt; b]\)</span> ou <span class="math inline">\(P[X &gt; a]\)</span>, que nada mais são do que cálculos de áreas no intervalo especificado.</p>
+<p>A integração de Monte Carlo nos fornece uma estimativa dessa integral, e, como vimos, o erro padrão dessa estimativa pode ser calculado, e intervalos de confiança podem ser obtidos devido à suposição de que assintoticamente a estimativa possui distribuição normal.</p>
+<p>Agora, veremos que podemos obter essa mesma estimativa, mas de uma forma um pouco diferente: simulando a própria distribuição de interesse, e obtendo valores de áreas (integrais) usando a própria amostra. A vantagem é que, dessa forma, obtemos uma descrição mais completa do problema em questão, e, com isso, podemos obter outras medidas que forem necessárias, de uma única vez. Além disso, medidas de incerteza como erros-padrões e intervalos de confiança podem ser derivados a partir da própria distribuição amostral.</p>
+<p>A obtenção de uma amostra da distribuição de interesse será fundamental para os métodos de inferência que veremos mais adiante. Além disso, estes métodos são utilizados como o “padrão” para a resolução de problemas em inferência bayesiana.</p>
+</div>
+<div id="método-não-sequencial" class="section level1">
+<h1><span class="header-section-number">2</span> Método não sequencial</h1>
+<div id="método-de-aceitação-e-rejeição" class="section level2">
+<h2><span class="header-section-number">2.1</span> Método de aceitação e rejeição</h2>
+<p>Se a função densidade de probabilidade for conhecida, <span class="math inline">\(f\)</span>, então é possível gerar números aleatórios dessa variável aleatória caracterizada por <span class="math inline">\(f\)</span> pelo método da aceitação e rejeição. É necessário satisfazer dois requisitos:</p>
+<ol style="list-style-type: decimal">
+<li>Ter um bom gerador de números uniformes.</li>
+<li>Ter um bom gerador de números de uma variável aleatória representada por uma distribuição <span class="math inline">\(D\)</span>, escolhida de tal maneira que existe uma constante <span class="math inline">\(M\)</span> tal que a densidade de <span class="math inline">\(g\)</span> que caracteriza a distribuição <span class="math inline">\(D\)</span> satisfaz <span class="math display">\[
+f(x) \leq M g(x)
+\]</span> para todo <span class="math inline">\(x\)</span> do domínio de <span class="math inline">\(f\)</span>. A função <span class="math inline">\(g\)</span> que “encapsula” a função <span class="math inline">\(f\)</span> é chamada de <strong>distribuiçao proposta</strong> (<em>proposal</em>).</li>
+</ol>
+<p>O seguinte algoritmo permite gerar números aleatórios de uma distribuição de probabilidade caracterizada pela função densidade <span class="math inline">\(f\)</span>:</p>
+<ol style="list-style-type: decimal">
+<li>Gerar <span class="math inline">\(y\)</span> como sendo uma ocorrência da variável aleatória representada por <span class="math inline">\(D\)</span>.</li>
+<li>Gerar <span class="math inline">\(u\)</span> como sendo uma ocorrência de uma uniforme padrão.</li>
+<li>Se <span class="math display">\[
+u \leq \frac{f(y)}{M g(y)}
+\]</span> considerar que <span class="math inline">\(x = y\)</span> é um valor da distribuição de probabilidade alvo cuja densidade é <span class="math inline">\(f\)</span>, caso contrário, descartar <span class="math inline">\(y\)</span>.</li>
+<li>Repetir até atingir o número de valores desejado <span class="math inline">\(n\)</span>.</li>
+</ol>
+<p>Veja que o valor de <span class="math inline">\(u\)</span> é comparável com a razão <span class="math inline">\(f(y)/Mg(y)\)</span>, pois esta razão sempre será algum valor entre 0 e 1. Portanto o valor de <span class="math inline">\(u\)</span> é sempre relativo à essa razão (i.e., não está na mesma escala das densidades de <span class="math inline">\(f\)</span> e <span class="math inline">\(g\)</span>).</p>
+<p>Para determinar o valor de <span class="math inline">\(M\)</span>, basta seguir a seguinte relação</p>
+<p><span class="math display">\[
+M \geq \max_x \frac{f(x)}{g(x)}
+\]</span></p>
+<p>Alguns pontos que devem ser levados em consideração:</p>
+<ol style="list-style-type: decimal">
+<li>O limite <span class="math inline">\(f(x) \leq M g(x)\)</span> não precisa ser tão pequeno. O algoritmo permanece válido (mas possivelmente menos eficiente) quando <span class="math inline">\(M\)</span> for um valor maior</li>
+<li>A probabilidade de aceitação é <span class="math inline">\(1/M\)</span>. Portanto <span class="math inline">\(M\)</span> deve ser o menor possível para maior eficiência computacional.</li>
+</ol>
+<div class="alert alert-warning">
+<p>Para uma ilustração animada veja <a href="http://leg.ufpr.br/~walmes/ensino/EC2/tutoriais/met-ac-rej.html">este exemplo</a> da geração de números de uma distribuição normal, a partir de uma Cauchy (distribuição proposta). Para os detalhes da implementação veja <a href="http://leg.ufpr.br/~walmes/ensino/EC2/tutoriais/06-met-ac-rej.html">este link</a>.</p>
+</div>
+<div id="exemplo-beta" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Exemplo (Beta)</h3>
+<!-- Robert e Casella -->
+<p>Considere que deseja-se gerar valores de uma distribuição <span class="math inline">\(\text{Beta}(\alpha = 2.7, \beta = 6.3)\)</span> (e também suponha que não dispomos de um gerador como o que já existe no R pela função <code>rbeta()</code>).</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">curve</span>(<span class="kw">dbeta</span>(x, <span class="fl">2.7</span>, <span class="fl">6.3</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/beta-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>A distribuição proposta mais natural seria uma Uniforme entre 0 e 1, que possui densidade 1 (para todo <span class="math inline">\(x\)</span>).</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">curve</span>(<span class="kw">dbeta</span>(x, <span class="fl">2.7</span>, <span class="fl">6.3</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="kw">curve</span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="dv">0</span> <span class="op">*</span><span class="st"> </span>x, <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb2-3" title="3"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;f(x)&quot;</span>, <span class="st">&quot;g(x)&quot;</span>),</a>
+<a class="sourceLine" id="cb2-4" title="4">       <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="dt">col =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">1</span>), <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/propbeta1-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Como podemos achar o valor de <span class="math inline">\(M\)</span> que satisfaça <span class="math inline">\(f(x) \leq M g(x)\)</span>? Já vimos que esse valor pode ser determinado por <span class="math display">\[
+M \geq \max_x \frac{f(x)}{g(x)}
+\]</span> O valor máximo da densidade de <span class="math inline">\(g(x)\)</span> é fácil de ser encontrado, pois nesse caso é 1 para todo <span class="math inline">\(x\)</span>. Como fazer então para determinar o valor máximo da <span class="math inline">\(\text{Beta}(2.7, 6.3)\)</span>? Temos duas opções:</p>
+<ol style="list-style-type: decimal">
+<li>Usar a expressão da <strong>moda</strong> da distribuição (se existir)</li>
+<li>Achar esse valor máximo por otimização numérica</li>
+</ol>
+<p>No caso da distribuição Beta, existe uma expressão fechada para de determinar a moda, que é <span class="math inline">\(\frac{\alpha-1}{\alpha+\beta-2}\)</span>. Portanto seria fácil nesse caso determinar o valor máximo da densidade por meio de</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co">## Define parâmetros</span></a>
+<a class="sourceLine" id="cb3-2" title="2">alfa &lt;-<span class="st"> </span><span class="fl">2.7</span>; beta &lt;-<span class="st"> </span><span class="fl">6.3</span></a>
+<a class="sourceLine" id="cb3-3" title="3"><span class="co">## A moda é</span></a>
+<a class="sourceLine" id="cb3-4" title="4">(moda &lt;-<span class="st"> </span>(alfa <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)<span class="op">/</span>(alfa <span class="op">+</span><span class="st"> </span>beta <span class="op">-</span><span class="st"> </span><span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb3-5" title="5"><span class="co"># [1] 0.2428571</span></a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="co">## A densidade nesse ponto é então</span></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="kw">dbeta</span>(moda, alfa, beta)</a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="co"># [1] 2.669744</span></a></code></pre></div>
+<p>No entanto, em diversas situações, não temos uma expressão fechada para a moda ou ela não pode ser determinada analiticamente. Por isso, nesses casos, podemos encontrar o valor máximo da função através de <strong>otimização numérica</strong> dessa função. Esse método serve para qualquer distribuição (na verdade qualquer função) onde deseja-se obter o ponto de máxima.</p>
+<p>No R, podemos passar a função que desejamos maximizar para a função <code>optimize()</code>. Aqui usaremos a função <code>dbeta()</code> que já implementa a expressão de densidade da Beta, mas poderíamos também escrever essa função manualmente e usá-la na otimização.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">(max.beta &lt;-<span class="st"> </span><span class="kw">optimize</span>(<span class="dt">f =</span> <span class="cf">function</span>(x) {<span class="kw">dbeta</span>(x, alfa, beta)<span class="op">/</span><span class="kw">dunif</span>(x)},</a>
+<a class="sourceLine" id="cb4-2" title="2">                      <span class="dt">interval =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">maximum =</span> <span class="ot">TRUE</span>))</a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="co"># $maximum</span></a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="co"># [1] 0.2428608</span></a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="co"># </span></a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co"># $objective</span></a>
+<a class="sourceLine" id="cb4-7" title="7"><span class="co"># [1] 2.669744</span></a></code></pre></div>
+<p>Note que a função retorna dois valores: o ponto onde foi encontrada a densidade máxima (igual a moda), e o valor da densidade nesse ponto. Veja que os resultados são virtualmente os mesmos dos anteriores obtidos de forma analítica. Por ser uma forma mais geral, prosseguiremos com o valor de densidade máximo obtido dessa forma. Agora podemos então determinar o valor de <span class="math inline">\(M\)</span>, como sendo</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">(M &lt;-<span class="st"> </span>max.beta<span class="op">$</span>objective<span class="op">/</span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="co"># [1] 2.669744</span></a></code></pre></div>
+<p>Assim, ficamos com a distribuição proposta <span class="math inline">\(Mg(x)\)</span> como pode ser visto abaixo.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">curve</span>(<span class="kw">dbeta</span>(x, alfa, beta), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="kw">curve</span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="dv">0</span> <span class="op">*</span><span class="st"> </span>x, <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="kw">curve</span>(M <span class="op">*</span><span class="st"> </span><span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="dv">0</span> <span class="op">*</span><span class="st"> </span>x, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">2</span>, <span class="dt">lwd =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="kw">legend</span>(<span class="st">&quot;right&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;f(x)&quot;</span>, <span class="st">&quot;g(x)&quot;</span>, <span class="st">&quot;M g(x)&quot;</span>),</a>
+<a class="sourceLine" id="cb6-5" title="5">       <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>), <span class="dt">col =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="dt">lwd =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/propbeta2-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Seguindo com o algoritmo de aceitação e rejeição, a ideia é a mesma do exemplo anterior, mudando as funções apropriadamente.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="co">## Define funções</span></a>
+<a class="sourceLine" id="cb7-2" title="2">f &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dbeta</span>(x, alfa, beta)</a>
+<a class="sourceLine" id="cb7-3" title="3">g &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="dv">0</span> <span class="op">*</span><span class="st"> </span>x</a>
+<a class="sourceLine" id="cb7-4" title="4"></a>
+<a class="sourceLine" id="cb7-5" title="5"><span class="co">## Simula com número fixo</span></a>
+<a class="sourceLine" id="cb7-6" title="6">Nsim &lt;-<span class="st"> </span><span class="dv">2500</span></a>
+<a class="sourceLine" id="cb7-7" title="7"><span class="co">## Amostra da proposta U(0,1)</span></a>
+<a class="sourceLine" id="cb7-8" title="8">y &lt;-<span class="st"> </span><span class="kw">runif</span>(Nsim)</a>
+<a class="sourceLine" id="cb7-9" title="9"><span class="co">## Amostra u também de U(0,1)</span></a>
+<a class="sourceLine" id="cb7-10" title="10">u &lt;-<span class="st"> </span><span class="kw">runif</span>(Nsim)</a>
+<a class="sourceLine" id="cb7-11" title="11"><span class="co">## Calcula a razão</span></a>
+<a class="sourceLine" id="cb7-12" title="12">r &lt;-<span class="st"> </span><span class="kw">f</span>(y)<span class="op">/</span>(M <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(y))</a>
+<a class="sourceLine" id="cb7-13" title="13"><span class="co">## x serão os valores de y onde u &lt; r</span></a>
+<a class="sourceLine" id="cb7-14" title="14">x &lt;-<span class="st"> </span>y[u <span class="op">&lt;</span><span class="st"> </span>r]</a>
+<a class="sourceLine" id="cb7-15" title="15"><span class="co">## Aceitados</span></a>
+<a class="sourceLine" id="cb7-16" title="16">ua &lt;-<span class="st"> </span>u[u <span class="op">&lt;</span><span class="st"> </span>r]</a>
+<a class="sourceLine" id="cb7-17" title="17"><span class="co">## Rejeitados</span></a>
+<a class="sourceLine" id="cb7-18" title="18">ur &lt;-<span class="st"> </span>u[u <span class="op">&gt;=</span><span class="st"> </span>r]</a></code></pre></div>
+<p>Assim como no exemplo anterior, podemos visualizar os pontos amsotrados que foram aceitados e aqueles rejeitados.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">curve</span>(<span class="kw">dbeta</span>(x, alfa, beta), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb8-2" title="2"><span class="kw">curve</span>(M <span class="op">*</span><span class="st"> </span><span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="dv">0</span> <span class="op">*</span><span class="st"> </span>x, <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">2</span>, <span class="dt">lwd =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="kw">points</span>(x, ua <span class="op">*</span><span class="st"> </span>M <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(x), <span class="dt">col =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="kw">points</span>(y[u <span class="op">&gt;=</span><span class="st"> </span>r], ur <span class="op">*</span><span class="st"> </span>M <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(y[u <span class="op">&gt;=</span><span class="st"> </span>r]), <span class="dt">col =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/betaac-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Lembre-se que a taxa de aceitação teórica é <span class="math inline">\(1/M\)</span>, e neste exemplo temos</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="co">## Quantos foram aceitados</span></a>
+<a class="sourceLine" id="cb9-2" title="2"><span class="kw">length</span>(x)<span class="op">/</span><span class="kw">length</span>(y)</a>
+<a class="sourceLine" id="cb9-3" title="3"><span class="co"># [1] 0.3572</span></a>
+<a class="sourceLine" id="cb9-4" title="4"><span class="co">## Taxa (teorica) de aceitacao é</span></a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="dv">1</span><span class="op">/</span>M</a>
+<a class="sourceLine" id="cb9-6" title="6"><span class="co"># [1] 0.3745677</span></a></code></pre></div>
+<p>Note pelo gráfico acima que a maior parte dos pontos amostrados não são aceitos (veja também a baixa taxa de aceitação). Isso mostra que estamos disperdisando a maior parte do tempo computacional amostrando pontos que não serão aceitos.</p>
+<p>Devemos então pensar em uma outra distribuição proposta, com a intenção de melhorar (aumentar) a taxa de aceitação. Naturalmente, uma distribuição proposta com um formato mais próximo daquele que queremos amostrar seria possivelmente mais eficiente.</p>
+<p>Considere então como uma nova distribuição proposta uma <span class="math inline">\(\text{Beta}(2, 6)\)</span> (ainda queremos amostrar de uma <span class="math inline">\(\text{Beta}(2.7, 6.3)\)</span>).</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">curve</span>(<span class="kw">dbeta</span>(x, <span class="fl">2.7</span>, <span class="fl">6.3</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">4</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">3</span>))</a>
+<a class="sourceLine" id="cb10-2" title="2"><span class="kw">curve</span>(<span class="kw">dbeta</span>(x, <span class="dv">2</span>, <span class="dv">6</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;f(x)&quot;</span>, <span class="st">&quot;g(x)&quot;</span>),</a>
+<a class="sourceLine" id="cb10-4" title="4">       <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="dt">col =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">1</span>), <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/propbeta3-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Com o formato mais próximo da proposta, certamente a taxa de aceitação será maior. Precisamos novamente encontrar o valor <span class="math inline">\(M\)</span> que satisfaça <span class="math inline">\(f(x) \leq M g(x)\)</span>. Já vimos que podemos usar a moda, mas vamos usar o método geral de encontrar a densidade máxima das duas distribuições por otimização numérica. Aqui também temos duas opções:</p>
+<ol style="list-style-type: decimal">
+<li>Encontrar o máximo de cada função separadamente e fazer a razão entre eles</li>
+<li>Encontrar diretamente o máxima da razão entre as duas distribuições</li>
+</ol>
+<p>A segunda abordagem é mais direta e levará ao mesmo resultado da primeira, mas só precisaremos fazer uma otimização. Portanto prosseguimos com</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">(M &lt;-<span class="st"> </span><span class="kw">optimize</span>(<span class="dt">f =</span> <span class="cf">function</span>(x) {<span class="kw">dbeta</span>(x, <span class="fl">2.7</span>, <span class="fl">6.3</span>)<span class="op">/</span><span class="kw">dbeta</span>(x, <span class="dv">2</span>, <span class="dv">6</span>)},</a>
+<a class="sourceLine" id="cb11-2" title="2">               <span class="dt">interval =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">maximum =</span> <span class="ot">TRUE</span>)<span class="op">$</span>objective)</a>
+<a class="sourceLine" id="cb11-3" title="3"><span class="co"># [1] 1.671808</span></a></code></pre></div>
+<p>Note que esse já é o valor de <span class="math inline">\(M\)</span>, e ficamos com a seguinte situação</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="kw">curve</span>(<span class="kw">dbeta</span>(x, <span class="fl">2.7</span>, <span class="fl">6.3</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">4</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">5</span>))</a>
+<a class="sourceLine" id="cb12-2" title="2"><span class="kw">curve</span>(<span class="kw">dbeta</span>(x, <span class="dv">2</span>, <span class="dv">6</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb12-3" title="3"><span class="kw">curve</span>(M <span class="op">*</span><span class="st"> </span><span class="kw">dbeta</span>(x, <span class="dv">2</span>, <span class="dv">6</span>), <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">2</span>, <span class="dt">lwd =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb12-4" title="4"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;f(x)&quot;</span>, <span class="st">&quot;g(x)&quot;</span>, <span class="st">&quot;M g(x)&quot;</span>),</a>
+<a class="sourceLine" id="cb12-5" title="5">       <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>), <span class="dt">col =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="dt">lwd =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/propbeta4-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Agora fazemos o mesmo processo para um número fixo de simulações</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="co">## Define funções</span></a>
+<a class="sourceLine" id="cb13-2" title="2">f &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dbeta</span>(x, <span class="fl">2.7</span>, <span class="fl">6.3</span>)</a>
+<a class="sourceLine" id="cb13-3" title="3">g &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dbeta</span>(x, <span class="dv">2</span>, <span class="dv">6</span>)</a>
+<a class="sourceLine" id="cb13-4" title="4"></a>
+<a class="sourceLine" id="cb13-5" title="5"><span class="co">## Simula</span></a>
+<a class="sourceLine" id="cb13-6" title="6">Nsim &lt;-<span class="st"> </span><span class="dv">2500</span></a>
+<a class="sourceLine" id="cb13-7" title="7"><span class="co">## Amostra da proposta</span></a>
+<a class="sourceLine" id="cb13-8" title="8">y &lt;-<span class="st"> </span><span class="kw">rbeta</span>(Nsim, <span class="dv">2</span>, <span class="dv">6</span>)</a>
+<a class="sourceLine" id="cb13-9" title="9"><span class="co">## Amostra da U(0,1)</span></a>
+<a class="sourceLine" id="cb13-10" title="10">u &lt;-<span class="st"> </span><span class="kw">runif</span>(Nsim)</a>
+<a class="sourceLine" id="cb13-11" title="11">r &lt;-<span class="st"> </span><span class="kw">f</span>(y)<span class="op">/</span>(M <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(y))</a>
+<a class="sourceLine" id="cb13-12" title="12">x &lt;-<span class="st"> </span>y[u <span class="op">&lt;</span><span class="st"> </span>r]</a>
+<a class="sourceLine" id="cb13-13" title="13">ua &lt;-<span class="st"> </span>u[u <span class="op">&lt;</span><span class="st"> </span>r]</a>
+<a class="sourceLine" id="cb13-14" title="14">ur &lt;-<span class="st"> </span>u[u <span class="op">&gt;=</span><span class="st"> </span>r]</a></code></pre></div>
+<p>O resultado dos pontos aceitados agora pode ser visto abaixo.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">curve</span>(<span class="kw">dbeta</span>(x, <span class="fl">2.7</span>, <span class="fl">6.3</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">4</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">5</span>))</a>
+<a class="sourceLine" id="cb14-2" title="2"><span class="kw">curve</span>(M <span class="op">*</span><span class="st"> </span><span class="kw">dbeta</span>(x, <span class="dv">2</span>, <span class="dv">6</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">2</span>, <span class="dt">lwd =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="kw">points</span>(x, ua <span class="op">*</span><span class="st"> </span>M <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(x), <span class="dt">col =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb14-4" title="4"><span class="kw">points</span>(y[u <span class="op">&gt;=</span><span class="st"> </span>r], ur <span class="op">*</span><span class="st"> </span>M <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(y[u <span class="op">&gt;=</span><span class="st"> </span>r]), <span class="dt">col =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/betaac2-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Veja que muitos mais pontos agora são aceitos. De fato, a taxa de aceitação usando essa nova distribuição proposta é bem maior quando comparada à taxa anterior com a uniforme como proposta.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="co">## Quantos foram aceitados</span></a>
+<a class="sourceLine" id="cb15-2" title="2"><span class="kw">length</span>(x)<span class="op">/</span><span class="kw">length</span>(y)</a>
+<a class="sourceLine" id="cb15-3" title="3"><span class="co"># [1] 0.5756</span></a>
+<a class="sourceLine" id="cb15-4" title="4"><span class="co">## Taxa (teorica) de aceitacao é</span></a>
+<a class="sourceLine" id="cb15-5" title="5"><span class="dv">1</span><span class="op">/</span>M</a>
+<a class="sourceLine" id="cb15-6" title="6"><span class="co"># [1] 0.5981549</span></a></code></pre></div>
+<p>Novamente, podemos verificar a distribuição da amostra gerada através de um histograma, e (preferencialmente), através das distribuições acumuladas empírica e teórica.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb16-2" title="2"><span class="kw">hist</span>(x, <span class="dt">freq =</span> <span class="ot">FALSE</span>); <span class="kw">lines</span>(<span class="kw">density</span>(x), <span class="dt">col =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb16-3" title="3"><span class="kw">plot</span>(<span class="kw">ecdf</span>(x))</a>
+<a class="sourceLine" id="cb16-4" title="4"><span class="kw">curve</span>(<span class="kw">pbeta</span>(x, <span class="fl">2.7</span>, <span class="fl">6.3</span>), <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb16-5" title="5"><span class="kw">legend</span>(<span class="st">&quot;right&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;Empírica&quot;</span>, <span class="st">&quot;Teórica&quot;),</span></a>
+<a class="sourceLine" id="cb16-6" title="6"><span class="st">       lty = 1, col = 1:2, bty = &quot;</span>n<span class="st">&quot;)</span></a>
+<a class="sourceLine" id="cb16-7" title="7"><span class="st">par(mfrow = c(1, 1))</span></a></code></pre></div>
+<p><img src="figures/MCMC-1/betaconf-1.png" width="80%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="métodos-sequenciais" class="section level1">
+<h1><span class="header-section-number">3</span> Métodos sequenciais</h1>
+<p>Em situações em que <span class="math inline">\(\theta\)</span> (ou <span class="math inline">\(X\)</span>) tem dimensão elevada, o procedimento a ser apresentado é geralmente mais eficiente para gerar quantidades aleatórias.</p>
+<p>O ponto crítico do método MCMC está na formulação de probabilidades de transição apropriadas. O algoritmo de Metropolis-Hastings é uma forma conveniente de obter uma amostra simulada, a partir do uso de uma cadeia de Markov generalizada para um espaço de estado contínuo.</p>
+<p>Segue abaixo uma descrição das probabilidades de transição especificadas conforme algumas das alternativas que podem ser adotadas para implementar o algoritmo de Metropolis-Hastings.</p>
+<p>O procedimento mais geral será visto na sequência.</p>
+<div id="metropolis-hastings" class="section level2">
+<h2><span class="header-section-number">3.1</span> Metropolis-Hastings</h2>
+<p>O algoritmo de Metropolis-Hastings gera uma cadeia de Markov <span class="math inline">\(\{X_0, X_1, \ldots\}\)</span> conforme definido abaixo.</p>
+<ol style="list-style-type: decimal">
+<li>Defina uma distribuição proposta <span class="math inline">\(g(\cdot|X_t)\)</span></li>
+<li>Defina um valor inicial <span class="math inline">\(X_0\)</span>, dentro do domínio de <span class="math inline">\(g\)</span></li>
+<li>Repita os seguintes passos até convergir para uma distribuição estacionária:
+<ol style="list-style-type: lower-alpha">
+<li>Gere um valor <strong>candidato</strong> <span class="math inline">\(Y=X_{t+1}\)</span> a partir de <span class="math inline">\(g(\cdot|X_t)\)</span> (note que o valor candidato é dependente do valor anterior)</li>
+<li>Gere <span class="math inline">\(U\)</span> de uma <span class="math inline">\(\text{U}(0,1)\)</span></li>
+<li>Calcule a taxa de aceitação <span class="math display">\[
+\alpha(X_t, Y) = \min
+\left( \frac{f(Y)g(X_t|Y)}{f(X_t)g(Y|X_t)}, 1 \right)
+\]</span> Se <span class="math display">\[
+U \leq \alpha(X_t, Y)
+\]</span> aceite <span class="math inline">\(Y\)</span> e faça <span class="math inline">\(X_{t+1}=Y\)</span>; caso contrário faça <span class="math inline">\(X_{t+1}=X_t\)</span></li>
+</ol></li>
+</ol>
+<p>Observações:</p>
+<ul>
+<li>Note que só precisamos conhecer o núcleo da densidade alvo <span class="math inline">\(f\)</span>, ou seja, não é necessário saber a constante de integração (ou de normalização), uma vez que, mesmo sem essa constante, a densidade de <span class="math inline">\(f\)</span> será proporcional.</li>
+<li>Se a distribuição proposta for adequada, a “cadeia” de Metropolis-Hastings irá convergir para uma distribuição estacionária única <span class="math inline">\(\pi\)</span>.</li>
+<li>O algoritmo foi desenvolvido de forma que a distribuição estacionária da cadeia é de fato a distribuição alvo <span class="math inline">\(f\)</span>.</li>
+</ul>
+</div>
+<div id="metropolis-random-walk" class="section level2">
+<h2><span class="header-section-number">3.2</span> Metropolis Random Walk</h2>
+<p>O algoritmo de Metropolis-Hastings é uma generalização do algoritmo de Metropolis <em>random walk</em>. Nesse caso, a particularização é que no algoritmo de Metropolis, a distribuição proposta deve ser obrigatoriamente <strong>simétrica</strong>.</p>
+<p>Sendo assim, se <span class="math inline">\(g(\cdot|X_t)\)</span> é simétrica, podemos dizer que</p>
+<p><span class="math display">\[
+g(X_t|Y) = g(Y|X_t)
+\]</span></p>
+<p>Portanto, a taxa de aceitação fica agora simplificada</p>
+<p><span class="math display">\[
+\begin{aligned}
+\alpha(X_t, Y) &amp;= \min
+\left( \frac{f(Y)g(X_t|Y)}{f(X_t)g(Y|X_t)}, 1 \right) \\
+ &amp;= \min
+\left( \frac{f(Y)}{f(X_t)}, 1 \right)
+\end{aligned}
+\]</span></p>
+<p>Sendo assim, se um valor candidato <span class="math inline">\(Y = X_{t+1}\)</span> é gerado a partir de uma distribuição proposta simétrica, então a probabilidade da cadeia se mover de <span class="math inline">\(X_t\)</span> para <span class="math inline">\(X_{t+1}\)</span> depende apenas da distância entre eles, i.e. <span class="math inline">\(g(X_{t+1}|X_t) = g(|X_{t+1} - X_t|)\)</span>. Então, a cada iteração, um increment <span class="math inline">\(Z\)</span> é gerado a partir de <span class="math inline">\(g(\cdot)\)</span>, e <span class="math inline">\(Y\)</span> é definido como <span class="math inline">\(Y = X_t + Z\)</span> (veja que é a própria definição de random walk).</p>
+<p>O incremento aleatório <span class="math inline">\(Z\)</span> pode ser, por exemplo, normal com média zero, de forma que o valor candidadto é <span class="math inline">\(Y|X_t \sim \text{N}(X_t, \sigma^2)\)</span>, para algum <span class="math inline">\(\sigma^2 &gt; 0\)</span> constante. No enatnto, o incremento <span class="math inline">\(Z\)</span> também pode ser proveniente de uma distribuição uniforme no intervalo <span class="math inline">\((-\delta, \delta)\)</span>, por exemplo.</p>
+<p>Assim, o algoritmo de Metropolis random walk pode ser definido da seguinte forma:</p>
+<ol style="list-style-type: decimal">
+<li>Defina uma distribuição proposta <span class="math inline">\(g\)</span> <strong>simétrica</strong></li>
+<li>Defina um valor inicial <span class="math inline">\(X_0\)</span>, dentro do domínio de <span class="math inline">\(f\)</span></li>
+<li>Repita os seguintes passos até convergir para uma distribuição estacionária:
+<ol style="list-style-type: lower-alpha">
+<li>Gere um valor <strong>candidato</strong> <span class="math inline">\(Y \equiv X_{t+1} = X_t+Z\)</span></li>
+<li>Gere <span class="math inline">\(U\)</span> de uma <span class="math inline">\(\text{U}(0,1)\)</span></li>
+<li>Calcule a taxa de aceitação <span class="math display">\[
+\alpha(X_t, Y) = \min
+\left( \frac{f(Y)}{f(X_t)}, 1 \right)
+\]</span> Se <span class="math display">\[
+U \leq \alpha(X_t, Y)
+\]</span> aceite <span class="math inline">\(Y\)</span> e faça <span class="math inline">\(X_{t+1}=Y\)</span>; caso contrário faça <span class="math inline">\(X_{t+1}=X_t\)</span></li>
+</ol></li>
+</ol>
+<div id="exemplo-com-uniforme" class="section level3">
+<h3><span class="header-section-number">3.2.1</span> Exemplo com uniforme</h3>
+<p>Suponha que se deseja gerar valores de uma normal padrão, usando como distribuição proposta uma <span class="math inline">\(\text{U}(-\delta, \delta)\)</span>.</p>
+<ol style="list-style-type: decimal">
+<li>Simule <span class="math inline">\(z \sim \text{U}(-\delta, \delta)\)</span> e faça <span class="math inline">\(Y = X_t+Z\)</span></li>
+<li>Calcule a probabilidade de aceitação <span class="math inline">\(\alpha(X_t, Y) = \min \left( \frac{f(Y)}{f(X_t)}, 1 \right)\)</span>, onde <span class="math inline">\(f\)</span> é a densidade da normal padrão</li>
+<li>Simule <span class="math inline">\(u \sim \text{U}(0,1)\)</span>. Se <span class="math inline">\(u \leq \alpha(X_t, Y)\)</span>, então <span class="math inline">\(X_{t+1}=Y\)</span>; caso contrário <span class="math inline">\(X_{t+1}=X_t\)</span></li>
+</ol>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">f &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dnorm</span>(x, <span class="dv">0</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb17-2" title="2">delta &lt;-<span class="st"> </span><span class="fl">0.5</span></a>
+<a class="sourceLine" id="cb17-3" title="3">N &lt;-<span class="st"> </span><span class="dv">500</span></a>
+<a class="sourceLine" id="cb17-4" title="4">x &lt;-<span class="st"> </span><span class="kw">numeric</span>(N)</a>
+<a class="sourceLine" id="cb17-5" title="5">x[<span class="dv">1</span>] &lt;-<span class="st"> </span><span class="dv">0</span></a>
+<a class="sourceLine" id="cb17-6" title="6"><span class="kw">set.seed</span>(<span class="dv">2019-10-11</span>)</a>
+<a class="sourceLine" id="cb17-7" title="7"><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>N) {</a>
+<a class="sourceLine" id="cb17-8" title="8">    z &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>, <span class="op">-</span>delta, delta)</a>
+<a class="sourceLine" id="cb17-9" title="9">    y &lt;-<span class="st"> </span>x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>z</a>
+<a class="sourceLine" id="cb17-10" title="10">    alpha &lt;-<span class="st"> </span><span class="kw">min</span>(<span class="kw">f</span>(y)<span class="op">/</span><span class="kw">f</span>(x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]), <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb17-11" title="11">    u &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb17-12" title="12">    <span class="cf">if</span>(u <span class="op">&lt;=</span><span class="st"> </span>alpha) {</a>
+<a class="sourceLine" id="cb17-13" title="13">        x[i] &lt;-<span class="st"> </span>y</a>
+<a class="sourceLine" id="cb17-14" title="14">    } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb17-15" title="15">        x[i] &lt;-<span class="st"> </span>x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb17-16" title="16">    }</a>
+<a class="sourceLine" id="cb17-17" title="17">}</a>
+<a class="sourceLine" id="cb17-18" title="18"><span class="kw">plot</span>(x, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-10-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Veja o que acontece se aumentarmos o valor de <span class="math inline">\(\delta\)</span></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1">f &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dnorm</span>(x, <span class="dv">0</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb18-2" title="2">delta &lt;-<span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb18-3" title="3">N &lt;-<span class="st"> </span><span class="dv">500</span></a>
+<a class="sourceLine" id="cb18-4" title="4">x2 &lt;-<span class="st"> </span><span class="kw">numeric</span>(N)</a>
+<a class="sourceLine" id="cb18-5" title="5">x2[<span class="dv">1</span>] &lt;-<span class="st"> </span><span class="dv">0</span></a>
+<a class="sourceLine" id="cb18-6" title="6"><span class="kw">set.seed</span>(<span class="dv">2019-10-11</span>)</a>
+<a class="sourceLine" id="cb18-7" title="7"><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>N) {</a>
+<a class="sourceLine" id="cb18-8" title="8">    z &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>, <span class="op">-</span>delta, delta)</a>
+<a class="sourceLine" id="cb18-9" title="9">    y &lt;-<span class="st"> </span>x2[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>z</a>
+<a class="sourceLine" id="cb18-10" title="10">    alpha &lt;-<span class="st"> </span><span class="kw">min</span>(<span class="kw">f</span>(y)<span class="op">/</span><span class="kw">f</span>(x2[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]), <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb18-11" title="11">    u &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb18-12" title="12">    <span class="cf">if</span>(u <span class="op">&lt;=</span><span class="st"> </span>alpha) {</a>
+<a class="sourceLine" id="cb18-13" title="13">        x2[i] &lt;-<span class="st"> </span>y</a>
+<a class="sourceLine" id="cb18-14" title="14">    } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb18-15" title="15">        x2[i] &lt;-<span class="st"> </span>x2[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb18-16" title="16">    }</a>
+<a class="sourceLine" id="cb18-17" title="17">}</a>
+<a class="sourceLine" id="cb18-18" title="18"><span class="kw">plot</span>(x2, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-11-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Compara a distribuição das amostras com a distribuição teórica</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb19-2" title="2"><span class="kw">plot</span>(<span class="kw">ecdf</span>(x))</a>
+<a class="sourceLine" id="cb19-3" title="3"><span class="kw">curve</span>(<span class="kw">pnorm</span>(x), <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb19-4" title="4"><span class="kw">plot</span>(<span class="kw">ecdf</span>(x2))</a>
+<a class="sourceLine" id="cb19-5" title="5"><span class="kw">curve</span>(<span class="kw">pnorm</span>(x), <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb19-6" title="6"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-12-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Comparando as duas cadeias</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb20-2" title="2"><span class="kw">plot</span>(x, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">main =</span> <span class="kw">expression</span>(delta <span class="op">==</span><span class="st"> </span><span class="fl">0.5</span>))</a>
+<a class="sourceLine" id="cb20-3" title="3"><span class="kw">plot</span>(x2, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">main =</span> <span class="kw">expression</span>(delta <span class="op">==</span><span class="st"> </span><span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb20-4" title="4"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-13-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>No primeiro caso, os valores propostos ficam muito próximos do valor atual, e quase sempre serão aceitos. No entanto, levará muitas iterações até o algoritmo cobrir todo o espaço de <span class="math inline">\(X\)</span>.</p>
+<p>No segundo caso, a taxa de rejeição é excessivamente alta e a cadeia se movimenta muito pouco, pois os valores propostos podem ficar muito longe do atual.</p>
+<p>Nas duas situações o algoritmo pode ser ineficiente. Na prática temos que testar vários valores de <span class="math inline">\(\delta\)</span> e monitorar a taxa de aceitação. A partir disso surge um importante conceito em amostradores MCMC: <em>tuning</em>, ou “refinamento”. Em teoria, não existe um valor ideal para <span class="math inline">\(\delta\)</span>, ambas as cadeias irão eventualmente convergir para a distribuição alvo (normal nesse caso). No entanto, a velocidade de convergência e a quantidade de espaço amostral explorado dependem de <span class="math inline">\(\delta\)</span>. Portanto, o amostrador pode ser refinado para melhorar sua eficiência.</p>
+<p>Veja também que no primeiro caso, como os valores propostos são mais próximos do atual, eles também terão uma correlação maior.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb21-2" title="2"><span class="kw">acf</span>(x, <span class="dt">lag.max =</span> <span class="dv">50</span>)</a>
+<a class="sourceLine" id="cb21-3" title="3"><span class="kw">acf</span>(x2, <span class="dt">lag.max =</span> <span class="dv">50</span>)</a>
+<a class="sourceLine" id="cb21-4" title="4"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-14-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Veja como fica uma animação com o método em funcionamento:</p>
+<iframe src="rwsampler1.html" width="80%" height="715px" style="display:block; margin: auto;" frameborder="0">
+</iframe>
+<p>VEJA também o código-fonte para outro exemplo!</p>
+</div>
+<div id="exemplo-com-normal" class="section level3">
+<h3><span class="header-section-number">3.2.2</span> Exemplo com normal</h3>
+<p>Considere gerar valores de uma distribuição <span class="math inline">\(t\)</span> de Student com <span class="math inline">\(\nu\)</span> graus de liberdade, usando como distribuição proposta uma <span class="math inline">\(\text{N}(X_t, \sigma)\)</span>.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1">rw.Metropolis &lt;-<span class="st"> </span><span class="cf">function</span>(nu, sigma, x0, N) {</a>
+<a class="sourceLine" id="cb22-2" title="2">    f &lt;-<span class="st"> </span><span class="cf">function</span>(x, nu) <span class="kw">dt</span>(x, nu)</a>
+<a class="sourceLine" id="cb22-3" title="3">    x &lt;-<span class="st"> </span><span class="kw">numeric</span>(N)</a>
+<a class="sourceLine" id="cb22-4" title="4">    x[<span class="dv">1</span>] &lt;-<span class="st"> </span>x0</a>
+<a class="sourceLine" id="cb22-5" title="5">    u &lt;-<span class="st"> </span><span class="kw">runif</span>(N)</a>
+<a class="sourceLine" id="cb22-6" title="6">    <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>N) {</a>
+<a class="sourceLine" id="cb22-7" title="7">        z &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">1</span>, <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> sigma)</a>
+<a class="sourceLine" id="cb22-8" title="8">        y &lt;-<span class="st"> </span>x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>z</a>
+<a class="sourceLine" id="cb22-9" title="9">        alpha &lt;-<span class="st"> </span><span class="kw">min</span>(<span class="kw">f</span>(y, nu)<span class="op">/</span><span class="kw">f</span>(x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>], nu), <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb22-10" title="10">        u &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb22-11" title="11">        <span class="cf">if</span>(u <span class="op">&lt;=</span><span class="st"> </span>alpha) {</a>
+<a class="sourceLine" id="cb22-12" title="12">            x[i] &lt;-<span class="st"> </span>y</a>
+<a class="sourceLine" id="cb22-13" title="13">        } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb22-14" title="14">            x[i] &lt;-<span class="st"> </span>x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb22-15" title="15">        }</a>
+<a class="sourceLine" id="cb22-16" title="16">    }</a>
+<a class="sourceLine" id="cb22-17" title="17">    <span class="kw">return</span>(x)</a>
+<a class="sourceLine" id="cb22-18" title="18">}</a></code></pre></div>
+<p>Supondo que queremos gerar uma distribuição <span class="math inline">\(t(\nu = 4)\)</span>. Vamos fazer isso com valores diferentes de <span class="math inline">\(\sigma\)</span> da distribuição normal proposta.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">nu &lt;-<span class="st"> </span><span class="dv">4</span></a>
+<a class="sourceLine" id="cb23-2" title="2">N &lt;-<span class="st"> </span><span class="dv">2000</span></a>
+<a class="sourceLine" id="cb23-3" title="3">sigma &lt;-<span class="st"> </span><span class="kw">c</span>(.<span class="dv">05</span>, <span class="fl">.5</span>, <span class="dv">2</span>,  <span class="dv">16</span>)</a>
+<a class="sourceLine" id="cb23-4" title="4">x0 &lt;-<span class="st"> </span><span class="dv">25</span></a>
+<a class="sourceLine" id="cb23-5" title="5">rw1 &lt;-<span class="st"> </span><span class="kw">rw.Metropolis</span>(nu, sigma[<span class="dv">1</span>], x0, N)</a>
+<a class="sourceLine" id="cb23-6" title="6">rw2 &lt;-<span class="st"> </span><span class="kw">rw.Metropolis</span>(nu, sigma[<span class="dv">2</span>], x0, N)</a>
+<a class="sourceLine" id="cb23-7" title="7">rw3 &lt;-<span class="st"> </span><span class="kw">rw.Metropolis</span>(nu, sigma[<span class="dv">3</span>], x0, N)</a>
+<a class="sourceLine" id="cb23-8" title="8">rw4 &lt;-<span class="st"> </span><span class="kw">rw.Metropolis</span>(nu, sigma[<span class="dv">4</span>], x0, N)</a>
+<a class="sourceLine" id="cb23-9" title="9"><span class="co">## Resultado das cadeias</span></a>
+<a class="sourceLine" id="cb23-10" title="10"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb23-11" title="11">refline &lt;-<span class="st"> </span><span class="kw">qt</span>(<span class="kw">c</span>(.<span class="dv">025</span>, <span class="fl">.975</span>), <span class="dt">df =</span> nu)</a>
+<a class="sourceLine" id="cb23-12" title="12">rw &lt;-<span class="st"> </span><span class="kw">cbind</span>(rw1, rw2, rw3,  rw4)</a>
+<a class="sourceLine" id="cb23-13" title="13"><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>) {</a>
+<a class="sourceLine" id="cb23-14" title="14">    <span class="kw">plot</span>(rw[, j], <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>,</a>
+<a class="sourceLine" id="cb23-15" title="15">         <span class="dt">main =</span> <span class="kw">bquote</span>(sigma <span class="op">==</span><span class="st"> </span>.(<span class="kw">round</span>(sigma[j], <span class="dv">3</span>))),</a>
+<a class="sourceLine" id="cb23-16" title="16">         <span class="dt">ylab =</span> <span class="st">&quot;X&quot;</span>, <span class="dt">ylim =</span> <span class="kw">range</span>(rw[, j]))</a>
+<a class="sourceLine" id="cb23-17" title="17">    <span class="kw">abline</span>(<span class="dt">h =</span> refline)</a>
+<a class="sourceLine" id="cb23-18" title="18">}</a>
+<a class="sourceLine" id="cb23-19" title="19"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-21-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<ul>
+<li>Com <span class="math inline">\(\sigma = 0.05\)</span> a probabilidade de aceitação <span class="math inline">\(\alpha\)</span> tende a ser grande, portanto quase todos os valores candidatos são aceitos. Os incrementos são pequenos e a cadeia não converge para a distribuição estacionária.</li>
+<li>Com <span class="math inline">\(\sigma = 0.5\)</span>, converge lentamente para a distribuição estacionária. Isso mostra que é importante definir um período de <em>burn-in</em> ou aquecimento da cadeia, descartando os primeiros valores gerados.</li>
+<li>Com <span class="math inline">\(\sigma = 2\)</span>, a cadeia possui uma boa mistura e converge rapidamente para a distribuição estacionária.</li>
+<li>Com <span class="math inline">\(\sigma = 16\)</span>, a probabilidade de aceitação <span class="math inline">\(\alpha\)</span> é pequena, e a maioria dos valores candidatos são rejeitados. A cadeia converge, mas é ineficiente.</li>
+</ul>
+</div>
+</div>
+<div id="amostrador-independente" class="section level2">
+<h2><span class="header-section-number">3.3</span> Amostrador independente</h2>
+<p>Outro caso particular do método geral de Metropolis-Hastings é o chamado amostrador independente. Nesse caso, a particularidade é que a distribuição proposta não depende mais de valores anteriores da cadeia, ou seja,</p>
+<p><span class="math display">\[
+g(Y|X_t) = g(Y)
+\]</span></p>
+<p>Dessa forma, a probabilidade de aceitação simplifica para</p>
+<p><span class="math display">\[
+\begin{aligned}
+\alpha(X_t, Y) &amp;= \min
+\left( \frac{f(Y)g(X_t|Y)}{f(X_t)g(Y|X_t)}, 1 \right) \\
+ &amp;= \min
+\left( \frac{f(Y)g(X_t)}{f(X_t)g(Y)}, 1 \right) \\
+ &amp;= \min
+\left( \frac{f(Y)}{f(X_t)} \bigg/ \frac{g(Y)}{g(X_t)}, 1 \right)
+\end{aligned}
+\]</span></p>
+<p>Note que, embora os valores de <span class="math inline">\(Y=X_{t+1}\)</span> sejam gerados de forma independente, a cadeia resultante <strong>não será iid</strong>, já que a probabilidade de aceitação ainda depende de <span class="math inline">\(X_t\)</span>.</p>
+<p>O amostrador independente é de fácil implementação, mas tende a funcionar bem apenas quando a distribuição proposta é parecida (em forma) com a distribuição alvo.</p>
+<p>Assim, o método do amostrador independente pode ser definido da seguinte forma:</p>
+<ol style="list-style-type: decimal">
+<li>Defina uma distribuição proposta <span class="math inline">\(g\)</span> <strong>similar</strong> à distribuição alvo</li>
+<li>Defina um valor inicial <span class="math inline">\(X_0\)</span>, dentro do domínio de <span class="math inline">\(g\)</span></li>
+<li>Repita os seguintes passos até convergir para uma distribuição estacionária:
+<ol style="list-style-type: lower-alpha">
+<li>Gere um valor <strong>candidato</strong> <span class="math inline">\(Y\)</span> a partir de <span class="math inline">\(g\)</span></li>
+<li>Gere <span class="math inline">\(U\)</span> de uma <span class="math inline">\(\text{U}(0,1)\)</span></li>
+<li>Calcule a taxa de aceitação <span class="math display">\[
+\alpha(X_t, Y) = \min
+\left( \frac{f(Y)g(X_t)}{f(X_t)g(Y)}, 1 \right)
+\]</span> Se <span class="math display">\[
+U \leq \alpha(X_t, Y)
+\]</span> aceite <span class="math inline">\(Y\)</span> e faça <span class="math inline">\(X_{t+1}=Y\)</span>; caso contrário faça <span class="math inline">\(X_{t+1}=X_t\)</span></li>
+</ol></li>
+</ol>
+<div id="exemplo-beta-1" class="section level3">
+<h3><span class="header-section-number">3.3.1</span> Exemplo (beta)</h3>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1"><span class="co">## Gerar números de uma distribuição Beta usando a distribuição Uniforme</span></a>
+<a class="sourceLine" id="cb24-2" title="2"><span class="co">## e/ou normal.</span></a>
+<a class="sourceLine" id="cb24-3" title="3"></a>
+<a class="sourceLine" id="cb24-4" title="4"><span class="co">## Distribuição alvo: X ~ Beta(2, 3)</span></a>
+<a class="sourceLine" id="cb24-5" title="5">f &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dbeta</span>(x, <span class="dt">shape1 =</span> <span class="dv">2</span>, <span class="dt">shape2 =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb24-6" title="6"><span class="kw">curve</span>(f, <span class="dv">0</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb24-7" title="7"><span class="co">## Distribuição candidata (proposal): X ~ Uniforme(0,1)</span></a>
+<a class="sourceLine" id="cb24-8" title="8">g &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dunif</span>(x, <span class="dv">0</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb24-9" title="9"></a>
+<a class="sourceLine" id="cb24-10" title="10"><span class="co">## Gráfico das densidados sobrepostas.</span></a>
+<a class="sourceLine" id="cb24-11" title="11"><span class="kw">curve</span>(f, <span class="dv">0</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb24-12" title="12"><span class="kw">curve</span>(g, <span class="dt">add=</span><span class="ot">TRUE</span>, <span class="dt">col=</span><span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb24-13" title="13"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend=</span><span class="kw">c</span>(<span class="st">&quot;Alvo&quot;</span>, <span class="st">&quot;Candidata&quot;</span>), <span class="dt">lty=</span><span class="dv">1</span>, <span class="dt">col=</span><span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,</a>
+<a class="sourceLine" id="cb24-14" title="14">       <span class="dt">bty=</span><span class="st">&quot;n&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-22-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1"></a>
+<a class="sourceLine" id="cb25-2" title="2">N &lt;-<span class="st"> </span><span class="dv">500</span></a>
+<a class="sourceLine" id="cb25-3" title="3">x &lt;-<span class="st"> </span><span class="kw">numeric</span>(N)</a>
+<a class="sourceLine" id="cb25-4" title="4">x[<span class="dv">1</span>] &lt;-<span class="st"> </span><span class="fl">0.5</span></a>
+<a class="sourceLine" id="cb25-5" title="5"><span class="kw">set.seed</span>(<span class="dv">2019-10-11</span>)</a>
+<a class="sourceLine" id="cb25-6" title="6"><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>N) {</a>
+<a class="sourceLine" id="cb25-7" title="7">    y &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>) <span class="co"># Distribuição proposta</span></a>
+<a class="sourceLine" id="cb25-8" title="8">    alpha &lt;-<span class="st"> </span><span class="kw">min</span>((<span class="kw">f</span>(y) <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>])) <span class="op">/</span><span class="st"> </span>(<span class="kw">f</span>(x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]) <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(y)), <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb25-9" title="9">    u &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb25-10" title="10">    <span class="cf">if</span>(u <span class="op">&lt;=</span><span class="st"> </span>alpha) {</a>
+<a class="sourceLine" id="cb25-11" title="11">        x[i] &lt;-<span class="st"> </span>y</a>
+<a class="sourceLine" id="cb25-12" title="12">    } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb25-13" title="13">        x[i] &lt;-<span class="st"> </span>x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb25-14" title="14">    }</a>
+<a class="sourceLine" id="cb25-15" title="15">}</a>
+<a class="sourceLine" id="cb25-16" title="16"></a>
+<a class="sourceLine" id="cb25-17" title="17"><span class="co">## Cadeia</span></a>
+<a class="sourceLine" id="cb25-18" title="18"><span class="kw">plot</span>(x, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-22-2.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" title="1"></a>
+<a class="sourceLine" id="cb26-2" title="2"><span class="co">## Compara com teorica</span></a>
+<a class="sourceLine" id="cb26-3" title="3"><span class="kw">plot</span>(<span class="kw">ecdf</span>(x))</a>
+<a class="sourceLine" id="cb26-4" title="4"><span class="kw">curve</span>(<span class="kw">pbeta</span>(x, <span class="dv">2</span>, <span class="dv">3</span>), <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-22-3.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Veja como fica uma animação com o método em funcionamento:</p>
+<iframe src="iidsampler1.html" width="80%" height="715px" style="display:block; margin: auto;" frameborder="0">
+</iframe>
+<p><strong>Outro exemplo:</strong></p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1"><span class="co">## Distribuição alvo: X ~ Beta(2, 3)</span></a>
+<a class="sourceLine" id="cb27-2" title="2">f &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dbeta</span>(x, <span class="dt">shape1 =</span> <span class="dv">2</span>, <span class="dt">shape2 =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb27-3" title="3"><span class="kw">curve</span>(f, <span class="dv">0</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb27-4" title="4"><span class="co">## Distribuição candidata (proposal): X ~ Normal(0.5, 0.25)</span></a>
+<a class="sourceLine" id="cb27-5" title="5">g &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dnorm</span>(x, <span class="fl">0.5</span>, <span class="fl">0.25</span>)</a>
+<a class="sourceLine" id="cb27-6" title="6"></a>
+<a class="sourceLine" id="cb27-7" title="7"><span class="co">## Gráfico das densidados sobrepostas.</span></a>
+<a class="sourceLine" id="cb27-8" title="8"><span class="kw">curve</span>(f, <span class="dv">0</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb27-9" title="9"><span class="kw">curve</span>(g, <span class="dt">add=</span><span class="ot">TRUE</span>, <span class="dt">col=</span><span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb27-10" title="10"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend=</span><span class="kw">c</span>(<span class="st">&quot;Alvo&quot;</span>, <span class="st">&quot;Candidata&quot;</span>), <span class="dt">lty=</span><span class="dv">1</span>, <span class="dt">col=</span><span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,</a>
+<a class="sourceLine" id="cb27-11" title="11">       <span class="dt">bty=</span><span class="st">&quot;n&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-27-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1"></a>
+<a class="sourceLine" id="cb28-2" title="2">N &lt;-<span class="st"> </span><span class="dv">500</span></a>
+<a class="sourceLine" id="cb28-3" title="3">x2 &lt;-<span class="st"> </span><span class="kw">numeric</span>(N)</a>
+<a class="sourceLine" id="cb28-4" title="4">x2[<span class="dv">1</span>] &lt;-<span class="st"> </span><span class="fl">0.5</span></a>
+<a class="sourceLine" id="cb28-5" title="5"><span class="kw">set.seed</span>(<span class="dv">2019-10-11</span>)</a>
+<a class="sourceLine" id="cb28-6" title="6"><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>N) {</a>
+<a class="sourceLine" id="cb28-7" title="7">    y &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">1</span>, <span class="fl">0.5</span>, <span class="fl">0.25</span>) <span class="co"># Distribuição proposta</span></a>
+<a class="sourceLine" id="cb28-8" title="8">    alpha &lt;-<span class="st"> </span><span class="kw">min</span>((<span class="kw">f</span>(y) <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(x2[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>])) <span class="op">/</span><span class="st"> </span>(<span class="kw">f</span>(x2[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]) <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(y)), <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb28-9" title="9">    u &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb28-10" title="10">    <span class="cf">if</span>(u <span class="op">&lt;=</span><span class="st"> </span>alpha) {</a>
+<a class="sourceLine" id="cb28-11" title="11">        x2[i] &lt;-<span class="st"> </span>y</a>
+<a class="sourceLine" id="cb28-12" title="12">    } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb28-13" title="13">        x2[i] &lt;-<span class="st"> </span>x2[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb28-14" title="14">    }</a>
+<a class="sourceLine" id="cb28-15" title="15">}</a>
+<a class="sourceLine" id="cb28-16" title="16"></a>
+<a class="sourceLine" id="cb28-17" title="17"><span class="co">## Cadeia</span></a>
+<a class="sourceLine" id="cb28-18" title="18"><span class="kw">plot</span>(x2, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-27-2.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1"></a>
+<a class="sourceLine" id="cb29-2" title="2"><span class="co">## Compara com teorica</span></a>
+<a class="sourceLine" id="cb29-3" title="3"><span class="kw">plot</span>(<span class="kw">ecdf</span>(x2))</a>
+<a class="sourceLine" id="cb29-4" title="4"><span class="kw">curve</span>(<span class="kw">pbeta</span>(x, <span class="dv">2</span>, <span class="dv">3</span>), <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-27-3.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Veja como fica uma animação com o método em funcionamento:</p>
+<iframe src="iidsampler2.html" width="80%" height="715px" style="display:block; margin: auto;" frameborder="0">
+</iframe>
+<p>Comparando as cadeias geradas com as duas diferentes propostas:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb30-2" title="2"><span class="kw">plot</span>(x, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>)</a>
+<a class="sourceLine" id="cb30-3" title="3"><span class="kw">plot</span>(x2, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>)</a>
+<a class="sourceLine" id="cb30-4" title="4"><span class="kw">acf</span>(x)</a>
+<a class="sourceLine" id="cb30-5" title="5"><span class="kw">acf</span>(x2)</a>
+<a class="sourceLine" id="cb30-6" title="6"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</a></code></pre></div>
+<p><img src="figures/MCMC-1/unnamed-chunk-32-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>VEJA também o código-fonte para outro exemplo!</p>
+</div>
+</div>
+</div>
+
+<center>
+  <hr width="100%" size="3px">
+  <p> <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt_BR">
+      <img src="https://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" alt="Licença Creative Commons 4.0"> </a>
+  </p>
+  <p> <font size="2"> Este conteúdo
+      está disponível por meio da Licença Creative Commons 4.0 </font>
+  </p>
+</center>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = false;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
