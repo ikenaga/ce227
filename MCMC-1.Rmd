@@ -1,0 +1,1474 @@
+---
+title: "Métodos de Monte Carlo via Cadeias de Markov"
+# subtitle: "Método da transformação de variáveis"
+author: "Fernando P. Mayer"
+# bibliography: ref.bib
+output:
+  html_document:
+    number_sections: true
+    toc_depth: 3
+---
+
+```{r, cache=FALSE, include=FALSE}
+source("setup_knitr.R")
+opts_chunk$set(fig.path = "figures/MCMC-1/")
+```
+
+# Introdução
+
+Já vimos que a integração de Monte Carlo serve para aproximar integrais
+de alta dimensão ou que não possuem solução fechada (analítica).
+
+Agora veremos que a integração de Monte Carlo, naturalmente serve também
+para o cáculo de probabilidades entre algum intervalo, e.g., $P[a < X <
+b]$ ou $P[X > a]$, que nada mais são do que cálculos de áreas no
+intervalo especificado.
+
+A integração de Monte Carlo nos fornece uma estimativa dessa integral,
+e, como vimos, o erro padrão dessa estimativa pode ser calculado, e
+intervalos de confiança podem ser obtidos devido à suposição de que
+assintoticamente a estimativa possui distribuição normal.
+
+Agora, veremos que podemos obter essa mesma estimativa, mas de uma forma
+um pouco diferente: simulando a própria distribuição de interesse, e
+obtendo valores de áreas (integrais) usando a própria amostra. A
+vantagem é que, dessa forma, obtemos uma descrição mais completa do
+problema em questão, e, com isso, podemos obter outras medidas que forem
+necessárias, de uma única vez. Além disso, medidas de incerteza como
+erros-padrões e intervalos de confiança podem ser derivados a partir da
+própria distribuição amostral.
+
+A obtenção de uma amostra da distribuição de interesse será fundamental
+para os métodos de inferência que veremos mais adiante. Além disso,
+estes métodos são utilizados como o "padrão" para a resolução de
+problemas em inferência bayesiana.
+
+# Método não sequencial
+
+## Método de aceitação e rejeição
+
+Se a função densidade de probabilidade for conhecida, $f$, então é
+possível gerar números aleatórios dessa variável aleatória caracterizada
+por $f$ pelo método da aceitação e rejeição. É necessário satisfazer
+dois requisitos:
+
+1. Ter um bom gerador de números uniformes.
+2. Ter um bom gerador de números de uma variável aleatória representada
+por uma distribuição $D$, escolhida de tal maneira que existe uma
+constante $M$ tal que a densidade de $g$ que caracteriza a distribuição
+$D$ satisfaz
+$$
+f(x) \leq M g(x)
+$$
+para todo $x$ do domínio de $f$. A função $g$ que "encapsula" a função
+$f$ é chamada de **distribuiçao proposta** (*proposal*).
+
+O seguinte algoritmo permite gerar números aleatórios de uma
+distribuição de probabilidade caracterizada pela função densidade $f$:
+
+1. Gerar $y$ como sendo uma ocorrência da variável aleatória
+representada por $D$.
+2. Gerar $u$ como sendo uma ocorrência de uma uniforme padrão.
+3. Se
+$$
+u \leq \frac{f(y)}{M g(y)}
+$$
+considerar que $x = y$ é um valor da
+distribuição de probabilidade alvo cuja densidade é $f$, caso
+contrário, descartar $y$.
+4. Repetir até atingir o número de valores desejado $n$.
+
+Veja que o valor de $u$ é comparável com a razão $f(y)/Mg(y)$,
+pois esta razão sempre será algum valor entre 0 e 1. Portanto o valor de
+$u$ é sempre relativo à essa razão (i.e., não está na mesma escala das
+densidades de $f$ e $g$).
+
+Para determinar o valor de $M$, basta seguir a seguinte relação
+
+$$
+M \geq \max_x \frac{f(x)}{g(x)}
+$$
+
+Alguns pontos que devem ser levados em consideração:
+
+1. O limite $f(x) \leq M g(x)$ não precisa ser tão pequeno. O algoritmo
+   permanece válido (mas possivelmente menos eficiente) quando $M$ for
+   um valor maior
+2. A probabilidade de aceitação é $1/M$. Portanto $M$ deve ser o menor
+   possível para maior eficiência computacional.
+
+<div class="alert alert-warning">
+Para uma ilustração animada veja [este
+exemplo](http://leg.ufpr.br/~walmes/ensino/EC2/tutoriais/met-ac-rej.html)
+da geração de números de uma distribuição normal, a partir de uma Cauchy
+(distribuição proposta). Para os detalhes da implementação veja [este
+link](http://leg.ufpr.br/~walmes/ensino/EC2/tutoriais/06-met-ac-rej.html).
+</div>
+
+<!-- ## Exemplo 1 -->
+
+<!-- Seja $X$ uma VA com $f(x) = 1.5 x^2, -1 < x < 1$. Simular valores -->
+<!-- desta. -->
+
+<!-- ```{r fdp} -->
+<!-- ## Gráfico da f.d.p da v.a. X, f(x). -->
+<!-- curve(1.5 * (x ^ 2), -1, 1) -->
+<!-- ## Tem integral 1? -->
+<!-- integrate(function(x) 1.5 * (x^2), lower = -1, upper = 1) -->
+<!-- ``` -->
+
+<!-- Vamos considerar como $g$ (a distribuição prposta) a densidade de uma -->
+<!-- uniforme entre -1 e 1. Então se a base é 2, o altura deve ser 0.5 para -->
+<!-- ter produto 1, assim $g(y) = 0.5, -1 < y < 1$. Qual deve ser um valor de -->
+<!-- $M$ para garantir que $f(x) \leq M g(x)$ para todo $x$ dentro do -->
+<!-- intervalo $[-1, 1]$? Pela definição acima, temos que: -->
+<!-- $$ -->
+<!-- M \geq \max_x \frac{f(x)}{g(x)} = \frac{1.5}{0.5} = 3 -->
+<!-- $$ -->
+<!-- Portanto, fazemos $M = 3$, pois esse é o valor mínimo necessário para -->
+<!-- satisfazer $f(x) \leq M g(x)$ (e queremos o valor de $M$ menor possível -->
+<!-- para mais eficiência computacional). -->
+
+<!-- No gráfico abaixo, vemos a função $f(x)$, a proposta $g(x)$, e a que -->
+<!-- iremos de fato utilizar no algoritmo, a $M g(x)$ -->
+
+<!-- ```{r proposal} -->
+<!-- curve(1.5 * (x^2), -1, 1, col = 4) -->
+<!-- curve(0.5 + 0 * x, add = TRUE, lty = 2) -->
+<!-- curve(3 * 0.5 + 0 * x, add = TRUE, lty = 2, lwd = 2) -->
+<!-- legend("bottomright", legend = c("f(x)", "g(x)", "M g(x)"), -->
+<!--        lty = c(1, 2, 2), col = c(4, 1, 1), lwd = c(1, 1, 2), bty = "n") -->
+<!-- ``` -->
+
+<!-- Veja que o valor de $u$ é comparável com a razão $f(y)/Mg(y)$, -->
+<!-- pois esta razão sempre será algum valor entre 0 e 1. Portanto o valor de -->
+<!-- $u$ é sempre relativo à essa razão (i.e., não está na mesma escala das -->
+<!-- densidades de $f$ e $g$). -->
+
+<!-- <div class="alert alert-warning"> -->
+<!-- Para uma ilustração animada veja [este -->
+<!-- exemplo](http://leg.ufpr.br/~walmes/ensino/EC2/tutoriais/met-ac-rej.html) -->
+<!-- da geração de números de uma distribuição normal, a partir de uma Cauchy -->
+<!-- (distribuição proposta). Para os detalhes da implementação veja [este -->
+<!-- link](http://leg.ufpr.br/~walmes/ensino/EC2/tutoriais/06-met-ac-rej.html). -->
+<!-- </div> -->
+
+<!-- Agora, podemos definir um algoritmo que repete esse processo para um -->
+<!-- número fixo de amostras da distribuição proposta. -->
+
+<!-- ```{r} -->
+<!-- ## Criando os elementos necessários. -->
+<!-- f <- function(x) 1.5 * x^2 -->
+<!-- g <- function(x) 0.5 + 0 * x -->
+<!-- M <- 3 -->
+<!-- x <- NULL -->
+
+<!-- ## Simula de uma unica vez, com um valor fixo de simulações -->
+<!-- Nsim <- 2500 -->
+<!-- set.seed(1) -->
+<!-- ## Amostra da proposta -->
+<!-- y <- runif(Nsim, -1, 1) -->
+<!-- ## Amostra da U(0,1) -->
+<!-- u <- runif(Nsim) -->
+<!-- ## Calcula a razão -->
+<!-- r <- f(y)/(M * g(y)) -->
+<!-- ## x será um vetor com os valores de y onde u < r -->
+<!-- x <- y[u < r] -->
+<!-- ## Valores de u aceitos (apenas para o grafico) -->
+<!-- ua <- u[u < r] -->
+<!-- ## Valores de u rejeitados (apenas para o grafico) -->
+<!-- ur <- u[u >= r] -->
+<!-- ``` -->
+
+<!-- Graficamente, temos a seguinte situação. Os pontos verde são aqueles -->
+<!-- aceitados na simulação, e portanto, farão parte da amostra aleatória da -->
+<!-- distribuição $f$ que queremos. Os pontos em vermelho são todos aqueles -->
+<!-- que foram rejeitados e foram descartados. -->
+
+<!-- ```{r sim1} -->
+<!-- curve(1.5 * (x^2), -1, 1, col = 4) -->
+<!-- curve(3 * 0.5 + 0 * x, add = TRUE, lty = 2, lwd = 2) -->
+<!-- points(x, ua * M * g(x), col = 3) -->
+<!-- points(y[u >= r], ur * M * g(y[u >= r]), col = 2) -->
+<!-- ``` -->
+
+<!-- Lembre-se que a taxa teórica de aceitação é $1/M$, portanto, podemos -->
+<!-- conferir isso com essa amostra específica. -->
+
+<!-- ```{r} -->
+<!-- ## Quantos foram aceitados -->
+<!-- length(x)/length(y) -->
+<!-- ## Taxa (teorica) de aceitacao é -->
+<!-- 1/M -->
+<!-- ## Quantos foram rejeitados -->
+<!-- length(ur)/length(u) -->
+<!-- ``` -->
+
+<!-- No algoritmo acima, fixamos o número de amostras de $g$ (2500), e com -->
+<!-- isso, obtivemos uma amostra de apenas `r length(x)` valores de $f$ -->
+<!-- (porque a taxa de aceitação foi de `r round(length(x)/length(y),2)*100`%). -->
+<!-- No entanto, na maioria das vezes, o que queremos é gerar um número fixo -->
+<!-- $N$ de valores da distribuição de interesse $f$. Como não temos como -->
+<!-- prever antecipadamente a taxa de aceitação para cada simulação, então -->
+<!-- precisamos de uma estrutura de repetição como o `while()`, que executará -->
+<!-- o algoritmo o número de vezes necessário para gerar uma amostra com -->
+<!-- exatamente $N$ valores. -->
+
+<!-- ```{r} -->
+<!-- ## Simula 1000 valores de f -->
+<!-- N <- 1000L -->
+<!-- x <- numeric(0) -->
+<!-- while(length(x) < N) { -->
+<!--     y <- runif(1, -1, 1) -->
+<!--     u <- runif(1) -->
+<!--     r <- f(y)/(M * g(y)) -->
+<!--     if(u < r) { -->
+<!--         ## Não é a forma mais eficiente! -->
+<!--         x <- c(x, y) -->
+<!--     } -->
+<!-- } -->
+<!-- length(x) -->
+<!-- ``` -->
+
+<!-- Podemos então verificar se a simulação gerou de fato valores de $f$ -->
+<!-- através de um histograma e da comparação das distribuições acumuladas -->
+<!-- da amostra (empírica) e teórica (definido a expressão analítica para a -->
+<!-- acumulada $F_X(x)$). -->
+
+<!-- ```{r compara, fig.show='hold'} -->
+<!-- par(mfrow = c(1, 2)) -->
+<!-- hist(x) -->
+<!-- Fx <- function(x) 0.5 * (x^3 + 1) -->
+<!-- plot(ecdf(x)) -->
+<!-- curve(Fx, add = TRUE, from = -1, to = 1, col = 2) -->
+<!-- legend("right", legend = c("Empírica", "Teórica"), -->
+<!--        lty = 1, col = 1:2, bty = "n") -->
+<!-- par(mfrow = c(1, 1)) -->
+<!-- ``` -->
+
+### Exemplo (Beta)
+
+<!-- Robert e Casella -->
+
+Considere que deseja-se gerar valores de uma distribuição
+$\text{Beta}(\alpha = 2.7, \beta = 6.3)$ (e também suponha que não
+dispomos de um gerador como o que já existe no R pela função `rbeta()`).
+
+```{r beta}
+curve(dbeta(x, 2.7, 6.3), from = 0, to = 1)
+```
+
+A distribuição proposta mais natural seria uma Uniforme entre 0 e 1, que
+possui densidade 1 (para todo $x$).
+
+```{r propbeta1}
+curve(dbeta(x, 2.7, 6.3), from = 0, to = 1, col = 4)
+curve(1 + 0 * x, from = 0, to = 1, add = TRUE, lty = 2)
+legend("topright", legend = c("f(x)", "g(x)"),
+       lty = c(1, 2), col = c(4, 1), bty = "n")
+```
+
+Como podemos achar o valor de $M$ que satisfaça $f(x) \leq M g(x)$? Já
+vimos que esse valor pode ser determinado por
+$$
+M \geq \max_x \frac{f(x)}{g(x)}
+$$
+O valor máximo da densidade de $g(x)$ é fácil de ser encontrado, pois
+nesse caso é 1 para todo $x$. Como fazer então para determinar o valor
+máximo da $\text{Beta}(2.7, 6.3)$? Temos duas opções:
+
+1. Usar a expressão da **moda** da distribuição (se existir)
+2. Achar esse valor máximo por otimização numérica
+
+No caso da distribuição Beta, existe uma expressão fechada para de
+determinar a moda, que é $\frac{\alpha-1}{\alpha+\beta-2}$. Portanto
+seria fácil nesse caso determinar o valor máximo da densidade por meio
+de
+
+```{r}
+## Define parâmetros
+alfa <- 2.7; beta <- 6.3
+## A moda é
+(moda <- (alfa - 1)/(alfa + beta - 2))
+## A densidade nesse ponto é então
+dbeta(moda, alfa, beta)
+```
+
+No entanto, em diversas situações, não temos uma expressão fechada para
+a moda ou ela não pode ser determinada analiticamente. Por isso, nesses
+casos, podemos encontrar o valor máximo da função através de
+**otimização numérica** dessa função. Esse método serve para qualquer
+distribuição (na verdade qualquer função) onde deseja-se obter o ponto
+de máxima.
+
+No R, podemos passar a função que desejamos maximizar para a função
+`optimize()`. Aqui usaremos a função `dbeta()` que já implementa a
+expressão de densidade da Beta, mas poderíamos também escrever essa
+função manualmente e usá-la na otimização.
+
+```{r}
+(max.beta <- optimize(f = function(x) {dbeta(x, alfa, beta)/dunif(x)},
+                      interval = c(0, 1), maximum = TRUE))
+```
+
+Note que a função retorna dois valores: o ponto onde foi encontrada a
+densidade máxima (igual a moda), e o valor da densidade nesse ponto.
+Veja que os resultados são virtualmente os mesmos dos anteriores obtidos
+de forma analítica. Por ser uma forma mais geral, prosseguiremos com o
+valor de densidade máximo obtido dessa forma. Agora podemos então
+determinar o valor de $M$, como sendo
+
+```{r}
+(M <- max.beta$objective/1)
+```
+
+Assim, ficamos com a distribuição proposta $Mg(x)$ como pode ser visto
+abaixo.
+
+```{r propbeta2}
+curve(dbeta(x, alfa, beta), from = 0, to = 1, col = 4)
+curve(1 + 0 * x, from = 0, to = 1, add = TRUE, lty = 2)
+curve(M * 1 + 0 * x, add = TRUE, lty = 2, lwd = 2)
+legend("right", legend = c("f(x)", "g(x)", "M g(x)"),
+       lty = c(1, 2, 2), col = c(4, 1, 1), lwd = c(1, 1, 2), bty = "n")
+```
+
+Seguindo com o algoritmo de aceitação e rejeição, a ideia é a mesma do
+exemplo anterior, mudando as funções apropriadamente.
+
+```{r}
+## Define funções
+f <- function(x) dbeta(x, alfa, beta)
+g <- function(x) 1 + 0 * x
+
+## Simula com número fixo
+Nsim <- 2500
+## Amostra da proposta U(0,1)
+y <- runif(Nsim)
+## Amostra u também de U(0,1)
+u <- runif(Nsim)
+## Calcula a razão
+r <- f(y)/(M * g(y))
+## x serão os valores de y onde u < r
+x <- y[u < r]
+## Aceitados
+ua <- u[u < r]
+## Rejeitados
+ur <- u[u >= r]
+```
+
+Assim como no exemplo anterior, podemos visualizar os pontos amsotrados
+que foram aceitados e aqueles rejeitados.
+
+```{r betaac}
+curve(dbeta(x, alfa, beta), from = 0, to = 1, col = 4)
+curve(M * 1 + 0 * x, from = 0, to = 1, add = TRUE, lty = 2, lwd = 2)
+points(x, ua * M * g(x), col = 3)
+points(y[u >= r], ur * M * g(y[u >= r]), col = 2)
+```
+
+Lembre-se que a taxa de aceitação teórica é $1/M$, e neste exemplo temos
+
+```{r}
+## Quantos foram aceitados
+length(x)/length(y)
+## Taxa (teorica) de aceitacao é
+1/M
+```
+
+Note pelo gráfico acima que a maior parte dos pontos amostrados não
+são aceitos (veja também a baixa taxa de aceitação). Isso mostra que
+estamos disperdisando a maior parte do tempo computacional amostrando
+pontos que não serão aceitos.
+
+Devemos então pensar em uma outra distribuição proposta, com a intenção
+de melhorar (aumentar) a taxa de aceitação. Naturalmente, uma
+distribuição proposta com um formato mais próximo daquele que queremos
+amostrar seria possivelmente mais eficiente.
+
+Considere então como uma nova distribuição proposta uma $\text{Beta}(2,
+6)$ (ainda queremos amostrar de uma $\text{Beta}(2.7, 6.3)$).
+
+```{r propbeta3}
+curve(dbeta(x, 2.7, 6.3), from = 0, to = 1, col = 4, ylim = c(0, 3))
+curve(dbeta(x, 2, 6), from = 0, to = 1, add = TRUE, lty = 2)
+legend("topright", legend = c("f(x)", "g(x)"),
+       lty = c(1, 2), col = c(4, 1), bty = "n")
+```
+
+Com o formato mais próximo da proposta, certamente a taxa de aceitação
+será maior. Precisamos novamente encontrar o valor $M$ que satisfaça
+$f(x) \leq M g(x)$. Já vimos que podemos usar a moda, mas vamos usar o
+método geral de encontrar a densidade máxima das duas distribuições por
+otimização numérica. Aqui também temos duas opções:
+
+1. Encontrar o máximo de cada função separadamente e fazer a razão entre
+   eles
+2. Encontrar diretamente o máxima da razão entre as duas distribuições
+
+A segunda abordagem é mais direta e levará ao mesmo resultado da
+primeira, mas só precisaremos fazer uma otimização. Portanto
+prosseguimos com
+
+```{r}
+(M <- optimize(f = function(x) {dbeta(x, 2.7, 6.3)/dbeta(x, 2, 6)},
+               interval = c(0, 1), maximum = TRUE)$objective)
+```
+
+Note que esse já é o valor de $M$, e ficamos com a seguinte situação
+
+```{r propbeta4}
+curve(dbeta(x, 2.7, 6.3), from = 0, to = 1, col = 4, ylim = c(0, 5))
+curve(dbeta(x, 2, 6), from = 0, to = 1, add = TRUE, lty = 2)
+curve(M * dbeta(x, 2, 6), add = TRUE, lty = 2, lwd = 2)
+legend("topright", legend = c("f(x)", "g(x)", "M g(x)"),
+       lty = c(1, 2, 2), col = c(4, 1, 1), lwd = c(1, 1, 2), bty = "n")
+```
+
+Agora fazemos o mesmo processo para um número fixo de simulações
+
+```{r}
+## Define funções
+f <- function(x) dbeta(x, 2.7, 6.3)
+g <- function(x) dbeta(x, 2, 6)
+
+## Simula
+Nsim <- 2500
+## Amostra da proposta
+y <- rbeta(Nsim, 2, 6)
+## Amostra da U(0,1)
+u <- runif(Nsim)
+r <- f(y)/(M * g(y))
+x <- y[u < r]
+ua <- u[u < r]
+ur <- u[u >= r]
+```
+
+O resultado dos pontos aceitados agora pode ser visto abaixo.
+
+```{r betaac2}
+curve(dbeta(x, 2.7, 6.3), from = 0, to = 1, col = 4, ylim = c(0, 5))
+curve(M * dbeta(x, 2, 6), from = 0, to = 1, add = TRUE, lty = 2, lwd = 2)
+points(x, ua * M * g(x), col = 3)
+points(y[u >= r], ur * M * g(y[u >= r]), col = 2)
+```
+
+Veja que muitos mais pontos agora são aceitos. De fato, a taxa de
+aceitação usando essa nova distribuição proposta é bem maior quando
+comparada à taxa anterior com a uniforme como proposta.
+
+```{r}
+## Quantos foram aceitados
+length(x)/length(y)
+## Taxa (teorica) de aceitacao é
+1/M
+```
+
+Novamente, podemos verificar a distribuição da amostra gerada através de
+um histograma, e (preferencialmente), através das distribuições
+acumuladas empírica e teórica.
+
+```{r betaconf, fig.show='hold'}
+par(mfrow = c(1, 2))
+hist(x, freq = FALSE); lines(density(x), col = 2)
+plot(ecdf(x))
+curve(pbeta(x, 2.7, 6.3), add = TRUE, from = 0, to = 1, col = 2)
+legend("right", legend = c("Empírica", "Teórica"),
+       lty = 1, col = 1:2, bty = "n")
+par(mfrow = c(1, 1))
+```
+
+# Métodos sequenciais
+
+Em situações em que $\theta$ (ou $X$) tem dimensão elevada, o
+procedimento a ser apresentado é geralmente mais eficiente para gerar
+quantidades aleatórias.
+
+O ponto crítico do método MCMC está na formulação de probabilidades de
+transição apropriadas. O algoritmo de Metropolis-Hastings é uma forma
+conveniente de obter uma amostra simulada, a partir do uso de uma cadeia
+de Markov generalizada para um espaço de estado contínuo.
+
+Segue abaixo uma descrição das probabilidades de transição especificadas
+conforme algumas das alternativas que podem ser adotadas para
+implementar o algoritmo de Metropolis-Hastings.
+
+O procedimento mais geral será visto na sequência.
+
+## Metropolis-Hastings
+
+O algoritmo de Metropolis-Hastings gera uma cadeia de Markov $\{X_0,
+X_1, \ldots\}$ conforme definido abaixo.
+
+1. Defina uma distribuição proposta $g(\cdot|X_t)$
+2. Defina um valor inicial $X_0$, dentro do domínio de $g$
+3. Repita os seguintes passos até convergir para uma distribuição
+   estacionária:
+   a. Gere um valor **candidato** $Y=X_{t+1}$ a partir de $g(\cdot|X_t)$
+   (note que o valor candidato é dependente do valor anterior)
+   b. Gere $U$ de uma $\text{U}(0,1)$
+   c. Calcule a taxa de aceitação
+   $$
+   \alpha(X_t, Y) = \min
+   \left( \frac{f(Y)g(X_t|Y)}{f(X_t)g(Y|X_t)}, 1 \right)
+   $$
+   Se
+   $$
+   U \leq \alpha(X_t, Y)
+   $$
+   aceite $Y$ e faça $X_{t+1}=Y$; caso contrário faça $X_{t+1}=X_t$
+
+Observações:
+
+- Note que só precisamos conhecer o núcleo da densidade alvo $f$, ou
+seja, não é necessário saber a constante de integração (ou de
+normalização), uma vez que, mesmo sem essa constante, a densidade de $f$
+será proporcional.
+- Se a distribuição proposta for adequada, a "cadeia" de
+  Metropolis-Hastings irá convergir para uma distribuição estacionária
+  única $\pi$.
+- O algoritmo foi desenvolvido de forma que a distribuição estacionária
+  da cadeia é de fato a distribuição alvo $f$.
+
+## Metropolis Random Walk
+
+O algoritmo de Metropolis-Hastings é uma generalização do algoritmo de
+Metropolis *random walk*. Nesse caso, a particularização é que no
+algoritmo de Metropolis, a distribuição proposta deve ser
+obrigatoriamente **simétrica**.
+
+Sendo assim, se $g(\cdot|X_t)$ é simétrica, podemos dizer que
+
+$$
+g(X_t|Y) = g(Y|X_t)
+$$
+
+Portanto, a taxa de aceitação fica agora simplificada
+
+$$
+\begin{aligned}
+\alpha(X_t, Y) &= \min
+\left( \frac{f(Y)g(X_t|Y)}{f(X_t)g(Y|X_t)}, 1 \right) \\
+ &= \min
+\left( \frac{f(Y)}{f(X_t)}, 1 \right)
+\end{aligned}
+$$
+
+Sendo assim, se um valor candidato $Y = X_{t+1}$ é gerado a partir de
+uma distribuição proposta simétrica, então a probabilidade da cadeia se
+mover de $X_t$ para $X_{t+1}$ depende apenas da distância entre eles,
+i.e. $g(X_{t+1}|X_t) = g(|X_{t+1} - X_t|)$. Então, a cada iteração, um
+increment $Z$ é gerado a partir de $g(\cdot)$, e $Y$ é definido como $Y
+= X_t + Z$ (veja que é a própria definição de random walk).
+
+O incremento aleatório $Z$ pode ser, por exemplo, normal com média zero,
+de forma que o valor candidadto é $Y|X_t \sim \text{N}(X_t, \sigma^2)$,
+para algum $\sigma^2 > 0$ constante. No enatnto, o incremento $Z$ também
+pode ser proveniente de uma distribuição uniforme no intervalo
+$(-\delta, \delta)$, por exemplo.
+
+Assim, o algoritmo de Metropolis random walk pode ser definido da
+seguinte forma:
+
+1. Defina uma distribuição proposta $g$ **simétrica**
+2. Defina um valor inicial $X_0$, dentro do domínio de $f$
+3. Repita os seguintes passos até convergir para uma distribuição
+   estacionária:
+   a. Gere um valor **candidato** $Y \equiv X_{t+1} = X_t+Z$
+   b. Gere $U$ de uma $\text{U}(0,1)$
+   c. Calcule a taxa de aceitação
+   $$
+   \alpha(X_t, Y) = \min
+   \left( \frac{f(Y)}{f(X_t)}, 1 \right)
+   $$
+   Se
+   $$
+   U \leq \alpha(X_t, Y)
+   $$
+   aceite $Y$ e faça $X_{t+1}=Y$; caso contrário faça $X_{t+1}=X_t$
+
+### Exemplo com uniforme
+
+Suponha que se deseja gerar valores de uma normal padrão, usando como
+distribuição proposta uma $\text{U}(-\delta, \delta)$.
+
+1. Simule $z \sim \text{U}(-\delta, \delta)$ e faça $Y = X_t+Z$
+2. Calcule a probabilidade de aceitação $\alpha(X_t, Y) = \min \left(
+   \frac{f(Y)}{f(X_t)}, 1 \right)$, onde $f$ é a densidade da normal
+   padrão
+3. Simule $u \sim \text{U}(0,1)$. Se $u \leq \alpha(X_t, Y)$, então
+   $X_{t+1}=Y$; caso contrário $X_{t+1}=X_t$
+
+```{r}
+f <- function(x) dnorm(x, 0, 1)
+delta <- 0.5
+N <- 500
+x <- numeric(N)
+x[1] <- 0
+set.seed(2019-10-11)
+for(i in 2:N) {
+    z <- runif(1, -delta, delta)
+    y <- x[i - 1] + z
+    alpha <- min(f(y)/f(x[i - 1]), 1)
+    u <- runif(1)
+    if(u <= alpha) {
+        x[i] <- y
+    } else {
+        x[i] <- x[i - 1]
+    }
+}
+plot(x, type = "l")
+```
+
+Veja o que acontece se aumentarmos o valor de $\delta$
+
+```{r}
+f <- function(x) dnorm(x, 0, 1)
+delta <- 2
+N <- 500
+x2 <- numeric(N)
+x2[1] <- 0
+set.seed(2019-10-11)
+for(i in 2:N) {
+    z <- runif(1, -delta, delta)
+    y <- x2[i - 1] + z
+    alpha <- min(f(y)/f(x2[i - 1]), 1)
+    u <- runif(1)
+    if(u <= alpha) {
+        x2[i] <- y
+    } else {
+        x2[i] <- x2[i - 1]
+    }
+}
+plot(x2, type = "l")
+```
+
+Compara a distribuição das amostras com a distribuição teórica
+
+```{r, fig.show='hold'}
+par(mfrow = c(1, 2))
+plot(ecdf(x))
+curve(pnorm(x), add = TRUE, col = 2)
+plot(ecdf(x2))
+curve(pnorm(x), add = TRUE, col = 2)
+par(mfrow = c(1, 1))
+```
+
+Comparando as duas cadeias
+
+```{r, fig.show='hold'}
+par(mfrow = c(2, 1))
+plot(x, type = "l", main = expression(delta == 0.5))
+plot(x2, type = "l", main = expression(delta == 2))
+par(mfrow = c(1, 1))
+```
+
+No primeiro caso, os valores propostos ficam muito próximos do valor
+atual, e quase sempre serão aceitos. No entanto, levará muitas iterações
+até o algoritmo cobrir todo o espaço de $X$.
+
+No segundo caso, a taxa de rejeição é excessivamente alta e a cadeia se
+movimenta muito pouco, pois os valores propostos podem ficar muito longe
+do atual.
+
+Nas duas situações o algoritmo pode ser ineficiente. Na prática temos
+que testar vários valores de $\delta$ e monitorar a taxa de aceitação.
+A partir disso surge um importante conceito em amostradores MCMC:
+*tuning*, ou "refinamento". Em teoria, não existe um valor ideal para
+$\delta$, ambas as cadeias irão eventualmente convergir para a
+distribuição alvo (normal nesse caso). No entanto, a velocidade de
+convergência e a quantidade de espaço amostral explorado dependem de
+$\delta$. Portanto, o amostrador pode ser refinado para melhorar sua
+eficiência.
+
+Veja também que no primeiro caso, como os valores propostos são mais
+próximos do atual, eles também terão uma correlação maior.
+
+```{r, fig.show='hold'}
+par(mfrow = c(1, 2))
+acf(x, lag.max = 50)
+acf(x2, lag.max = 50)
+par(mfrow = c(1, 1))
+```
+
+```{r, include=FALSE}
+## Ilustrando o procedimento (com um exemplo bem simples). Obter
+## realizações de uma distribuição Normal(0, 1). Definir a distribuição
+## candidata qX(x,.) como sendo a uniforme(-delta, delta) que é
+## simétrica.
+
+qX <- function(delta, xi){
+    ## delta e xi: escalares parâmetros da distribuição candidata.
+    ## A distribuição candidata é a uniforme.
+    ## Retorna uma realização da distribuição candidata.
+    runif(1, xi-delta, xi+delta)
+}
+rwsampler1 <- function(nsim, x1, delta, mu, sigma,
+                       plot=FALSE, go=c("click","enter","none")){
+    out <- vector(mode="numeric", length=nsim)
+    out[1] <- x1
+    for(i in 2:nsim){
+        ## Realização da distribuição alvo.
+        if(plot & go[1]=="click"){
+            can <- locator(n=1)$x
+        } else {
+            can <- qX(delta, xi=out[i-1])
+        }
+        dn1 <- dnorm(can, mu, sigma)
+        dn0 <- dnorm(out[i-1], mu, sigma)
+        ratio <- dn1/dn0
+        u <- runif(1)
+        if(u<ratio) out[i] <- can else out[i] <- out[i-1]
+        if(plot & nsim<=20){
+            curve(dnorm(x, mu, sigma), mu-4*sigma, mu+4*sigma,
+                  ylab="densidade")
+            curve(dunif(x, out[i-1]-delta, out[i-1]+delta), add=TRUE, lty=2)
+            du <- dunif(can, out[i-1]-delta, out[i-1]+delta)
+            ## segments(can, du, can, 0, col=4)
+            segments(can, dn1, can, 0, col=2);
+            segments(out[i-1], dn0, out[i-1], 0, col=4);
+            cex <- 2.5; col="yellow"
+            points(can, dn1, pch=19, cex=cex, col="green");
+            points(out[i-1], dn0, pch=19, cex=cex, col=col);
+            ## points(can, dn1, pch="N");
+            ## points(out[i-1], dn0, pch="n");
+            text(can, dn1, expression(f[X]));
+            text(out[i-1], dn0, expression(f[X]));
+            ex <- substitute(frac(f[X](x[i]),
+                                  f[X](x[i-1]))*" = "*
+                             frac(dn1, dn0)==ratio,
+                             list(dn1=dn1, dn0=dn0, ratio=ratio))
+            r <- substitute("u = "~u<ratio,
+                            list(ratio=ratio, u=u))
+            mtext(ex, side=3, line=1, adj=0)
+            mtext(r, side=3, line=2, adj=1)
+            mtext(sprintf("então %s", ifelse(u<ratio, "aceita", "rejeita")),
+                  side=3, line=1, adj=1)
+            switch(go[1],
+                   click=locator(n=1),
+                   console=readline(prompt="Press [enter] to continue"),
+                   none=Sys.sleep(0.5))
+        }
+    }
+    return(out)
+}
+```
+
+```{r, include=FALSE, eval=FALSE}
+mu <- 0; sigma <- 1
+x <- rwsampler1(nsim=10, x1=-1, delta= .5, mu, sigma, plot=TRUE,
+                go="console")
+## x <- rwsampler1(nsim=10, x1=-1, delta= .5, mu, sigma, plot=TRUE,
+##                 go="click")
+x <- rwsampler1(nsim=10, x1=-1, delta=2, mu, sigma, plot=TRUE,
+                go="console")
+## x <- rwsampler1(nsim=10, x1=-1, delta=2, mu, sigma, plot=TRUE,
+##                 go="click")
+```
+
+```{r, include=FALSE, results='hide', cache=TRUE}
+animation::saveHTML(
+               rwsampler1(nsim = 20, x1 = -1, delta = 2, mu = 0,
+                          sigma = 1, plot = TRUE, go = "none"),
+               img.name = "rwsampler1-",
+               imgdir = "figures/rwsampler1/",
+               htmlfile = "rwsampler1.html",
+               autobrowse = FALSE,
+               verbose = FALSE,
+               ani.width = 600,
+               ani.height = 600)
+```
+
+Veja como fica uma animação com o método em funcionamento:
+
+```{r, echo=FALSE, results='asis', out.extra='style="display:block; margin: auto;" frameborder="0"'}
+knitr::include_url("rwsampler1.html", height = "715px")
+```
+
+VEJA também o código-fonte para outro exemplo!
+
+```{r, eval=FALSE, include=FALSE}
+## Simular de uma mistura de normais. Normais com variância 1 e mistura
+## 1:1.
+k <- 0.5
+curve(k*dnorm(x, 0, 1)+(1-k)*dnorm(x, 7, 1), -3, 10)
+curve(0.1*dunif(x), add=TRUE, col=2, n=1024)
+
+rwsampler2 <- function(nsim, x1, delta,
+                       plot=FALSE, go=c("click","enter","none")){
+    out <- vector(mode="numeric", length=nsim)
+    out[1] <- x1
+    for(i in 2:nsim){
+        ## Realização da distribuição alvo.
+        if(plot & go[1]=="click"){
+            can <- locator(n=1)$x
+        } else {
+            can <- qX(delta, xi=out[i-1])
+        }
+        dn1 <- k*dnorm(can, 0, 1)+(1-k)*dnorm(can, 7, 1)
+        dn0 <- k*dnorm(out[i-1], 0, 1)+(1-k)*dnorm(out[i-1], 7, 1)
+        ratio <- dn1/dn0
+        u <- runif(1)
+        if(u<ratio) out[i] <- can else out[i] <- out[i-1]
+        if(plot & nsim<=20){
+            curve(k*dnorm(x, 0, 1)+(1-k)*dnorm(x, 7, 1), -3, 10,
+                  ylab="densidade")
+            curve(0.3*dunif(x, out[i-1]-delta, out[i-1]+delta),
+                  add=TRUE, lty=2)
+            du <- dunif(can, out[i-1]-delta, out[i-1]+delta)
+            ## segments(can, du, can, 0, col=4)
+            segments(can, dn1, can, 0, col=2);
+            segments(out[i-1], dn0, out[i-1], 0, col=4);
+            cex <- 2.5; col="yellow"
+            points(can, dn1, pch=19, cex=cex, col="green");
+            points(out[i-1], dn0, pch=19, cex=cex, col=col);
+            ## points(can, dn1, pch="N");
+            ## points(out[i-1], dn0, pch="n");
+            text(can, dn1, expression(f[X]));
+            text(out[i-1], dn0, expression(f[X]));
+            ex <- substitute(frac(f[X](x[i]),
+                                  f[X](x[i-1]))*" = "*
+                             frac(dn1, dn0)==ratio,
+                             list(dn1=dn1, dn0=dn0, ratio=ratio))
+            r <- substitute("u = "~u<ratio,
+                            list(ratio=ratio, u=u))
+            mtext(ex, side=3, line=1, adj=0)
+            mtext(r, side=3, line=2, adj=1)
+            mtext(sprintf("então %s", ifelse(u<ratio, "aceita", "rejeita")),
+                  side=3, line=1, adj=1)
+            switch(go[1],
+                   click=locator(n=1),
+                   console=readline(prompt="Press [enter] to continue"),
+                   none=Sys.sleep(0.5))
+        }
+    }
+    return(out)
+}
+
+x <- rwsampler2(nsim=20, x1=1, delta=2, plot=TRUE, go="console")
+x <- rwsampler2(nsim=20, x1=1, delta=1, plot=TRUE, go="console")
+x <- rwsampler2(nsim=20, x1=1, delta=4, plot=TRUE, go="console")
+
+##----------------------------------------------------------------------
+## Muitos valores.
+
+## Janela estreita -----------------------------------------------------
+set.seed(123)
+x <- rwsampler2(nsim=20000, x1=1, delta=1, plot=FALSE)
+
+par(mfrow=c(2,2))
+plot(x, type="l")        ## Traço da cadeia completa.
+plot(x[1:100], type="l") ## Traço do começo da cadeia.
+acf(x)                   ## Mostra que a cadeia não é independente.
+plot(ecdf(x))            ## Acumulada teórica vs empírica.
+curve(k*pnorm(x, 0, 1)+(1-k)*pnorm(x, 7, 1), add=TRUE, col=2); layout(1)
+prop.table(table(x<3.5))
+
+## Janela larga --------------------------------------------------------
+set.seed(123)
+x <- rwsampler2(nsim=20000, x1=1, delta=4, plot=FALSE)
+
+par(mfrow=c(2,2))
+plot(x, type="l")        ## Traço da cadeia completa.
+plot(x[1:100], type="l") ## Traço do começo da cadeia.
+acf(x)                   ## Mostra que a cadeia não é independente.
+plot(ecdf(x))            ## Acumulada teórica vs empírica.
+curve(k*pnorm(x, 0, 1)+(1-k)*pnorm(x, 7, 1), add=TRUE, col=2); layout(1)
+prop.table(table(x<3.5))
+```
+
+### Exemplo com normal
+
+Considere gerar valores de uma distribuição $t$ de Student com $\nu$
+graus de liberdade, usando como distribuição proposta uma $\text{N}(X_t,
+\sigma)$.
+
+```{r}
+rw.Metropolis <- function(nu, sigma, x0, N) {
+    f <- function(x, nu) dt(x, nu)
+    x <- numeric(N)
+    x[1] <- x0
+    u <- runif(N)
+    for(i in 2:N) {
+        z <- rnorm(1, mean = 0, sd = sigma)
+        y <- x[i - 1] + z
+        alpha <- min(f(y, nu)/f(x[i - 1], nu), 1)
+        u <- runif(1)
+        if(u <= alpha) {
+            x[i] <- y
+        } else {
+            x[i] <- x[i - 1]
+        }
+    }
+    return(x)
+}
+```
+
+Supondo que queremos gerar uma distribuição $t(\nu = 4)$. Vamos fazer
+isso com valores diferentes de $\sigma$ da distribuição normal proposta.
+
+```{r, fig.show='hold'}
+nu <- 4
+N <- 2000
+sigma <- c(.05, .5, 2,  16)
+x0 <- 25
+rw1 <- rw.Metropolis(nu, sigma[1], x0, N)
+rw2 <- rw.Metropolis(nu, sigma[2], x0, N)
+rw3 <- rw.Metropolis(nu, sigma[3], x0, N)
+rw4 <- rw.Metropolis(nu, sigma[4], x0, N)
+## Resultado das cadeias
+par(mfrow = c(2, 2))
+refline <- qt(c(.025, .975), df = nu)
+rw <- cbind(rw1, rw2, rw3,  rw4)
+for (j in 1:4) {
+    plot(rw[, j], type = "l",
+         main = bquote(sigma == .(round(sigma[j], 3))),
+         ylab = "X", ylim = range(rw[, j]))
+    abline(h = refline)
+}
+par(mfrow = c(1, 1))
+```
+
+- Com $\sigma = 0.05$ a probabilidade de aceitação $\alpha$ tende a ser
+  grande, portanto quase todos os valores candidatos são aceitos. Os
+  incrementos são pequenos e a cadeia não converge para a distribuição
+  estacionária.
+- Com $\sigma = 0.5$, converge lentamente para a distribuição
+  estacionária. Isso mostra que é importante definir um período de
+  *burn-in* ou aquecimento da cadeia, descartando os primeiros valores
+  gerados.
+- Com $\sigma = 2$, a cadeia possui uma boa mistura e converge
+  rapidamente para a distribuição estacionária.
+- Com $\sigma = 16$, a probabilidade de aceitação $\alpha$ é pequena, e
+  a maioria dos valores candidatos são rejeitados. A cadeia converge,
+  mas é ineficiente.
+
+## Amostrador independente
+
+Outro caso particular do método geral de Metropolis-Hastings é o chamado
+amostrador independente. Nesse caso, a particularidade é que a
+distribuição proposta não depende mais de valores anteriores da cadeia,
+ou seja,
+
+$$
+g(Y|X_t) = g(Y)
+$$
+
+Dessa forma, a probabilidade de aceitação simplifica para
+
+$$
+\begin{aligned}
+\alpha(X_t, Y) &= \min
+\left( \frac{f(Y)g(X_t|Y)}{f(X_t)g(Y|X_t)}, 1 \right) \\
+ &= \min
+\left( \frac{f(Y)g(X_t)}{f(X_t)g(Y)}, 1 \right) \\
+ &= \min
+\left( \frac{f(Y)}{f(X_t)} \bigg/ \frac{g(Y)}{g(X_t)}, 1 \right)
+\end{aligned}
+$$
+
+Note que, embora os valores de $Y=X_{t+1}$ sejam gerados de forma
+independente, a cadeia resultante **não será iid**, já que a
+probabilidade de aceitação ainda depende de $X_t$.
+
+O amostrador independente é de fácil implementação, mas tende a
+funcionar bem apenas quando a distribuição proposta é parecida (em
+forma) com a distribuição alvo.
+
+Assim, o método do amostrador independente pode ser definido da seguinte
+forma:
+
+1. Defina uma distribuição proposta $g$ **similar** à distribuição alvo
+2. Defina um valor inicial $X_0$, dentro do domínio de $g$
+3. Repita os seguintes passos até convergir para uma distribuição
+   estacionária:
+   a. Gere um valor **candidato** $Y$ a partir de $g$
+   b. Gere $U$ de uma $\text{U}(0,1)$
+   c. Calcule a taxa de aceitação
+   $$
+   \alpha(X_t, Y) = \min
+   \left( \frac{f(Y)g(X_t)}{f(X_t)g(Y)}, 1 \right)
+   $$
+   Se
+   $$
+   U \leq \alpha(X_t, Y)
+   $$
+   aceite $Y$ e faça $X_{t+1}=Y$; caso contrário faça $X_{t+1}=X_t$
+
+### Exemplo (beta)
+
+```{r}
+## Gerar números de uma distribuição Beta usando a distribuição Uniforme
+## e/ou normal.
+
+## Distribuição alvo: X ~ Beta(2, 3)
+f <- function(x) dbeta(x, shape1 = 2, shape2 = 3)
+curve(f, 0, 1)
+## Distribuição candidata (proposal): X ~ Uniforme(0,1)
+g <- function(x) dunif(x, 0, 1)
+
+## Gráfico das densidados sobrepostas.
+curve(f, 0, 1)
+curve(g, add=TRUE, col=2)
+legend("topright", legend=c("Alvo", "Candidata"), lty=1, col=1:2,
+       bty="n")
+
+N <- 500
+x <- numeric(N)
+x[1] <- 0.5
+set.seed(2019-10-11)
+for(i in 2:N) {
+    y <- runif(1) # Distribuição proposta
+    alpha <- min((f(y) * g(x[i - 1])) / (f(x[i - 1]) * g(y)), 1)
+    u <- runif(1)
+    if(u <= alpha) {
+        x[i] <- y
+    } else {
+        x[i] <- x[i - 1]
+    }
+}
+
+## Cadeia
+plot(x, type = "l")
+
+## Compara com teorica
+plot(ecdf(x))
+curve(pbeta(x, 2, 3), add = TRUE, col = 2)
+```
+
+
+```{r, include=FALSE}
+## Alvo: Beta.
+## Canditada: Uniforme.
+iidsampler1 <- function(nsim, x1, plot=FALSE,
+                        go=c("click","enter","none")){
+    out <- vector(mode="numeric", length=nsim)
+    ## Valor para iniciar a cadeia.
+    out[1] <- x1
+    for(i in 2:nsim){
+        ## Realização da distribuição alvo.
+        if(plot & go[1]=="click"){
+            y <- locator(n=1)$x
+        } else {
+            y <- runif(1)
+        }
+        ## Cálculo da razão de aceitação.
+        dg1 <- dbeta(y, 2, 3)
+        dn1 <- dunif(y)
+        dg0 <- dbeta(out[i-1], 2, 3)
+        dn0 <- dunif(out[i-1])
+        ratio <- (dg1/dg0)/(dn1/dn0)
+        u <- runif(1)
+        if(u<ratio){
+            ## Se sim, cadeia ganha novo valor.
+            out[i] <- y
+        } else {
+            ## Se não, cadeia recebe o último.
+            out[i] <- out[i-1]
+        }
+        ## Parte de representação gráfica do método.
+        if(plot & nsim<=20){
+            ## Curvas.
+            curve(dbeta(x, 2, 3), 0, 1, xlim=c(0, 1),
+                  ylab="densidade");
+            curve(dunif(x), add=TRUE, lty=2);
+            ## Lengendas.
+            legend("topright",
+                   legend=c(expression(f[X]*" ~ Beta"),
+                       expression(f[Y]*" ~ Unif")),
+                   lty=c(1,2), bty="n")
+            legend("right",
+                   legend=c(expression("Candidato em"*~i),
+                       expression("Valor em"*~i-1)),
+                   lty=1, col=c(2,4), bty="n")
+            ## Segmentos da base até os valores nas funções.
+            segments(y, dg1, y, 0, col=2, lty=1);
+            segments(y, dn1, y, 0, col=2, lty=1);
+            segments(out[i-1], dg0, out[i-1], 0, col=4, lty=1);
+            segments(out[i-1], dn0, out[i-1], 0, col=4, lty=1);
+            ## Pontos sobre as funções.
+            cex <- 2.5; col="yellow"
+            points(y, dg1, pch=19, cex=cex, col="green");
+            points(y, dn1, pch=19, cex=cex, col=col);
+            points(out[i-1], dg0, pch=19, cex=cex, col="green");
+            points(out[i-1], dn0, pch=19, cex=cex, col=col);
+            ## Rótulos dos pontos.
+            text(y, dg1, labels=expression(f[X]));
+            text(y, dn1, labels=expression(f[Y]));
+            text(out[i-1], dg0, expression(f[X]));
+            text(out[i-1], dn0, expression(f[Y]));
+            text(c(y, out[i-1]), 0,
+                 labels=c(expression(x[i]), expression(x[i-1])),
+                 pos=4)
+            ## Anotações matemáticas.
+            L <- list(dg1=dg1, dg0=dg0, dn1=dn1,
+                      dn0=dn0, num=dg1/dg0, den=dn1/dn0,
+                      ratio=ratio)
+            L <- lapply(L, round, digits=3)
+            ex <- substitute(frac(f[X](x[i]), f[X](x[i-1]))/
+                             frac(f[Y](x[i]), f[Y](x[i-1]))*" = "*
+                             frac(dg1, dg0)/frac(dn1, dn0)*" = "*
+                             num/den==ratio, L)
+            r <- substitute("u = "~u<ratio,
+                            lapply(list(ratio=ratio, u=u),
+                                   round, digits=3))
+            mtext(ex, side=3, line=1, adj=0)
+            mtext(r, side=3, line=2, adj=1)
+            mtext(ifelse(u<ratio,
+                         expression(Aceita~x[i]),
+                         expression(Repete~x[i-1])),
+                  side=3, line=1, adj=1)
+            switch(go[1],
+                   ## Avança por cliques do mouse.
+                   click=locator(n=1),
+                   ## Avança por enter no console.
+                   console=readline(prompt="Press [enter] to continue"),
+                   ## Avança com intervalo de tempo entre etapas.
+                   none=Sys.sleep(0.5))
+        }
+    }
+    return(out)
+}
+```
+
+```{r, include=FALSE, eval=FALSE}
+n <- 10
+x <- iidsampler1(n, x1=0.5, plot=TRUE, go="console")
+## Gerando muitos números pelo método.
+x <- iidsampler1(5000, x1=0.5)
+par(mfrow=c(2,2))
+plot(x, type="l")        ## Traço da cadeia completa.
+plot(x[1:100], type="l") ## Traço do começo da cadeia.
+acf(x)                   ## Mostra que a cadeia não é independente.
+plot(ecdf(x))            ## Acumulada teórica vs empírica.
+curve(pbeta(x, 2, 3), add=TRUE, col=2); layout(1)
+```
+
+```{r, include=FALSE, results='hide', cache=TRUE}
+animation::saveHTML(
+               iidsampler1(n = 20, x1 = 0.5, plot = TRUE, go = "none"),
+               img.name = "iidsampler1-",
+               imgdir = "figures/iidsampler1/",
+               htmlfile = "iidsampler1.html",
+               autobrowse = FALSE,
+               verbose = FALSE,
+               ani.width = 600,
+               ani.height = 600)
+```
+
+Veja como fica uma animação com o método em funcionamento:
+
+```{r, echo=FALSE, results='asis', out.extra='style="display:block; margin: auto;" frameborder="0"'}
+knitr::include_url("iidsampler1.html", height = "715px")
+```
+
+**Outro exemplo:**
+
+```{r}
+## Distribuição alvo: X ~ Beta(2, 3)
+f <- function(x) dbeta(x, shape1 = 2, shape2 = 3)
+curve(f, 0, 1)
+## Distribuição candidata (proposal): X ~ Normal(0.5, 0.25)
+g <- function(x) dnorm(x, 0.5, 0.25)
+
+## Gráfico das densidados sobrepostas.
+curve(f, 0, 1)
+curve(g, add=TRUE, col=2)
+legend("topright", legend=c("Alvo", "Candidata"), lty=1, col=1:2,
+       bty="n")
+
+N <- 500
+x2 <- numeric(N)
+x2[1] <- 0.5
+set.seed(2019-10-11)
+for(i in 2:N) {
+    y <- rnorm(1, 0.5, 0.25) # Distribuição proposta
+    alpha <- min((f(y) * g(x2[i - 1])) / (f(x2[i - 1]) * g(y)), 1)
+    u <- runif(1)
+    if(u <= alpha) {
+        x2[i] <- y
+    } else {
+        x2[i] <- x2[i - 1]
+    }
+}
+
+## Cadeia
+plot(x2, type = "l")
+
+## Compara com teorica
+plot(ecdf(x2))
+curve(pbeta(x, 2, 3), add = TRUE, col = 2)
+```
+
+```{r, include=FALSE}
+## Alvo: Beta.
+## Canditada: Normal.
+## curve(dbeta(x, 2, 3), 0, 1)
+## curve(dnorm(x, 0.5, 0.25), add=TRUE, lty=2)
+iidsampler2 <- function(nsim, x1, plot=FALSE,
+                        go=c("click","console","none")){
+    out <- vector(mode="numeric", length=nsim)
+    out[1] <- x1
+    for(i in 2:nsim){
+        ## Realização da distribuição alvo.
+        if(plot & go[1]=="click"){
+            y <- locator(n=1)$x
+        } else {
+            y <- rnorm(1, 0.5, 0.25)
+        }
+        ## Cálculo da razão de aceitação.
+        dg1 <- dbeta(y, 2, 3)
+        dn1 <- dnorm(y, 0.5, 0.25)
+        dg0 <- dbeta(out[i-1], 2, 3)
+        dn0 <- dnorm(out[i-1], 0.5, 0.25)
+        ratio <- (dg1/dg0)/(dn1/dn0)
+        u <- runif(1)
+        if(u<ratio){
+            out[i] <- y
+        } else {
+            out[i] <- out[i-1]
+        }
+        ## Incluir contador da aceitação.
+        if(plot & nsim<=20){
+            ## Curvas.
+            curve(dbeta(x, 2, 3), 0, 1, xlim=c(0, 1),
+                  ylab="densidade");
+            curve(dnorm(x, 0.5, 0.25), add=TRUE, lty=2);
+            ## Lengendas.
+            legend("topright",
+                   legend=c(expression(f[X]*" ~ Beta"),
+                       expression(f[Y]*" ~ Normal")),
+                   lty=c(1,2), bty="n")
+            legend("right",
+                   legend=c(expression("Candidato em"*~i),
+                       expression("Valor em"*~i-1)),
+                   lty=1, col=c(2,4), bty="n")
+            ## Segmentos da base até os valores nas funções.
+            segments(y, dg1, y, 0, col=2, lty=1);
+            segments(y, dn1, y, 0, col=2, lty=1);
+            segments(out[i-1], dg0, out[i-1], 0, col=4, lty=1);
+            segments(out[i-1], dn0, out[i-1], 0, col=4, lty=1);
+            ## Pontos sobre as funções.
+            cex <- 2.5; col="yellow"
+            points(y, dg1, pch=19, cex=cex, col="green");
+            points(y, dn1, pch=19, cex=cex, col=col);
+            points(out[i-1], dg0, pch=19, cex=cex, col="green");
+            points(out[i-1], dn0, pch=19, cex=cex, col=col);
+            ## Rótulos dos pontos.
+            text(y, dg1, labels=expression(f[X]));
+            text(y, dn1, labels=expression(f[Y]));
+            text(out[i-1], dg0, expression(f[X]));
+            text(out[i-1], dn0, expression(f[Y]));
+            text(c(y, out[i-1]), 0,
+                 labels=c(expression(x[i]), expression(x[i-1])),
+                 pos=4)
+            ## Expressões matemáticas.
+            L <- list(dg1=dg1, dg0=dg0, dn1=dn1,
+                      dn0=dn0, num=dg1/dg0, den=dn1/dn0,
+                      ratio=ratio)
+            L <- lapply(L, round, digits=3)
+            ex <- substitute(frac(f[X](x[i]), f[X](x[i-1]))/
+                             frac(f[Y](x[i]), f[Y](x[i-1]))*" = "*
+                             frac(dg1, dg0)/frac(dn1, dn0)*" = "*
+                             num/den==ratio, L)
+            r <- substitute("u = "~u<ratio,
+                             lapply(list(ratio=ratio, u=u),
+                                    round, digits=3))
+            mtext(ex, side=3, line=1, adj=0)
+            mtext(r, side=3, line=2, adj=1)
+            mtext(ifelse(u<ratio,
+                         expression(Aceita~x[i]),
+                         expression(Repete~x[i-1])),
+                  side=3, line=1, adj=1)
+            switch(go[1],
+                   click=locator(n=1),
+                   console=readline(prompt="Press [enter] to continue"),
+                   none=Sys.sleep(0.5))
+        }
+    }
+    return(out)
+}
+```
+
+```{r, eval=FALSE, include=FALSE}
+n <- 10
+x <- iidsampler2(n, x1=0.5, plot=TRUE, go="console")
+## Gerando muitos números pelo método.
+x <- iidsampler2(5000, x1=0.5)
+par(mfrow=c(2,2))
+plot(x, type="l")        ## Traço da cadeia completa.
+plot(x[1:100], type="l") ## Traço do começo da cadeia.
+acf(x)                   ## Mostra que a cadeia não é independente.
+plot(ecdf(x))            ## Acumulada teórica vs empírica.
+curve(pbeta(x, 2, 3), add=TRUE, col=2); layout(1)
+```
+
+```{r, include=FALSE, results='hide', cache=TRUE}
+animation::saveHTML(
+               iidsampler2(n = 20, x1 = 0.5, plot = TRUE, go = "none"),
+               img.name = "iidsampler2-",
+               imgdir = "figures/iidsampler2/",
+               htmlfile = "iidsampler2.html",
+               autobrowse = FALSE,
+               verbose = FALSE,
+               ani.width = 600,
+               ani.height = 600)
+```
+
+Veja como fica uma animação com o método em funcionamento:
+
+```{r, echo=FALSE, results='asis', out.extra='style="display:block; margin: auto;" frameborder="0"'}
+knitr::include_url("iidsampler2.html", height = "715px")
+```
+
+Comparando as cadeias geradas com as duas diferentes propostas:
+
+```{r, fig.show='hold'}
+par(mfrow = c(2, 2))
+plot(x, type = "l")
+plot(x2, type = "l")
+acf(x)
+acf(x2)
+par(mfrow = c(1, 1))
+```
+
+VEJA também o código-fonte para outro exemplo!
+
+```{r, eval=FALSE, include=FALSE}
+## Alvo: Gama.
+## Canditada: Normal.
+curve(dgamma(x, 2, 1), -1.5, 8)
+curve(dnorm(x, 2, sqrt(2)), add=TRUE, lty=2)
+
+iidsampler3 <- function(nsim, x1, alpha=2, beta=1, mu=NULL, sig=NULL,
+                        plot=FALSE, go=c("click","enter","none")){
+    out <- vector(mode="numeric", length=nsim)
+    ## Esperança da distribuição proposta.
+    out[1] <- x1
+    ## Esperança da distribuição proposta.
+    if(is.null(mu)){
+        mu <- alpha/beta
+    }
+    ## Variância da distribuição proposta.
+    if(is.null(sig)){
+        sig <- sqrt(alpha/(beta^2))
+    }
+    for(i in 2:nsim){
+        ## Realização da distribuição alvo.
+        if(plot & go[1]=="click"){
+            y <- locator(n=1)$x
+        } else {
+            y <- rnorm(1, mu, sig)
+        }
+        ## Cálculo da razão de aceitação.
+        dg1 <- dgamma(y, alpha, beta)
+        dn1 <- dnorm(y, mu, sig)
+        dg0 <- dgamma(out[i-1], alpha, beta)
+        dn0 <- dnorm(out[i-1], mu, sig)
+        ratio <- (dg1/dg0)/(dn1/dn0)
+        u <- runif(1)
+        if(u<ratio){
+            out[i] <- y
+        } else {
+            out[i] <- out[i-1]
+        }
+        ## Incluir contador da aceitação.
+        if(plot & nsim<=20){
+            ## Curvas.
+            curve(dgamma(x, alpha, beta), 0, 8, xlim=c(-2, 8),
+                  ylab="densidade");
+            curve(dnorm(x, mu, sig), add=TRUE, lty=2);
+            ## Lengendas.
+            legend("topright",
+                   legend=c(expression(f[X]*" ~ Gama"),
+                       expression(f[Y]*" ~ Normal")),
+                   lty=c(1,2), bty="n")
+            legend("right",
+                   legend=c(expression("Candidato em"*~i),
+                       expression("Valor em"*~i-1)),
+                   lty=1, col=c(2,4), bty="n")
+            ## Segmentos da base até os valores nas funções.
+            segments(y, dg1, y, 0, col=2, lty=1);
+            segments(y, dn1, y, 0, col=2, lty=1);
+            segments(out[i-1], dg0, out[i-1], 0, col=4, lty=1);
+            segments(out[i-1], dn0, out[i-1], 0, col=4, lty=1);
+            ## Pontos sobre as funções.
+            cex <- 2.5; col="yellow"
+            points(y, dg1, pch=19, cex=cex, col="green");
+            points(y, dn1, pch=19, cex=cex, col=col);
+            points(out[i-1], dg0, pch=19, cex=cex, col="green");
+            points(out[i-1], dn0, pch=19, cex=cex, col=col);
+            ## Rótulos dos pontos.
+            text(y, dg1, labels=expression(f[X]));
+            text(y, dn1, labels=expression(f[Y]));
+            text(out[i-1], dg0, expression(f[X]));
+            text(out[i-1], dn0, expression(f[Y]));
+            text(c(y, out[i-1]), 0,
+                 labels=c(expression(x[i]), expression(x[i-1])),
+                 pos=4)
+            ## Expressões matemáticas.
+            L <- list(dg1=dg1, dg0=dg0, dn1=dn1,
+                      dn0=dn0, num=dg1/dg0, den=dn1/dn0,
+                      ratio=ratio)
+            L <- lapply(L, round, digits=3)
+            ex <- substitute(frac(f[X](x[i]), f[X](x[i-1]))/
+                             frac(f[Y](x[i]), f[Y](x[i-1]))*" = "*
+                             frac(dg1, dg0)/frac(dn1, dn0)*" = "*
+                             num/den==ratio, L)
+            r <- substitute("u = "~u<ratio,
+                             lapply(list(ratio=ratio, u=u),
+                                    round, digits=3))
+            mtext(ex, side=3, line=1, adj=0)
+            mtext(r, side=3, line=2, adj=1)
+            mtext(ifelse(u<ratio,
+                         expression(Aceita~x[i]),
+                         expression(Repete~x[i-1])),
+                  side=3, line=1, adj=1)
+            switch(go[1],
+                   click=locator(n=1),
+                   console=readline(prompt="Press [enter] to continue"),
+                   none=Sys.sleep(0.5))
+        }
+    }
+    return(out)
+}
+
+n <- 10
+x <- iidsampler3(n, x1=0.5, plot=TRUE, go="console")
+
+## Gerando muitos números pelo método.
+x <- iidsampler3(5000, x1=0.5)
+par(mfrow=c(2,2))
+plot(x, type="l")        ## Traço da cadeia completa.
+plot(x[1:100], type="l") ## Traço do começo da cadeia.
+acf(x)                   ## Mostra que a cadeia não é independente.
+plot(ecdf(x))            ## Acumulada teórica vs empírica.
+curve(pgamma(x, 2, 1), add=TRUE, col=2); layout(1)
+
+##----------------------------------------------------------------------
+## Início da cadeia mal escolhido. Não convergência.
+set.seed(123)
+x <- iidsampler3(5000, x1=9.5)
+par(mfrow=c(2,2))
+plot(x, type="l")        ## Traço da cadeia completa.
+plot(x[1:100], type="l") ## Traço do começo da cadeia.
+acf(x)                   ## Mostra que a cadeia não é independente.
+plot(ecdf(x))            ## Acumulada teórica vs empírica.
+curve(pgamma(x, 2, 1), add=TRUE, col=2); layout(1)
+
+##----------------------------------------------------------------------
+## Densidade da candidata mal posicionada posicionada.
+n <- 5000; alpha <- 2; beta <- 1
+mu <- -2; sig <- 2
+curve(dgamma(x, alpha, beta), 0, 12, xlim=c(-8, 8), ylab="densidade");
+curve(dnorm(x, mu, sig), add=TRUE, lty=2);
+
+set.seed(123)
+x <- iidsampler3(n, alpha, beta, mu=mu, sig=sig, x1=2)
+par(mfrow=c(2,2))
+plot(x, type="l")        ## Traço da cadeia completa.
+plot(x[1:100], type="l") ## Traço do começo da cadeia.
+acf(x)                   ## Mostra que a cadeia não é independente.
+plot(ecdf(x))            ## Acumulada teórica vs empírica.
+curve(pgamma(x, alpha, beta), add=TRUE, col=2); layout(1)
+```
