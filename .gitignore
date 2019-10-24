@@ -3,3 +3,9 @@ cache/
 .Rhistory
 *.tex
 figures/
+css/
+js/
+rwsampler1.html
+iidsampler1.html
+iidsampler2.html
+mhsampler1.html
