@@ -56,7 +56,7 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **17/10 (Qui)**: (FM) Integração de Monte Carlo: método simples e
   amostragem por importância. [HTML](MC_intro.html).
 - **22/10 (Ter)**:
-- **24/10 (Qui)**:
+- **24/10 (Qui)**: [HTML](MCMC-1.html).
 - **29/10 (Ter)**:
 - **31/10 (Qui)**:
 - **05/11 (Ter)**:
