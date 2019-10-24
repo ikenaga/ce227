@@ -2,6 +2,9 @@ language: r
 cache: packages
 pandoc_version: 2.5
 
+apt_packages:
+  - libmagick++-dev
+
 before_script:
   - chmod +x ./_build.sh
   - chmod +x ./_deploy.sh
