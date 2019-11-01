@@ -59,7 +59,9 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **24/10 (Qui)**: (FM) Método de aceitação-rejeição. MCMC:
   Metropolis-Hastings e Metropolis random walk. [HTML](MCMC-1.html).
 - **29/10 (Ter)**:
-- **31/10 (Qui)**:
+- **31/10 (Qui)**: (FM) Método geral de Metropolis-Hastings.
+  [HTML](MCMC-2.html). Exemplo de amostrador de Gibbs.
+  [Script](scripts/gibbs_aula1.R).
 - **05/11 (Ter)**:
 - **07/11 (Qui)**:
 - **12/11 (Ter)**:
