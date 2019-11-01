@@ -1,6 +1,6 @@
 ##======================================================================
 ## Exemplo 7.2 do Casella e Robert - Beta-binomial
-## X | theta ~ Bin(mu, theta)
+## X | theta ~ Bin(n, theta)
 ## theta ~ Beta(a, b)
 
 ## Condicionais são
