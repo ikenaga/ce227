@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Fernando P. Mayer" />
+
+
+<title>Métodos de Monte Carlo via Cadeias de Markov</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-66454501-14"></script>
+<script>
+ window.dataLayer = window.dataLayer || [];
+ function gtag(){dataLayer.push(arguments);}
+ gtag('js', new Date());
+
+ gtag('config', 'UA-66454501-14');
+</script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; } /* Alert */
+code span.an { color: #008000; } /* Annotation */
+code span.at { } /* Attribute */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #0000ff; } /* ControlFlow */
+code span.ch { color: #008080; } /* Char */
+code span.cn { } /* Constant */
+code span.co { color: #008000; } /* Comment */
+code span.cv { color: #008000; } /* CommentVar */
+code span.do { color: #008000; } /* Documentation */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.im { } /* Import */
+code span.in { color: #008000; } /* Information */
+code span.kw { color: #0000ff; } /* Keyword */
+code span.op { } /* Operator */
+code span.ot { color: #ff4000; } /* Other */
+code span.pp { color: #ff4000; } /* Preprocessor */
+code span.sc { color: #008080; } /* SpecialChar */
+code span.ss { color: #008080; } /* SpecialString */
+code span.st { color: #008080; } /* String */
+code span.va { } /* Variable */
+code span.vs { color: #008080; } /* VerbatimString */
+code span.wa { color: #008000; font-weight: bold; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">CE227</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="aulas.html">Aulas</a>
+</li>
+<li>
+  <a href="referencias.html">Referências</a>
+</li>
+<li>
+  <a href="notas.html">Notas</a>
+</li>
+<li>
+  <a href="materiais.html">Materiais</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/leg-ufpr/ce227">
+    <span class="fa fa-github fa-lg"></span>
+     
+    GitHub
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Métodos de Monte Carlo via Cadeias de Markov</h1>
+<h3 class="subtitle">Cadeias de Markov e algoritmo de Metropolis-Hastings</h3>
+<h4 class="author">Fernando P. Mayer</h4>
+
+</div>
+
+
+<div id="introdução" class="section level1">
+<h1><span class="header-section-number">1</span> Introdução</h1>
+<p>O termo “Monte Carlo via Cadeia de Markov” abrange uma grande gama de técnicas que possuem algumas ideias em comum:</p>
+<ol style="list-style-type: decimal">
+<li>Queremos amostrar de alguma função densidade de probabilidade complicada <span class="math inline">\(f\)</span>. A suposição aqui é que nós conseguimos <strong>calcular</strong> <span class="math inline">\(f\)</span>, mas não podemos amostrar dela.</li>
+<li>Sabemos que certos processos estocáticos chamados de <strong>cadeias de Markov</strong> convergem para uma <strong>distribuição estacionária</strong> (se certas condições forem satisfeitas). Simular desta cadeia de Markov por um período longo, eventualmente nos levará a uma amostra da distribuição estacionária da cadeia.</li>
+<li>Dada a forma funcional de <span class="math inline">\(f\)</span>, queremos construir uma cadeia de Markov que possui <span class="math inline">\(f\)</span> como sua distribuição estacionária.</li>
+<li>Queremos amostrar valores da cadeia de Markov de forma que a sequência de valores <span class="math inline">\(\{x_n\}\)</span>, gerada pela cadeia, irá <strong>convergir em distribuição</strong> para a densidade <span class="math inline">\(f\)</span>.</li>
+</ol>
+<p>Já vimos que os métodos de Monte Carlo via Cadeias de Markov (MCMC) servem basicamente para gerar valores de uma distribuição. No entanto, ao contrário dos métodos anteriores (e.g. aceitação-rejeição), os valores obtidos por MCMC são <strong>correlacionados</strong>.</p>
+<p>Uma amostra com valores correlacionados não é desejável, mas mesmo assim, os métodos de MCMC são preferidos em situações mais complexas. O primeiro motivo é que, mesmo com valores correlacionados, é possível selecionar uma (sub) amostra de valores que não seja correlacionada. O segundo motivo é que as <strong>cadeias de Markov possuem diferentes propriedades de convergência</strong>, que podem ser exploradas para se obter distribuições propostas mais fáceis de tratar numericamente, quando os métodos mais gerais de amostragem por importância (por exemplo) não se aplicam diretamente.</p>
+<p>Além disso, o conhecimento necessário da distribuição alvo que se quer gerar é mínimo, geralmente não é necessário saber a constante de integração por exemplo. Além disso, estes métodos via cadeias de Markov facilitam a resolução de problemas de alta dimensão, através de uma sequência de problemas menores que são mais fáceis de resolver (e.g. amostrador de Gibbs).</p>
+</div>
+<div id="metropolis-hastings" class="section level1">
+<h1><span class="header-section-number">2</span> Metropolis-Hastings</h1>
+<p>O algoritmo de Metropolis-Hastings gera uma cadeia de Markov <span class="math inline">\(\{X_0, X_1, \ldots\}\)</span> conforme definido abaixo.</p>
+<ol style="list-style-type: decimal">
+<li>Defina uma distribuição proposta <span class="math inline">\(g(\cdot|X_t)\)</span></li>
+<li>Defina um valor inicial <span class="math inline">\(X_0\)</span>, dentro do domínio de <span class="math inline">\(g\)</span></li>
+<li>Repita os seguintes passos até convergir para uma distribuição estacionária:
+<ol style="list-style-type: lower-alpha">
+<li>Gere um valor <strong>candidato</strong> <span class="math inline">\(Y=X_{t+1}\)</span> a partir de <span class="math inline">\(g(\cdot|X_t)\)</span> (note que o valor candidato é dependente do valor anterior)</li>
+<li>Gere <span class="math inline">\(U\)</span> de uma <span class="math inline">\(\text{U}(0,1)\)</span></li>
+<li>Calcule a taxa de aceitação <span class="math display">\[
+\alpha(X_t, Y) = \min
+\left( \frac{f(Y)g(X_t|Y)}{f(X_t)g(Y|X_t)}, 1 \right)
+\]</span> Se <span class="math display">\[
+U \leq \alpha(X_t, Y)
+\]</span> aceite <span class="math inline">\(Y\)</span> e faça <span class="math inline">\(X_{t+1}=Y\)</span>; caso contrário faça <span class="math inline">\(X_{t+1}=X_t\)</span></li>
+</ol></li>
+</ol>
+<p>Observações:</p>
+<ul>
+<li>Note que só precisamos conhecer o núcleo da densidade alvo <span class="math inline">\(f\)</span>, ou seja, não é necessário saber a constante de integração (ou de normalização), uma vez que, mesmo sem essa constante, a densidade de <span class="math inline">\(f\)</span> será proporcional.</li>
+<li>Se a distribuição proposta for adequada, a “cadeia” de Metropolis-Hastings irá convergir para uma distribuição estacionária única <span class="math inline">\(\pi\)</span>.</li>
+<li>O algoritmo foi desenvolvido de forma que a distribuição estacionária da cadeia é de fato a distribuição alvo <span class="math inline">\(f\)</span>.</li>
+</ul>
+<div id="exemplo-beta" class="section level2">
+<h2><span class="header-section-number">2.1</span> Exemplo (beta)</h2>
+<p>Considere o examplo de aulas anteriores sobre o algoritmo de aceitação-rejeição, onde deseja-se gerar valores de uma distribuição <span class="math inline">\(\text{Beta}(\alpha = 2.7, \beta = 6.3)\)</span>, com uma distribuição proposta <span class="math inline">\(\text{U}(0,1)\)</span>.</p>
+<p>Para comparação, vamos gerar valores usando o método de aceitação-rejeição e agora pelo método de Metropolis-Hastings.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co">## Aceitação-rejeição --------------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="co">## Define funções</span></a>
+<a class="sourceLine" id="cb1-3" title="3">f &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dbeta</span>(x, <span class="fl">2.7</span>, <span class="fl">6.3</span>)</a>
+<a class="sourceLine" id="cb1-4" title="4">g &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dunif</span>(x, <span class="dv">0</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb1-5" title="5"><span class="co">## Máximo M</span></a>
+<a class="sourceLine" id="cb1-6" title="6">(M &lt;-<span class="st"> </span><span class="kw">optimize</span>(<span class="dt">f =</span> <span class="cf">function</span>(x) {<span class="kw">f</span>(x)<span class="op">/</span><span class="kw">g</span>(x)},</a>
+<a class="sourceLine" id="cb1-7" title="7">               <span class="dt">interval =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">maximum =</span> <span class="ot">TRUE</span>)<span class="op">$</span>objective)</a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="co"># [1] 2.669744</span></a>
+<a class="sourceLine" id="cb1-9" title="9"><span class="kw">curve</span>(f, <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb1-10" title="10"><span class="kw">curve</span>(g, <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb1-11" title="11"><span class="kw">curve</span>(M <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(x), <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">2</span>, <span class="dt">lwd =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb1-12" title="12"><span class="kw">legend</span>(<span class="st">&quot;right&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;f(x)&quot;</span>, <span class="st">&quot;g(x)&quot;</span>, <span class="st">&quot;M g(x)&quot;</span>),</a>
+<a class="sourceLine" id="cb1-13" title="13">       <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>), <span class="dt">col =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="dt">lwd =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-2/unnamed-chunk-2-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co">## Simula com número fixo</span></a>
+<a class="sourceLine" id="cb2-2" title="2">N &lt;-<span class="st"> </span><span class="fl">1e5</span></a>
+<a class="sourceLine" id="cb2-3" title="3"><span class="co">## Amostra da proposta U(0,1)</span></a>
+<a class="sourceLine" id="cb2-4" title="4">y &lt;-<span class="st"> </span><span class="kw">runif</span>(N)</a>
+<a class="sourceLine" id="cb2-5" title="5"><span class="co">## Amostra u também de U(0,1)</span></a>
+<a class="sourceLine" id="cb2-6" title="6">u &lt;-<span class="st"> </span><span class="kw">runif</span>(N)</a>
+<a class="sourceLine" id="cb2-7" title="7"><span class="co">## Calcula a razão</span></a>
+<a class="sourceLine" id="cb2-8" title="8">r &lt;-<span class="st"> </span><span class="kw">f</span>(y)<span class="op">/</span>(M <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(y))</a>
+<a class="sourceLine" id="cb2-9" title="9"><span class="co">## x serão os valores de y onde u &lt; r</span></a>
+<a class="sourceLine" id="cb2-10" title="10">x.ar &lt;-<span class="st"> </span>y[u <span class="op">&lt;</span><span class="st"> </span>r]</a>
+<a class="sourceLine" id="cb2-11" title="11"><span class="co">## Aceitados</span></a>
+<a class="sourceLine" id="cb2-12" title="12">ua &lt;-<span class="st"> </span>u[u <span class="op">&lt;</span><span class="st"> </span>r]</a></code></pre></div>
+<p>Pelo algoritmo de Metropolis-Hastings, a simulação seria:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co">## Metropolis-Hastings -------------------------------------------------</span></a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="co">## Simula com número fixo</span></a>
+<a class="sourceLine" id="cb3-3" title="3">N &lt;-<span class="st"> </span><span class="fl">1e5</span></a>
+<a class="sourceLine" id="cb3-4" title="4">x &lt;-<span class="st"> </span><span class="kw">numeric</span>(N)</a>
+<a class="sourceLine" id="cb3-5" title="5">x[<span class="dv">1</span>] &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb3-6" title="6">k &lt;-<span class="st"> </span><span class="dv">0</span> <span class="co"># para contar quantos foram aceitos</span></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>N) {</a>
+<a class="sourceLine" id="cb3-8" title="8">    y &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb3-9" title="9">    num &lt;-<span class="st"> </span><span class="kw">f</span>(y) <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>])</a>
+<a class="sourceLine" id="cb3-10" title="10">    den &lt;-<span class="st"> </span><span class="kw">f</span>(x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]) <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(y)</a>
+<a class="sourceLine" id="cb3-11" title="11">    alpha &lt;-<span class="st"> </span>num<span class="op">/</span>den</a>
+<a class="sourceLine" id="cb3-12" title="12">    u &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb3-13" title="13">    <span class="cf">if</span> (u <span class="op">&lt;=</span><span class="st"> </span>alpha) {</a>
+<a class="sourceLine" id="cb3-14" title="14">        x[i] &lt;-<span class="st"> </span>y</a>
+<a class="sourceLine" id="cb3-15" title="15">    } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb3-16" title="16">        x[i] &lt;-<span class="st"> </span>x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb3-17" title="17">        k &lt;-<span class="st"> </span>k <span class="op">+</span><span class="st"> </span><span class="dv">1</span>     <span class="co"># contagem doa aceitos</span></a>
+<a class="sourceLine" id="cb3-18" title="18">    }</a>
+<a class="sourceLine" id="cb3-19" title="19">}</a></code></pre></div>
+<p>Comparando as duas abordagens:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co">## Taxa de aceitação - AR</span></a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="dv">1</span><span class="op">/</span>M <span class="co"># teórica</span></a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="co"># [1] 0.3745677</span></a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="kw">length</span>(ua)<span class="op">/</span>N</a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="co"># [1] 0.37214</span></a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co">## Taxa de aceitação - MH</span></a>
+<a class="sourceLine" id="cb4-7" title="7">k<span class="op">/</span>N</a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="co"># [1] 0.54647</span></a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="co">## Compara amostras com acumulada teórica</span></a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="kw">plot</span>(<span class="kw">ecdf</span>(x.ar), <span class="dt">main =</span> <span class="st">&quot;Aceitação-rejeição&quot;</span>)</a>
+<a class="sourceLine" id="cb4-12" title="12"><span class="kw">curve</span>(<span class="kw">pbeta</span>(x, <span class="fl">2.7</span>, <span class="fl">6.3</span>), <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb4-13" title="13"><span class="kw">plot</span>(<span class="kw">ecdf</span>(x), <span class="dt">main =</span> <span class="st">&quot;Metropolis-Hastings&quot;</span>)</a>
+<a class="sourceLine" id="cb4-14" title="14"><span class="kw">curve</span>(<span class="kw">pbeta</span>(x, <span class="fl">2.7</span>, <span class="fl">6.3</span>), <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb4-15" title="15"><span class="kw">legend</span>(<span class="st">&quot;right&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;Empírica&quot;</span>, <span class="st">&quot;Teórica&quot;),</span></a>
+<a class="sourceLine" id="cb4-16" title="16"><span class="st">       lty = 1, col = 1:2, bty = &quot;</span>n<span class="st">&quot;)</span></a></code></pre></div>
+<p><img src="figures/MCMC-2/unnamed-chunk-4-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="co">## Compara autocorrelação</span></a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="kw">acf</span>(x.ar, <span class="dt">main =</span> <span class="st">&quot;Aceitação-rejeição&quot;</span>)</a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="kw">acf</span>(x, <span class="dt">main =</span> <span class="st">&quot;Metropolis-Hastings&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-2/unnamed-chunk-4-2.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="co">## Compara as duas cadeias</span></a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="kw">plot.ts</span>(x.ar[<span class="dv">5000</span><span class="op">:</span><span class="dv">5200</span>], <span class="dt">main =</span> <span class="st">&quot;Aceitação-rejeição&quot;</span>)</a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="kw">plot.ts</span>(x[<span class="dv">5000</span><span class="op">:</span><span class="dv">5200</span>], <span class="dt">main =</span> <span class="st">&quot;Metropolis-Hastings&quot;</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-2/unnamed-chunk-4-3.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</a></code></pre></div>
+<p>Veja como fica uma animação com o método em funcionamento:</p>
+<iframe src="mhsampler1.html" width="80%" height="715px" style="display:block; margin: auto;" frameborder="0">
+</iframe>
+</div>
+<div id="exemplo-rayleigh" class="section level2">
+<h2><span class="header-section-number">2.2</span> Exemplo (Rayleigh)</h2>
+<p>Usando o algoritmo de Metropolis-Hastings, gere uma amostra de uma distribuição <span class="math inline">\(\text{Rayleigh}(\sigma)\)</span>, que possui a densidade</p>
+<p><span class="math display">\[
+f(x) = \frac{x}{\sigma^2} e^{-x^2/2\sigma^2}, \quad x \geq 0, \sigma &gt; 0
+\]</span></p>
+<p>A distribuição Rayleigh é utilizada para modelar tempo de vida sujeito à rápido decaimento. A moda da distribuição é em <span class="math inline">\(\sigma\)</span> e <span class="math inline">\(\text{E}(X) = \sigma\sqrt{\pi/2}\)</span>, <span class="math inline">\(\text{Var}(X) = \sigma^2(4-\pi)/2\)</span>.</p>
+<p>Como distribuição proposta, considere uma <span class="math inline">\(\chi^2\)</span> com <span class="math inline">\(X_t\)</span> graus de liberdade.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="co">## Define funções</span></a>
+<a class="sourceLine" id="cb8-2" title="2">f &lt;-<span class="st"> </span><span class="cf">function</span>(x, sigma) {</a>
+<a class="sourceLine" id="cb8-3" title="3">    (x <span class="op">/</span><span class="st"> </span>sigma<span class="op">^</span><span class="dv">2</span>) <span class="op">*</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x<span class="op">^</span><span class="dv">2</span> <span class="op">/</span><span class="st"> </span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>sigma<span class="op">^</span><span class="dv">2</span>)) <span class="op">*</span><span class="st"> </span>(x <span class="op">&gt;=</span><span class="st"> </span><span class="dv">0</span>) <span class="op">*</span><span class="st"> </span>(sigma <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb8-4" title="4">}</a>
+<a class="sourceLine" id="cb8-5" title="5">g &lt;-<span class="st"> </span><span class="cf">function</span>(x, df) <span class="kw">dchisq</span>(x, df)</a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co">## Visualiza _algumas_ propostas (pois os graus de liberdade da</span></a>
+<a class="sourceLine" id="cb8-7" title="7"><span class="co">## qui-quadrado irá depender de cada valor sorteado em cada iteração).</span></a>
+<a class="sourceLine" id="cb8-8" title="8"><span class="co">## </span><span class="al">NOTE</span><span class="co"> que os graus de liberdade da qui-quadrado não precisam ser</span></a>
+<a class="sourceLine" id="cb8-9" title="9"><span class="co">## inteiros</span></a>
+<a class="sourceLine" id="cb8-10" title="10"><span class="kw">curve</span>(<span class="kw">f</span>(x, <span class="dv">4</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">20</span>, <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">.3</span>), <span class="dt">lwd =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb8-11" title="11"><span class="kw">curve</span>(<span class="kw">g</span>(x, <span class="dv">1</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">20</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb8-12" title="12"><span class="kw">curve</span>(<span class="kw">g</span>(x, <span class="fl">2.5</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">20</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb8-13" title="13"><span class="kw">curve</span>(<span class="kw">g</span>(x, <span class="fl">3.2</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">20</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb8-14" title="14"><span class="kw">curve</span>(<span class="kw">g</span>(x, <span class="dv">4</span>), <span class="dt">from =</span> <span class="dv">0</span>, <span class="dt">to =</span> <span class="dv">20</span>, <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb8-15" title="15"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>,</a>
+<a class="sourceLine" id="cb8-16" title="16">       <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;Rayleigh(4)&quot;</span>, <span class="kw">expression</span>(chi<span class="op">^</span><span class="dv">2</span> <span class="op">~</span><span class="st"> </span>(<span class="dv">1</span>)),</a>
+<a class="sourceLine" id="cb8-17" title="17">                  <span class="kw">expression</span>(chi<span class="op">^</span><span class="dv">2</span> <span class="op">~</span><span class="st"> </span>(<span class="fl">2.5</span>)), <span class="kw">expression</span>(chi<span class="op">^</span><span class="dv">2</span> <span class="op">~</span><span class="st"> </span>(<span class="fl">3.2</span>)),</a>
+<a class="sourceLine" id="cb8-18" title="18">                  <span class="kw">expression</span>(chi<span class="op">^</span><span class="dv">2</span> <span class="op">~</span><span class="st"> </span>(<span class="dv">4</span>))),</a>
+<a class="sourceLine" id="cb8-19" title="19">       <span class="dt">lty =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-2/unnamed-chunk-9-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>O algoritmo de Metropolis-Hastings nesse caso ficaria assim:</p>
+<ol style="list-style-type: decimal">
+<li>Defina <span class="math inline">\(g(\cdot|X)\)</span> como uma densidade de <span class="math inline">\(\chi^2(X)\)</span></li>
+<li>Gere <span class="math inline">\(X_0\)</span> de <span class="math inline">\(\chi^2(1)\)</span></li>
+<li>Repita para <span class="math inline">\(i=2, \ldots, N\)</span>:
+<ol style="list-style-type: lower-alpha">
+<li>Gere <span class="math inline">\(Y = X_{t+1}\)</span> de <span class="math inline">\(\chi^2(X_t)\)</span></li>
+<li>Gere <span class="math inline">\(U\)</span> de <span class="math inline">\(\text{U}(0,1)\)</span></li>
+<li>Calcule a taxa de aceitação <span class="math display">\[
+\alpha(X_t, Y) = \min
+\left( \frac{f(Y)g(X_t|Y)}{f(X_t)g(Y|X_t)}, 1 \right)
+\]</span> onde <span class="math inline">\(f\)</span> é a <span class="math inline">\(\text{Rayleigh}(\sigma)\)</span>, <span class="math inline">\(g(X_t|Y)\)</span> é <span class="math inline">\(\chi^2(Y)\)</span> avaliada no ponto <span class="math inline">\(X_t\)</span>, e <span class="math inline">\(g(Y|X_t)\)</span> é a <span class="math inline">\(\chi^2(X_t)\)</span> avaliada no ponto <span class="math inline">\(Y\)</span>.</li>
+<li>Se <span class="math display">\[
+U \leq \alpha(X_t, Y)
+\]</span> aceite <span class="math inline">\(Y\)</span> e faça <span class="math inline">\(X_{t+1}=Y\)</span>; caso contrário faça <span class="math inline">\(X_{t+1}=X_t\)</span></li>
+</ol></li>
+</ol>
+<p>Portanto, para gerar valores de uma <span class="math inline">\(\text{Rayleigh}\)</span> com <span class="math inline">\(\sigma=4\)</span>, uma implementação do algoritmo seria:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">N &lt;-<span class="st"> </span><span class="fl">1e4</span></a>
+<a class="sourceLine" id="cb9-2" title="2"><span class="co">## Rayleigh(4)</span></a>
+<a class="sourceLine" id="cb9-3" title="3">sigma &lt;-<span class="st"> </span><span class="dv">4</span></a>
+<a class="sourceLine" id="cb9-4" title="4">x &lt;-<span class="st"> </span><span class="kw">numeric</span>(N)</a>
+<a class="sourceLine" id="cb9-5" title="5">x[<span class="dv">1</span>] &lt;-<span class="st"> </span><span class="kw">rchisq</span>(<span class="dv">1</span>, <span class="dt">df =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb9-6" title="6">k &lt;-<span class="st"> </span><span class="dv">0</span> <span class="co"># para contar quantos foram aceitos</span></a>
+<a class="sourceLine" id="cb9-7" title="7"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>N) {</a>
+<a class="sourceLine" id="cb9-8" title="8">    y &lt;-<span class="st"> </span><span class="kw">rchisq</span>(<span class="dv">1</span>, <span class="dt">df =</span> x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>])</a>
+<a class="sourceLine" id="cb9-9" title="9">    num &lt;-<span class="st"> </span><span class="kw">f</span>(y, sigma) <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>], <span class="dt">df =</span> y)</a>
+<a class="sourceLine" id="cb9-10" title="10">    den &lt;-<span class="st"> </span><span class="kw">f</span>(x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>], sigma) <span class="op">*</span><span class="st"> </span><span class="kw">g</span>(y, <span class="dt">df =</span> x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>])</a>
+<a class="sourceLine" id="cb9-11" title="11">    alpha &lt;-<span class="st"> </span>num<span class="op">/</span>den</a>
+<a class="sourceLine" id="cb9-12" title="12">    u &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb9-13" title="13">    <span class="cf">if</span> (u <span class="op">&lt;=</span><span class="st"> </span>alpha) {</a>
+<a class="sourceLine" id="cb9-14" title="14">        x[i] &lt;-<span class="st"> </span>y</a>
+<a class="sourceLine" id="cb9-15" title="15">    } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb9-16" title="16">        x[i] &lt;-<span class="st"> </span>x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb9-17" title="17">        k &lt;-<span class="st"> </span>k <span class="op">+</span><span class="st"> </span><span class="dv">1</span>     <span class="co"># contagem dos aceitos</span></a>
+<a class="sourceLine" id="cb9-18" title="18">    }</a>
+<a class="sourceLine" id="cb9-19" title="19">}</a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="co">## Taxa de aceitação</span></a>
+<a class="sourceLine" id="cb10-2" title="2">k<span class="op">/</span>N</a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="co"># [1] 0.4062</span></a>
+<a class="sourceLine" id="cb10-4" title="4"></a>
+<a class="sourceLine" id="cb10-5" title="5"><span class="co">## Traço da cadeia</span></a>
+<a class="sourceLine" id="cb10-6" title="6"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb10-7" title="7"><span class="kw">plot.ts</span>(x)</a>
+<a class="sourceLine" id="cb10-8" title="8"><span class="kw">plot.ts</span>(x[<span class="dv">5000</span><span class="op">:</span><span class="dv">5500</span>])</a></code></pre></div>
+<p><img src="figures/MCMC-2/unnamed-chunk-11-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb11-2" title="2"></a>
+<a class="sourceLine" id="cb11-3" title="3"><span class="co">## Histograma da distribuição e correlação entre as observações</span></a>
+<a class="sourceLine" id="cb11-4" title="4"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb11-5" title="5"><span class="kw">hist</span>(x, <span class="dt">freq =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb11-6" title="6">ind &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="kw">max</span>(x), <span class="dt">length.out =</span> <span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb11-7" title="7"><span class="kw">lines</span>(ind, (<span class="kw">f</span>(ind, sigma)), <span class="dt">col =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb11-8" title="8"><span class="kw">acf</span>(x)</a></code></pre></div>
+<p><img src="figures/MCMC-2/unnamed-chunk-11-2.png" width="80%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb12-2" title="2"></a>
+<a class="sourceLine" id="cb12-3" title="3"><span class="co">## Compara acumulada empírica com teórica</span></a>
+<a class="sourceLine" id="cb12-4" title="4"><span class="co">## Acumulada teórica da Rayleigh</span></a>
+<a class="sourceLine" id="cb12-5" title="5">Fx &lt;-<span class="st"> </span><span class="cf">function</span>(x, sigma) {</a>
+<a class="sourceLine" id="cb12-6" title="6">    <span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x<span class="op">^</span><span class="dv">2</span><span class="op">/</span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>sigma<span class="op">^</span><span class="dv">2</span>)) <span class="op">*</span><span class="st"> </span>(x <span class="op">&gt;=</span><span class="st"> </span><span class="dv">0</span>) <span class="op">*</span><span class="st"> </span>(sigma <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb12-7" title="7">}</a>
+<a class="sourceLine" id="cb12-8" title="8"><span class="kw">plot</span>(<span class="kw">ecdf</span>(x))</a>
+<a class="sourceLine" id="cb12-9" title="9"><span class="kw">curve</span>(<span class="kw">Fx</span>(x, <span class="dv">4</span>), <span class="dt">add =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">2</span>, <span class="dt">from =</span> <span class="dv">0</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-2/unnamed-chunk-11-3.png" width="80%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="extra-cadeias-de-markov" class="section level1 unnumbered">
+<h1>Extra: Cadeias de Markov</h1>
+<p>Uma cadeia de Markov é um <strong>processo estocático</strong> que evolui ao longo do tempo, passando por diversos <strong>estados</strong>. A sequência de estados é denotada pela coleção de valores <span class="math inline">\(\{X_t\}\)</span>, ou seja, é uma sequência de variáveis aleatórias dependentes <span class="math display">\[
+X_0, X_1, \ldots, X_t, \ldots
+\]</span> onde a transição entre os estados é aleatória, segundo a regra <span class="math display">\[
+P[X_t | X_{t-1}, X_{t-2}, \ldots, X_0] = P[X_t | X_{t-1}]
+\]</span> Essa relação significa que a distribuição de probabilidade de um processo no tempo <span class="math inline">\(t\)</span>, dado todos os outros valores da cadeia, é igual à distribuição de probabilidade condicionada apenas ao valor imediatamente anterior (essa propriedade é conhecida como <strong>propriedade de Markov</strong>).</p>
+<p>Dessa forma, para determinar a sequência de valores que a cadeia pode assumir, podemos determinar a distribuição do próximo valor conhecendo apenas o valor anterior.</p>
+<p>A coleção de estados que uma cadeia de Markov pode visitar é chamada de <strong>espaço de estados</strong>. A distribuição de probabilidade condicional, que determina se a cadeia se move de um estado para outro é chamada de <strong>kernel de transição</strong> ou <strong>matriz de transição</strong>, e pode ser denotada por <span class="math display">\[
+X_t | X_{t-1}, X_{t-2}, \ldots, X_0 \sim K(X_{t}, X_{t-1})
+\]</span> Por exemplo, uma cadeia de Markov do tipo <em>random walk</em> satisfaz <span class="math display">\[
+X_t = X_{t-1} + \epsilon
+\]</span> onde <span class="math inline">\(\epsilon \sim \text{N}(0,1)\)</span>, independente de <span class="math inline">\(X_t\)</span>. portanto, o kernel de transição <span class="math inline">\(K(X_{t}, X_{t-1})\)</span> corresponde a uma densidade <span class="math inline">\(\text{N}(X_{t-1},1)\)</span>.</p>
+<p>Considere o seguinte exemplo com 3 estados e matriz de transição <span class="math inline">\(P\)</span>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1">estados &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;PR&quot;</span>, <span class="st">&quot;RS&quot;</span>, <span class="st">&quot;SC&quot;</span>)</a>
+<a class="sourceLine" id="cb13-2" title="2">P &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(.<span class="dv">3</span>, <span class="fl">.3</span>, <span class="fl">.4</span>, <span class="fl">.4</span>, <span class="fl">.4</span>, <span class="fl">.2</span>, <span class="fl">.5</span>, <span class="fl">.3</span>, <span class="fl">.2</span>),</a>
+<a class="sourceLine" id="cb13-3" title="3">             <span class="dt">byrow =</span> <span class="ot">TRUE</span>, <span class="dt">ncol =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb13-4" title="4"><span class="kw">dimnames</span>(P) &lt;-<span class="st"> </span><span class="kw">list</span>(estados, estados); P</a>
+<a class="sourceLine" id="cb13-5" title="5"><span class="co">#     PR  RS  SC</span></a>
+<a class="sourceLine" id="cb13-6" title="6"><span class="co"># PR 0.3 0.3 0.4</span></a>
+<a class="sourceLine" id="cb13-7" title="7"><span class="co"># RS 0.4 0.4 0.2</span></a>
+<a class="sourceLine" id="cb13-8" title="8"><span class="co"># SC 0.5 0.3 0.2</span></a>
+<a class="sourceLine" id="cb13-9" title="9"><span class="kw">rowSums</span>(P)</a>
+<a class="sourceLine" id="cb13-10" title="10"><span class="co"># PR RS SC </span></a>
+<a class="sourceLine" id="cb13-11" title="11"><span class="co">#  1  1  1</span></a>
+<a class="sourceLine" id="cb13-12" title="12"><span class="kw">colSums</span>(P)</a>
+<a class="sourceLine" id="cb13-13" title="13"><span class="co">#  PR  RS  SC </span></a>
+<a class="sourceLine" id="cb13-14" title="14"><span class="co"># 1.2 1.0 0.8</span></a>
+<a class="sourceLine" id="cb13-15" title="15"><span class="co">## DAG</span></a>
+<a class="sourceLine" id="cb13-16" title="16">diagram<span class="op">::</span><span class="kw">plotmat</span>(<span class="kw">t</span>(P), <span class="dt">relsize =</span> <span class="fl">.75</span>)</a></code></pre></div>
+<p><img src="figures/MCMC-2/unnamed-chunk-15-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>A interpretação das entradas da matriz é que, se estivermos no estado <span class="math inline">\(i\)</span> no tempo <span class="math inline">\(t\)</span>, a probabilidade de mover para o estado <span class="math inline">\(j\)</span> no tempo <span class="math inline">\(t+1\)</span> será <span class="math display">\[
+P[X_{t+1} = j | X_t = i] = P_{ij}
+\]</span> Por exemplo, se estamos no PR, a probabilidade de ir para SC é 0.4, ou seja, <span class="math inline">\(P[X_{t+1} = \text{SC}|X_t = \text{PR}] = P_{13} = 0.4\)</span>.</p>
+<p>Suponha que inicialmente estamos em SC com probabilidade 1. Então a distribuição de probabilidade inicial para os três estados é <span class="math inline">\(\pi_0 = (0,0,1)\)</span>. Após uma iteração, a distribuição de probabilidade dos estados será então <span class="math display">\[
+\pi_1 = \pi_0 P = (0.5, 0.3, 0.2)
+\]</span></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">pi0 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb14-2" title="2">(pi1 &lt;-<span class="st"> </span>pi0 <span class="op">%*%</span><span class="st"> </span>P)</a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="co">#       PR  RS  SC</span></a>
+<a class="sourceLine" id="cb14-4" title="4"><span class="co"># [1,] 0.5 0.3 0.2</span></a></code></pre></div>
+<p>Após duas iterações, a probabilidade será</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">(pi2 &lt;-<span class="st"> </span>pi1 <span class="op">%*%</span><span class="st"> </span>P)</a>
+<a class="sourceLine" id="cb15-2" title="2"><span class="co">#        PR   RS  SC</span></a>
+<a class="sourceLine" id="cb15-3" title="3"><span class="co"># [1,] 0.37 0.33 0.3</span></a></code></pre></div>
+<p>Se continuarmos o processo acima <span class="math inline">\(n\)</span> vezes, obtemos a distribuição de probabilidade para os estados após <span class="math inline">\(n\)</span> iterações, que podemos escrever como <span class="math display">\[
+\pi_n = \pi_0 \underbrace{PPP \cdots P}_{n \text{ vezes}} = \pi_0 P^{(n)}
+\]</span> Por exemplo, após 50 iterações, obtemos</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="kw">library</span>(expm) <span class="co"># potencia de matriz</span></a>
+<a class="sourceLine" id="cb16-2" title="2"><span class="co"># Loading required package: Matrix</span></a>
+<a class="sourceLine" id="cb16-3" title="3"><span class="co"># </span></a>
+<a class="sourceLine" id="cb16-4" title="4"><span class="co"># Attaching package: &#39;expm&#39;</span></a>
+<a class="sourceLine" id="cb16-5" title="5"><span class="co"># The following object is masked from &#39;package:Matrix&#39;:</span></a>
+<a class="sourceLine" id="cb16-6" title="6"><span class="co"># </span></a>
+<a class="sourceLine" id="cb16-7" title="7"><span class="co">#     expm</span></a>
+<a class="sourceLine" id="cb16-8" title="8">pi0 <span class="op">%*%</span><span class="st"> </span>(P <span class="op">%^%</span><span class="st"> </span><span class="dv">50</span>)</a>
+<a class="sourceLine" id="cb16-9" title="9"><span class="co">#             PR        RS        SC</span></a>
+<a class="sourceLine" id="cb16-10" title="10"><span class="co"># [1,] 0.3888889 0.3333333 0.2777778</span></a></code></pre></div>
+<p>Para <span class="math inline">\(n \to \infty\)</span> iterações, existe uma distribuição <span class="math inline">\(\pi_e\)</span> tal que <span class="math display">\[
+||\pi_e - \pi_n || \longrightarrow 0
+\]</span> onde <span class="math inline">\(||\cdot||\)</span> é a distância total entre as duas densidades. Outra forma de definir esse fato é <span class="math display">\[
+\lim_{n \to \infty} \pi_n(i) = \pi_e(i)
+\]</span> para todos os estados <span class="math inline">\(i\)</span> no espaço de estados.</p>
+<p>A distribuição <span class="math inline">\(\pi_e\)</span> é chamada de <strong>distribuição estacionária</strong> de uma cadeia de Markov, e deve satisfazer a seguinte propriedade <span class="math display">\[
+\pi_e P = \pi_e
+\]</span> Isso significa que, não importa onde a cadeia é iniciada (<span class="math inline">\(\pi_0\)</span>), a distribuição <span class="math inline">\(\pi_n\)</span> eventualmente chegará na distribuição estacionária <span class="math inline">\(\pi_e\)</span>.</p>
+<p>No exemplo anterior, temos que</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">pi0 <span class="op">%*%</span><span class="st"> </span>(P <span class="op">%^%</span><span class="st"> </span><span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb17-2" title="2"><span class="co">#           PR      RS      SC</span></a>
+<a class="sourceLine" id="cb17-3" title="3"><span class="co"># [1,] 0.38905 0.33333 0.27762</span></a>
+<a class="sourceLine" id="cb17-4" title="4">pi0 <span class="op">%*%</span><span class="st"> </span>(P <span class="op">%^%</span><span class="st"> </span><span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb17-5" title="5"><span class="co">#             PR        RS        SC</span></a>
+<a class="sourceLine" id="cb17-6" title="6"><span class="co"># [1,] 0.3888888 0.3333333 0.2777778</span></a>
+<a class="sourceLine" id="cb17-7" title="7">pi0 <span class="op">%*%</span><span class="st"> </span>(P <span class="op">%^%</span><span class="st"> </span><span class="fl">1e2</span>)</a>
+<a class="sourceLine" id="cb17-8" title="8"><span class="co">#             PR        RS        SC</span></a>
+<a class="sourceLine" id="cb17-9" title="9"><span class="co"># [1,] 0.3888889 0.3333333 0.2777778</span></a>
+<a class="sourceLine" id="cb17-10" title="10">pi0 <span class="op">%*%</span><span class="st"> </span>(P <span class="op">%^%</span><span class="st"> </span><span class="fl">1e3</span>)</a>
+<a class="sourceLine" id="cb17-11" title="11"><span class="co">#             PR        RS        SC</span></a>
+<a class="sourceLine" id="cb17-12" title="12"><span class="co"># [1,] 0.3888889 0.3333333 0.2777778</span></a>
+<a class="sourceLine" id="cb17-13" title="13">pi0 <span class="op">%*%</span><span class="st"> </span>(P <span class="op">%^%</span><span class="st"> </span><span class="fl">1e4</span>)</a>
+<a class="sourceLine" id="cb17-14" title="14"><span class="co">#             PR        RS        SC</span></a>
+<a class="sourceLine" id="cb17-15" title="15"><span class="co"># [1,] 0.3888889 0.3333333 0.2777778</span></a></code></pre></div>
+<p>ou seja, após poucas iterações (<span class="math inline">\(\sim 100\)</span>) a distribuição estacionária já é atingida. Note portanto que</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1"><span class="co">## Distribuição estacionária</span></a>
+<a class="sourceLine" id="cb18-2" title="2">(pi_e &lt;-<span class="st"> </span>pi0 <span class="op">%*%</span><span class="st"> </span>(P <span class="op">%^%</span><span class="st"> </span><span class="fl">1e4</span>))</a>
+<a class="sourceLine" id="cb18-3" title="3"><span class="co">#             PR        RS        SC</span></a>
+<a class="sourceLine" id="cb18-4" title="4"><span class="co"># [1,] 0.3888889 0.3333333 0.2777778</span></a>
+<a class="sourceLine" id="cb18-5" title="5"><span class="co">## Propriedade da distribuição estacionária</span></a>
+<a class="sourceLine" id="cb18-6" title="6">pi_e <span class="op">%*%</span><span class="st"> </span>P</a>
+<a class="sourceLine" id="cb18-7" title="7"><span class="co">#             PR        RS        SC</span></a>
+<a class="sourceLine" id="cb18-8" title="8"><span class="co"># [1,] 0.3888889 0.3333333 0.2777778</span></a></code></pre></div>
+<p>A distribuição estacionária também pode ser <strong>aproximada</strong> a partir da frequência relativa de “visitas” em cada estado após muitas iterações. Para isso, inicia-se a cadeia em um estado qualquer, e os movimentos levarão aos outros estados a cada iteração, conforme estabelecido pela matriz de transição. O número de vezes que um estado é visitado a longo prazo (muitas iterações) levará a uma aproximação da distribuição estacionária, através das frequências relativas.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1"><span class="co">## Cria função para gerar cadeia</span></a>
+<a class="sourceLine" id="cb19-2" title="2">mc &lt;-<span class="st"> </span><span class="cf">function</span>(n, x1, P, states) {</a>
+<a class="sourceLine" id="cb19-3" title="3">    x &lt;-<span class="st"> </span><span class="kw">character</span>(n)</a>
+<a class="sourceLine" id="cb19-4" title="4">    x[<span class="dv">1</span>] &lt;-<span class="st"> </span>x1</a>
+<a class="sourceLine" id="cb19-5" title="5">    <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>n) {</a>
+<a class="sourceLine" id="cb19-6" title="6">        x[i] &lt;-<span class="st"> </span><span class="kw">sample</span>(states, <span class="dt">size =</span> <span class="dv">1</span>, <span class="dt">prob =</span> P[x[i <span class="op">-</span><span class="st"> </span><span class="dv">1</span>], ])</a>
+<a class="sourceLine" id="cb19-7" title="7">    }</a>
+<a class="sourceLine" id="cb19-8" title="8">    <span class="kw">return</span>(x)</a>
+<a class="sourceLine" id="cb19-9" title="9">}</a>
+<a class="sourceLine" id="cb19-10" title="10"><span class="co">## Tamanho da cadeia</span></a>
+<a class="sourceLine" id="cb19-11" title="11">N &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">1e2</span>, <span class="fl">1e3</span>, <span class="fl">1e4</span>, <span class="fl">1e5</span>)</a>
+<a class="sourceLine" id="cb19-12" title="12">res &lt;-<span class="st"> </span><span class="kw">lapply</span>(N, <span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb19-13" title="13">    <span class="kw">mc</span>(<span class="dt">n =</span> x, <span class="dt">x1 =</span> <span class="st">&quot;SC&quot;</span>, <span class="dt">P =</span> P, <span class="dt">states =</span> estados)</a>
+<a class="sourceLine" id="cb19-14" title="14">})</a>
+<a class="sourceLine" id="cb19-15" title="15"><span class="co">## Proporção relativa</span></a>
+<a class="sourceLine" id="cb19-16" title="16"><span class="kw">t</span>(<span class="kw">sapply</span>(res, <span class="cf">function</span>(x) <span class="kw">prop.table</span>(<span class="kw">table</span>(x))))</a>
+<a class="sourceLine" id="cb19-17" title="17"><span class="co">#           PR     RS      SC</span></a>
+<a class="sourceLine" id="cb19-18" title="18"><span class="co"># [1,] 0.37000 0.3700 0.26000</span></a>
+<a class="sourceLine" id="cb19-19" title="19"><span class="co"># [2,] 0.41600 0.2810 0.30300</span></a>
+<a class="sourceLine" id="cb19-20" title="20"><span class="co"># [3,] 0.39290 0.3334 0.27370</span></a>
+<a class="sourceLine" id="cb19-21" title="21"><span class="co"># [4,] 0.39102 0.3296 0.27938</span></a>
+<a class="sourceLine" id="cb19-22" title="22"><span class="co">## Começando em outro estado</span></a>
+<a class="sourceLine" id="cb19-23" title="23">res &lt;-<span class="st"> </span><span class="kw">lapply</span>(N, <span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb19-24" title="24">    <span class="kw">mc</span>(<span class="dt">n =</span> x, <span class="dt">x1 =</span> <span class="st">&quot;RS&quot;</span>, <span class="dt">P =</span> P, <span class="dt">states =</span> estados)</a>
+<a class="sourceLine" id="cb19-25" title="25">})</a>
+<a class="sourceLine" id="cb19-26" title="26"><span class="co">## Proporção relativa</span></a>
+<a class="sourceLine" id="cb19-27" title="27"><span class="kw">t</span>(<span class="kw">sapply</span>(res, <span class="cf">function</span>(x) <span class="kw">prop.table</span>(<span class="kw">table</span>(x))))</a>
+<a class="sourceLine" id="cb19-28" title="28"><span class="co">#           PR      RS      SC</span></a>
+<a class="sourceLine" id="cb19-29" title="29"><span class="co"># [1,] 0.47000 0.30000 0.23000</span></a>
+<a class="sourceLine" id="cb19-30" title="30"><span class="co"># [2,] 0.39600 0.34300 0.26100</span></a>
+<a class="sourceLine" id="cb19-31" title="31"><span class="co"># [3,] 0.38940 0.33570 0.27490</span></a>
+<a class="sourceLine" id="cb19-32" title="32"><span class="co"># [4,] 0.39026 0.33271 0.27703</span></a></code></pre></div>
+<p>Existem ainda três suposições necessárias para que os teoremas limite sejam verdadeiros. A cadeia deve ser:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Homogênea</strong>: as probabilidades de transição de um estado para outro são invariantes.</li>
+<li><strong>Irredutível</strong>: cada estado pode ser atingido a partir de qualquer outro em um número finito de iterações.</li>
+<li><strong>Aperiódica</strong>: não deve haver estados absorventes (i.e., estados em que, uma vez inseridos, não podem mais ser deixados).</li>
+</ol>
+<p>Em geral, os algoritmos de MCMC satisfazem estas três condições.</p>
+<p>No caso de cadeias recorrentes (ou aperiódicas), a distribuição estacionária também é a <strong>distribuição limite</strong>, no sentido de que a distribuição limite de <span class="math inline">\(\{X_t\}\)</span> é <span class="math inline">\(\pi_e\)</span> para qualquer valor de estado inicial <span class="math inline">\(X_0\)</span>. Esta propriedade é chamada de <strong>ergodicidade</strong>, e obviamente é de interesse direto nos métodos de MCMC, pois eventualmente atingiremos a distribuição alvo, que é a distribuição estacionária. Particularmente, para qualquer função <span class="math inline">\(h\)</span> <span class="math display">\[
+\frac{1}{T} \sum_{t=1}^{T} h(X_t) \longrightarrow \text{E}_{\pi}[h(X)]
+\]</span> ou seja, a Lei Forte dos Grandes Números, que é a base dos métodos de Monte Carlo também é aplicada nos métodos de MCMC. Essa definição também é conhecida como <strong>teorema ergódico</strong>. Isso também mostra que, embora a cadeia seja <strong>dependente por definição</strong>, a média aritmética dos valores da cadeia é um estimador consistente da média teórica.</p>
+<p>Veja uma animação em <a href="http://setosa.io/ev/markov-chains" class="uri">http://setosa.io/ev/markov-chains</a>.</p>
+</div>
+
+<center>
+  <hr width="100%" size="3px">
+  <p> <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt_BR">
+      <img src="https://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" alt="Licença Creative Commons 4.0"> </a>
+  </p>
+  <p> <font size="2"> Este conteúdo
+      está disponível por meio da Licença Creative Commons 4.0 </font>
+  </p>
+</center>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = false;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
