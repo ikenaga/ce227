@@ -4,13 +4,11 @@
 ## theta ~ Beta(a, b)
 
 ## Condicionais são
-## X | theta ~ Bin(mu, theta)
+## X | theta ~ Bin(n, theta)
 ## theta | X ~ Beta(x + a, n - x + b)
 
 ## Define constantes
 N <- 5000
-## Burnin
-burn <- 1000
 ## Vetores para armazenar as amostras
 T <- numeric(N)
 X <- numeric(N)
