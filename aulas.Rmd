@@ -55,10 +55,10 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **15/10 (Ter)**: (PJ) Predição - obtenção da distribuição preditiva (Cap 6)
 - **17/10 (Qui)**: (FM) Integração de Monte Carlo: método simples e
   amostragem por importância. [HTML](MC_intro.html).
-- **22/10 (Ter)**:
+- **22/10 (Ter)**: (PJ) Inferência por simulação. Resumos da posteriori e preditiva. Introdução mas métodos de simulação da posteriori e ao MCMC  
 - **24/10 (Qui)**: (FM) Método de aceitação-rejeição. MCMC:
   Metropolis-Hastings e Metropolis random walk. [HTML](MCMC-1.html).
-- **29/10 (Ter)**:
+- **29/10 (Ter)**: (PJ) Modelos com múltiplos parâmetros. Cap 4 da apostila e exercícios.
 - **31/10 (Qui)**: (FM) Método geral de Metropolis-Hastings.
   [HTML](MCMC-2.html). Exemplo de amostrador de Gibbs.
   [Script](scripts/gibbs_aula1.R).
