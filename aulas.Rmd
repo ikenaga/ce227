@@ -64,7 +64,7 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
   [Script](scripts/gibbs_aula1.R).
 - **05/11 (Ter)**: (PJ) Algorítmo de Gibbs: dos exemplos, distribuição normal e modelo Poisson com 2 níveis hierárquicos
   [Script](scripts/normalGIBBS.R).
-  [HTML](script/PoissonGammaGIBBS.html) 
+  [HTML](scripts/PoissonGammaGIBBS.html) 
 - **07/11 (Qui)**:
 - **12/11 (Ter)**:
 - **14/11 (Qui)**:
