@@ -62,7 +62,9 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **31/10 (Qui)**: (FM) Método geral de Metropolis-Hastings.
   [HTML](MCMC-2.html). Exemplo de amostrador de Gibbs.
   [Script](scripts/gibbs_aula1.R).
-- **05/11 (Ter)**:
+- **05/11 (Ter)**: (PJ) Algorítmo de Gibbs: dos exemplos, distribuição normal e modelo Poisson com 2 níveis hierárquicos
+  [Script](scripts/normalGIBBS.R).
+  [HTML](script/PoissonGammaGibbs.html) 
 - **07/11 (Qui)**:
 - **12/11 (Ter)**:
 - **14/11 (Qui)**:
