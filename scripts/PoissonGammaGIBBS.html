@@ -180,6 +180,8 @@ summary {
 </div>
 
 
+<div id="algorítmo-de-gibbs-modelos-poisson-com-prioris-em-dois-estágios" class="section level1">
+<h1>Algorítmo de Gibbs: Modelos Poisson com prioris em dois estágios</h1>
 <p>Seja um modelo com estrutura hierárquica no qual assume-se a distribuição <span class="math inline">\(Poisson(\lambda)\)</span> para as observações, priori <span class="math inline">\(Gamma(a, \beta)\)</span> com <span class="math inline">\(a\)</span> considerado aqui constante e hiperpriori <span class="math inline">\(Inversa-Gamma(c, d)\)</span> para <span class="math inline">\(beta\)</span>. Neste modelo não é possível amostrar diretamente da posteriori e obter as marginais em forma fechada. Implementar o algoritmo de Gibbs.</p>
 O modelo pode ser especificado da forma.
 <span class="math display">\[\begin{align*}
@@ -199,17 +201,17 @@ f(y|\lambda)f(\lambda|\beta)f(\beta) \]</span> Na expressão anterior, a estrutu
     f(\lambda,\beta|y) &amp;= \frac{\exp\{-n\lambda\} \lambda^{\sum{y_i}}}{\prod y!}
 \frac{1}{\beta^a \Gamma(a)} \lambda^{a-1} \exp\{-\lambda/\beta\}
 \frac{1}{d^c \Gamma(c)} \beta^{-c-1} \exp\{-1/d\beta\} \\
-&amp;\propto \lambda^{a-1} \lambda^{\sum y_i} \beta^{-a}\beta^{-c-1} \exp\{-n\lambda\}\exp\{-\lambda/\beta\}\exp\{-1/d\beta\}
-= \lambda^{a+\sum y_i} \beta^{-(a+c)-1} \exp\{-n\lambda -\frac{\lambda}{\beta} -\frac{1}{d\beta}\}
+&amp;\propto \lambda^{a-1} \lambda^{\sum y_i} \beta^{-a}\beta^{-c-1} \exp\{-n\lambda\}\exp\{-\lambda/\beta\}\exp\{-1/d\beta\} \\
+&amp; = \lambda^{a+\sum y_i} \beta^{-(a+c)-1} \exp\{-n\lambda -\frac{\lambda}{\beta} -\frac{1}{d\beta}\}
 \end{align*}\]</span>
 <p>As marginais não podem ser obtidas analiticamente. Entretanto as condicionais completas podem ser obtidas conforme a seguir, o que permite a implementação direta do algoritmo de Gibbs.</p>
 <span class="math display">\[\begin{align*}
     f(\lambda|y, \beta) &amp;\propto \lambda^{a+(\sum{y_i}) -1} \exp\{-n\lambda -\frac{\lambda}{\beta}\}\\
-[\lambda|y, \beta] \sim {\rm G}(a+\sum y_i, \frac{\beta}{n\beta + 1})
+[\lambda|y, \beta] &amp;\sim {\rm G}(a+\sum y_i, \frac{\beta}{n\beta + 1})
 \\
-f(\beta|y, \lambda) &amp;= \beta^{-(a+c)-1} \exp\{-\frac{\lambda}{\beta} -\frac{1}{d\beta}\}
-= \beta^{-(a+c)-1} \exp\{-\frac{1}{\frac{d\beta}{d\lambda + 1}}\}\\
-[\beta|y, \lambda] \sim {\rm IG}(a+c, \frac{d}{d\lambda + 1})
+f(\beta|y, \lambda) &amp;= \beta^{-(a+c)-1} \exp\{-\frac{\lambda}{\beta} -\frac{1}{d\beta}\} \\
+&amp; = \beta^{-(a+c)-1} \exp\{-\frac{1}{\frac{d\beta}{d\lambda + 1}}\}\\
+[\beta|y, \lambda] &amp;\sim {\rm IG}(a+c, \frac{d}{d\lambda + 1})
 \end{align*}\]</span>
 <pre class="{r}"><code>EVIG &lt;- function(a,b){
     E &lt;- ifelse(a &gt; 1, 1/(b * (a-1)), &quot;não pode ser calculada para este valor de a&quot;)
@@ -263,6 +265,7 @@ summary(lambda.sam)
 par(mfrow=c(1,2))
 plot(density(beta.sam, from=0, to=5)); abline(v=mean(betas)); rug(betas)
 plot(density(lambda.sam, from=0, to=20)); abline(v=mean(lambdas)); rug(lambdas)</code></pre>
+</div>
 
 
 
