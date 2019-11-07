@@ -1,0 +1,4 @@
+model{
+  x ~ dpois(lam)
+  lam ~ dgamma(2,2)
+}
