@@ -55,7 +55,7 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **15/10 (Ter)**: (PJ) Predição - obtenção da distribuição preditiva (Cap 6)
 - **17/10 (Qui)**: (FM) Integração de Monte Carlo: método simples e
   amostragem por importância. [HTML](MC_intro.html).
-- **22/10 (Ter)**: (PJ) Inferência por simulação. Resumos da posteriori e preditiva. Introdução mas métodos de simulação da posteriori e ao MCMC  
+- **22/10 (Ter)**: (PJ) Inferência por simulação. Resumos da posteriori e preditiva. Introdução aos métodos de simulação da posteriori e ao MCMC.
 - **24/10 (Qui)**: (FM) Método de aceitação-rejeição. MCMC:
   Metropolis-Hastings e Metropolis random walk. [HTML](MCMC-1.html).
 - **29/10 (Ter)**: (PJ) Modelos com múltiplos parâmetros. Cap 4 da apostila e exercícios.
@@ -64,8 +64,10 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
   [Script](scripts/gibbs_aula1.R).
 - **05/11 (Ter)**: (PJ) Algorítmo de Gibbs: dos exemplos, distribuição normal e modelo Poisson com 2 níveis hierárquicos
   [Script](scripts/normalGIBBS.R).
-  [HTML](scripts/PoissonGammaGIBBS.html) 
-- **07/11 (Qui)**:
+  [HTML](scripts/PoissonGammaGIBBS.html)
+- **07/11 (Qui)**: (FM) Exemplos usando
+  [JAGS](http://mcmc-jags.sourceforge.net/).
+  [Script](scripts/gibbs-jags.R).
 - **12/11 (Ter)**:
 - **14/11 (Qui)**:
 - **19/11 (Ter)**:
