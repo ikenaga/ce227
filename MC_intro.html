@@ -553,7 +553,7 @@ P(\lim_{n \to \infty} |\bar{X}_n - \mu| &lt; \epsilon) = 1
 <a class="sourceLine" id="cb1-5" title="5">theta.hat &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x)</a>
 <a class="sourceLine" id="cb1-6" title="6"><span class="co">## Calcula a média</span></a>
 <a class="sourceLine" id="cb1-7" title="7">(m.theta.hat &lt;-<span class="st"> </span><span class="kw">sum</span>(theta.hat)<span class="op">/</span>m)</a>
-<a class="sourceLine" id="cb1-8" title="8"><span class="co"># [1] 0.6325073</span></a></code></pre></div>
+<a class="sourceLine" id="cb1-8" title="8"><span class="co"># [1] 0.6307498</span></a></code></pre></div>
 <p>Nesse caso, podemos obter a solução analítica e integração numérica no R para comparar as estimativas</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co">## Solução analítica</span></a>
 <a class="sourceLine" id="cb2-2" title="2">(theta &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span>))</a>
@@ -593,7 +593,7 @@ P(\lim_{n \to \infty} |\bar{X}_n - \mu| &lt; \epsilon) = 1
 <a class="sourceLine" id="cb3-6" title="6">theta.hat &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x)</a>
 <a class="sourceLine" id="cb3-7" title="7"><span class="co">## Calcula a média * (b - a)</span></a>
 <a class="sourceLine" id="cb3-8" title="8">(m.theta.hat &lt;-<span class="st"> </span>(<span class="kw">sum</span>(theta.hat)<span class="op">/</span>m) <span class="op">*</span><span class="st"> </span>(b <span class="op">-</span><span class="st"> </span>a))</a>
-<a class="sourceLine" id="cb3-9" title="9"><span class="co"># [1] 0.1175092</span></a></code></pre></div>
+<a class="sourceLine" id="cb3-9" title="9"><span class="co"># [1] 0.1168327</span></a></code></pre></div>
 <p>Nesse caso, podemos obter a solução analítica e integração numérica no R para comparar as estimativas</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co">## Solução analítica</span></a>
 <a class="sourceLine" id="cb4-2" title="2">(theta &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">2</span>) <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">4</span>))</a>
@@ -614,7 +614,7 @@ P[X&gt;2] = \int_2^{\infty} e^{-x} dx
 <a class="sourceLine" id="cb5-5" title="5">theta.hat2 &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>x2)</a>
 <a class="sourceLine" id="cb5-6" title="6"><span class="co">## Calcula a média * (b - a)</span></a>
 <a class="sourceLine" id="cb5-7" title="7">(m.theta.hat2 &lt;-<span class="st"> </span>(<span class="kw">sum</span>(theta.hat2)<span class="op">/</span>m) <span class="op">*</span><span class="st"> </span>(<span class="fl">1e5</span> <span class="op">-</span><span class="st"> </span><span class="dv">2</span>))</a>
-<a class="sourceLine" id="cb5-8" title="8"><span class="co"># [1] 9.012991e-05</span></a>
+<a class="sourceLine" id="cb5-8" title="8"><span class="co"># [1] 0.1166143</span></a>
 <a class="sourceLine" id="cb5-9" title="9"><span class="co">## Solução analítica</span></a>
 <a class="sourceLine" id="cb5-10" title="10">(theta2 &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">2</span>) <span class="op">-</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="fl">1e5</span>))</a>
 <a class="sourceLine" id="cb5-11" title="11"><span class="co"># [1] 0.1353353</span></a>
@@ -635,17 +635,17 @@ P[X&gt;2] = \int_2^{\infty} e^{-x} dx
 \]</span></p>
 <p>Seguindo o exemplo anterior, vimos que a estimativa da integral é</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">m.theta.hat</a>
-<a class="sourceLine" id="cb6-2" title="2"><span class="co"># [1] 0.1175092</span></a></code></pre></div>
+<a class="sourceLine" id="cb6-2" title="2"><span class="co"># [1] 0.1168327</span></a></code></pre></div>
 <p>Mas veja que existe uma distribuição de valores para compor esta estimativa média</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">hist</span>(theta.hat); <span class="kw">abline</span>(<span class="dt">v =</span> theta, <span class="dt">col =</span> <span class="dv">2</span>)</a></code></pre></div>
 <p><img src="figures/MC_intro/unnamed-chunk-9-1.png" width="80%" style="display: block; margin: auto;" /></p>
 <p>A variância relacionada ao estimador pode então ser calculada como</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="co">## Variancia</span></a>
 <a class="sourceLine" id="cb8-2" title="2">(v.theta.hat &lt;-<span class="st"> </span><span class="kw">sum</span>((theta.hat <span class="op">-</span><span class="st"> </span>m.theta.hat)<span class="op">^</span><span class="dv">2</span>)<span class="op">/</span>m<span class="op">^</span><span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb8-3" title="3"><span class="co"># [1] 4.515946e-07</span></a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co"># [1] 4.477019e-07</span></a>
 <a class="sourceLine" id="cb8-4" title="4"><span class="co">## Erro padrão</span></a>
 <a class="sourceLine" id="cb8-5" title="5">(se.theta.hat &lt;-<span class="st"> </span><span class="kw">sqrt</span>(v.theta.hat))</a>
-<a class="sourceLine" id="cb8-6" title="6"><span class="co"># [1] 0.0006720079</span></a></code></pre></div>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co"># [1] 0.0006691053</span></a></code></pre></div>
 <p>Pelo Teorema do Limite Central, temos que</p>
 <p><span class="math display">\[
 \frac{\hat\theta - \text{E}(\hat\theta)}{\sqrt{\hat{V}(\hat\theta)}}
@@ -659,10 +659,10 @@ P[X&gt;2] = \int_2^{\infty} e^{-x} dx
 <p>Com esse resultado, podemos inclusive fornecer um intervalo de confiança associado à nossa estimativa</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="co">## Media e veriancia</span></a>
 <a class="sourceLine" id="cb10-2" title="2"><span class="kw">c</span>(m.theta.hat, v.theta.hat)</a>
-<a class="sourceLine" id="cb10-3" title="3"><span class="co"># [1] 1.175092e-01 4.515946e-07</span></a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="co"># [1] 1.168327e-01 4.477019e-07</span></a>
 <a class="sourceLine" id="cb10-4" title="4"><span class="co">## Intervalo de confiança (95%)</span></a>
 <a class="sourceLine" id="cb10-5" title="5"><span class="kw">c</span>(m.theta.hat <span class="op">-</span><span class="st"> </span><span class="fl">1.96</span> <span class="op">*</span><span class="st"> </span>se.theta.hat, m.theta.hat <span class="op">+</span><span class="st"> </span><span class="fl">1.96</span> <span class="op">*</span><span class="st"> </span>se.theta.hat)</a>
-<a class="sourceLine" id="cb10-6" title="6"><span class="co"># [1] 0.1161921 0.1188263</span></a></code></pre></div>
+<a class="sourceLine" id="cb10-6" title="6"><span class="co"># [1] 0.1155213 0.1181442</span></a></code></pre></div>
 <p>Veja que assintoticamente, i.e., conforme aumentamos o tamanho da amostra, o valor da integral se aproxima cada vez mais do valor verdadeiro (que nesse caso sabemos calcular analiticamente, apenas para comparação).</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="co">## Simula a convergência para o verdadeiro valor conforme aumenta o</span></a>
 <a class="sourceLine" id="cb11-2" title="2"><span class="co">## tamanho da amostra</span></a>
