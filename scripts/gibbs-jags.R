@@ -30,6 +30,7 @@ theta ~ dgamma(1, 0.1)
 }"
 
 ## Ajuste
+library(runjags)
 m.jags <- run.jags(
     model = mod, monitor = params, data = datalist, inits = inicial,
     n.chains = 1, burnin = 5000, thin = 5, sample = 10000
@@ -88,6 +89,47 @@ with(ctes, c(media=mean(y), var=var(y)))
 with(ctes, plot(prop.table(table(y)), type="h", ylim=c(0,0.3)))
 with(ctes,lines((0:max(y))+0.1, dpois(0:max(y), lambda=mean(y)),
                 type="h", col=2))
+
+EVIG <- function(a,b){
+    E <- ifelse(a > 1, 1/(b * (a-1)), "não pode ser calculada para este valor de a")
+    V  <- ifelse(a > 2, 1/((b^2) * ((a-1)^2) * (a-2)), "não pode ser calculada para este valor de a")
+    return(c(E,V))
+}
+set.seed(2018)
+ctes <- list(a=3, c=2.5, d=0.8, n=50)
+with(ctes, EVIG(c, d))
+betas <- with(ctes, 1/rgamma(n, shape=c, scale=d))
+c(mean(betas),var(betas))
+lambdas <- with(ctes, rgamma(n, shape=a, rate=betas))
+(ctes$y <- rpois(ctes$n, lambda=lambdas))
+with(ctes, c(media=mean(y), var=var(y)))
+with(ctes, plot(prop.table(table(y)), type="h", ylim=c(0,0.3)))
+with(ctes,lines((0:max(y))+0.1, dpois(0:max(y), lambda=mean(y)), type="h", col=2))
+##
+ctes$sumY <- sum(ctes$y)
+##
+N <- 11000
+B <- 1000
+beta.sam <- lambda.sam <- numeric(N)
+beta.sam[1] <- lambda.sam[1] <- 10
+{
+    for(i in 2:N){
+        beta.sam[i] <- with(ctes, 1/rgamma(1, shape=a+c, scale=d/(d*lambda.sam[i-1]+1)))
+        lambda.sam[i] <- with(ctes, rgamma(1, shape=ctes$a+sumY, scale=beta.sam[i]/(n*beta.sam[i]+1)))
+    }
+}
+
+par(mfrow=c(2,1))
+plot(beta.sam, type="l")
+plot(lambda.sam, type="l")
+## retirando amostras consideradas aquecimento
+beta.sam <- beta.sam[-(1:B)]
+lambda.sam <- lambda.sam[-(1:B)]
+plot(beta.sam, type="l")
+plot(lambda.sam, type="l")
+plot(log(beta.sam), type="l")
+plot(lambda.sam, type="l")
+
 
 datalist <- dump.format(list(y = ctes$y))
 params <- c("lambda", "beta")
@@ -233,8 +275,8 @@ tau ~ dgamma(0.001, 0.001)
 ## Ajuste
 m.jags <- run.jags(
     model = mod, monitor = params, data = datalist, inits = inicial,
-    n.chains = 1, burnin = 5000, thin = 5, sample = 10000
-    ## mutate = list("prec2sd", vars = "tau")
+    n.chains = 1, burnin = 5000, thin = 5, sample = 10000,
+    mutate = list("prec2sd", vars = "tau")
     ## method = "parallel"
 )
 
@@ -329,7 +371,7 @@ str(sam)
 
 ## Gera classe mais apropriada
 sam <- coda.samples(jags,
-             c('b0', 'b1', 'sigma'),
+             c('b0', 'b1', 'sigma', 'y'),
              1000)
 class(sam)
 str(sam)
@@ -370,3 +412,4 @@ m.jags <- run.jags(
 m.jags
 quantile(lambda.sam, probs = c(.025, .5, .975))
 quantile(beta.sam, probs = c(.025, .5, .975))
+plot(m.jags)
