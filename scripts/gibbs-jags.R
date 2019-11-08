@@ -90,36 +90,22 @@ with(ctes, plot(prop.table(table(y)), type="h", ylim=c(0,0.3)))
 with(ctes,lines((0:max(y))+0.1, dpois(0:max(y), lambda=mean(y)),
                 type="h", col=2))
 
-EVIG <- function(a,b){
-    E <- ifelse(a > 1, 1/(b * (a-1)), "não pode ser calculada para este valor de a")
-    V  <- ifelse(a > 2, 1/((b^2) * ((a-1)^2) * (a-2)), "não pode ser calculada para este valor de a")
-    return(c(E,V))
-}
-set.seed(2018)
-ctes <- list(a=3, c=2.5, d=0.8, n=50)
-with(ctes, EVIG(c, d))
-betas <- with(ctes, 1/rgamma(n, shape=c, scale=d))
-c(mean(betas),var(betas))
-lambdas <- with(ctes, rgamma(n, shape=a, rate=betas))
-(ctes$y <- rpois(ctes$n, lambda=lambdas))
-with(ctes, c(media=mean(y), var=var(y)))
-with(ctes, plot(prop.table(table(y)), type="h", ylim=c(0,0.3)))
-with(ctes,lines((0:max(y))+0.1, dpois(0:max(y), lambda=mean(y)), type="h", col=2))
-##
+## Implementação manual do Gibbs sampler
 ctes$sumY <- sum(ctes$y)
-##
 N <- 11000
 B <- 1000
 beta.sam <- lambda.sam <- numeric(N)
 beta.sam[1] <- lambda.sam[1] <- 10
-{
-    for(i in 2:N){
-        beta.sam[i] <- with(ctes, 1/rgamma(1, shape=a+c, scale=d/(d*lambda.sam[i-1]+1)))
-        lambda.sam[i] <- with(ctes, rgamma(1, shape=ctes$a+sumY, scale=beta.sam[i]/(n*beta.sam[i]+1)))
-    }
+for(i in 2:N){
+    beta.sam[i] <- with(
+        ctes, 1/rgamma(1, shape=a+c,
+                       scale=d/(d*lambda.sam[i-1]+1)))
+    lambda.sam[i] <- with(
+        ctes, rgamma(1, shape=ctes$a+sumY,
+                     scale=beta.sam[i]/(n*beta.sam[i]+1)))
 }
 
-par(mfrow=c(2,1))
+par(mfrow = c(2, 1))
 plot(beta.sam, type="l")
 plot(lambda.sam, type="l")
 ## retirando amostras consideradas aquecimento
@@ -127,10 +113,9 @@ beta.sam <- beta.sam[-(1:B)]
 lambda.sam <- lambda.sam[-(1:B)]
 plot(beta.sam, type="l")
 plot(lambda.sam, type="l")
-plot(log(beta.sam), type="l")
-plot(lambda.sam, type="l")
+par(mfrow = c(1, 1))
 
-
+## Implementação em JAGS
 datalist <- dump.format(list(y = ctes$y))
 params <- c("lambda", "beta")
 inicial <- dump.format(list(lambda = 10, xi = 10))
@@ -320,19 +305,19 @@ curve(dgamma(x, a + n/2, b + sum((y - mu)^2)/2),
 par(mfrow = c(1, 1))
 
 ##======================================================================
-## Modelo de regressao
+## Modelo de regressão linear simples
 
-## Dados
+## Dados simulados
 n <- 20
 x <- sort(runif(n, 0, 20))
 epsilon <- rnorm(n, 0, 2.5)
-y <- 2 + 0.5*x + epsilon
+y <- 2 + 0.5 * x + epsilon
 plot(x, y)
 
 ##----------------------------------------------------------------------
 ## Usando rjags
-cat( "model {
-      	for (i in 1:n){
+cat("model {
+  for (i in 1:n){
 		y[i] ~ dnorm(mu[i], tau)
 		mu[i] <- b0 + b1 * x[i]
 	}
@@ -340,7 +325,7 @@ cat( "model {
 	b1 ~ dnorm(0, .0001)
 	tau <- pow(sigma, -2)
 	sigma ~ dunif(0, 100)
-}", file="reglin.model")
+}", file = "reglin.model")
 
 ## alternativa:
 ## tau ~dgamma(0.001, 0.001)
@@ -349,8 +334,11 @@ cat( "model {
 library(rjags)
 
 ## Iniciais
-inis <- list(list(b0=0, b1=1, sigma=1),
-             list(b0=2, b1=0.1, sigma=5))
+## Serão geradas duas cadeias, então é necessário especificar os
+## iniciais para cada uma. Isso é bom para testar a convergência das
+## cadeias a partir de pontos inciais diferentes
+inis <- list(list(b0 = 0, b1 = 1, sigma = 1),
+             list(b0 = 2, b1 = 0.1, sigma = 5))
 
 jags <- jags.model(
     'reglin.model',
@@ -364,15 +352,15 @@ jags
 
 ## Amostra da posterior
 sam <- jags.samples(jags,
-             c('b0', 'b1', 'sigma'),
-             1000)
+                    c('b0', 'b1', 'sigma'),
+                    1000)
 class(sam)
 str(sam)
 
 ## Gera classe mais apropriada
 sam <- coda.samples(jags,
-             c('b0', 'b1', 'sigma', 'y'),
-             1000)
+                    c('b0', 'b1', 'sigma'),
+                    1000)
 class(sam)
 str(sam)
 plot(sam)
@@ -391,7 +379,7 @@ inicial <- dump.format(list(b0 = 0, b1 = 1, sigma = 1))
 
 ## Modelo
 mod <- "model {
-      	for (i in 1:n){
+ 	for (i in 1:n){
 		y[i] ~ dnorm(mu[i], tau)
 		mu[i] <- b0 + b1 * x[i]
 	}
