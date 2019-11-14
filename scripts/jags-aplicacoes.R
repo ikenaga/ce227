@@ -1,4 +1,179 @@
 ##======================================================================
+## Exemplo prova PJ
+set.seed(22701)
+Ng <- 10
+Nobs <- 5
+N <- Ng*Nobs
+delta <- 5
+sigma <- 2
+mus <- rnorm(Ng, mean=50, sd=delta)
+y <- matrix(rnorm(N, mean=mus, sd=sigma), ncol=Ng, byrow=TRUE)
+q2.df <- data.frame(y = as.vector(y), grupo = rep(1:Ng, each=Nobs))
+
+##----------------------------------------------------------------------
+## Efeito fixo
+cat("model{
+  for(i in 1:M){
+     for(j in 1:N){
+        y[i,j] ~ dnorm(mu[i], tau)
+     }
+     mu[i] ~ dnorm(50, 0.0001)
+  }
+  tau <- pow(sigma, -2)
+  sigma ~ dunif(0, 100)
+}", file = "av04-q2.jags")
+
+q2.dat <- list(y = t(y), M = Ng, N = Nobs)
+q2.model <- jags.model(file="av04-q2.jags", data=q2.dat, n.chains=1)
+
+q2.sam <- coda.samples(q2.model,
+                       c("mu", "sigma"),
+                       20000, thin=10)
+summary(q2.sam)
+
+post.jags <- q2.sam[[1]][, 1:10]
+str(post.jags)
+
+## Gráficos com as posteriores
+post.jags.df <- stack(as.data.frame(post.jags))
+str(post.jags.df)
+p1 <- densityplot(~values, post.jags.df, groups = ind, auto.key = TRUE,
+                  xlab = expression(mu))
+p2 <- densityplot(~q2.sam[[1]][,11], xlab = expression(sigma^2))
+grid.arrange(p1, p2, ncol = 1)
+
+## ECDF das posteriores
+ecdfplot(~values, post.jags.df, groups = ind, auto.key = TRUE,
+         xlab = expression(mu^cpue))
+
+## Resumo numérico das posteriores
+(tab.res.jags <- t(cbind(apply(post.jags, 2, respost),
+                         s2 = respost(q2.sam[[1]][,11]))))
+
+## Compara intervalos de credibilidade
+segplot(factor(1:10) ~
+            tab.res.jags[1:10, 1] + tab.res.jags[1:10, 3],
+        centers = tab.res.jags[1:10, 2], draw.bands = FALSE,
+        xlab = expression(mu), ylab = "Áreas")
+
+## Compara com lm
+m <- lm(y ~ -1 + factor(grupo), q2.df)
+summary(m)
+tab.res.jags[1:10, 4:5]
+
+##----------------------------------------------------------------------
+## Efeito aleatório
+cat("model{
+  for(i in 1:M){
+     for(j in 1:N){
+        y[i,j] ~ dnorm(mu[i], tau)
+     }
+     mu[i] ~ dnorm(theta, tauD)
+  }
+  tau <- pow(sigma, -2)
+  sigma ~ dunif(0, 100)
+  theta ~ dnorm(0, .001)
+  tauD <- pow(delta, -2)
+  delta ~ dunif(0, 100)
+}", file = "av04-q2.jags")
+
+q2.dat <- list(y = t(y), M = Ng, N = Nobs)
+q2.model <- jags.model(file="av04-q2.jags", data=q2.dat, n.chains=1)
+
+q2.sam <- coda.samples(q2.model,
+                       c("mu", "sigma", "delta", "theta"),
+                       20000, thin=10)
+summary(q2.sam)
+
+post.jags <- q2.sam[[1]][, 2:11]
+str(post.jags)
+
+## Gráficos com as posteriores
+post.jags.df <- stack(as.data.frame(post.jags))
+str(post.jags.df)
+p1 <- densityplot(~values, post.jags.df, groups = ind, auto.key = TRUE,
+                  xlab = expression(mu))
+p2 <- densityplot(~q2.sam[[1]][,12], xlab = expression(sigma^2))
+p3 <- densityplot(~q2.sam[[1]][,13], xlab = expression(theta))
+p4 <- densityplot(~q2.sam[[1]][,1], xlab = expression(delta))
+grid.arrange(p2, p3, p4, ncol = 1)
+
+## ECDF das posteriores
+ecdfplot(~values, post.jags.df, groups = ind, auto.key = TRUE,
+         xlab = expression(mu^cpue))
+
+## Resumo numérico das posteriores
+(tab.res.jags <- t(cbind(apply(post.jags, 2, respost),
+                         s2 = respost(q2.sam[[1]][,12]))))
+
+## Compara intervalos de credibilidade
+segplot(factor(1:10) ~
+            tab.res.jags[1:10, 1] + tab.res.jags[1:10, 3],
+        centers = tab.res.jags[1:10, 2], draw.bands = FALSE,
+        xlab = expression(mu), ylab = "Áreas")
+
+## Compara com lme
+library(lme4)
+(q2.lmer <- lmer(y ~ 1|grupo, data=q2.df, REML=FALSE))
+t(ranef(q2.lmer)$grupo)
+t(ranef(q2.lmer)$grupo +  fixef(q2.lmer)[[1]])
+tab.res.jags[1:10, 4:5]
+
+
+##----------------------------------------------------------------------
+## INLA
+library(INLA)
+q2.inla <- inla(y ~  f(grupo, model="iid"), family="gaussian",
+                data=q2.df)
+summary(q2.inla)
+## passando de precisão para variância:
+sqrt(1/q2.inla$summary.hyperpar[,1])
+post.sigma = inla.tmarginal(function(x) sqrt(1/x),
+                            q2.inla$marginals.hyperpar[[1]])
+post.delta = inla.tmarginal(function(x) sqrt(1/x),
+                            q2.inla$marginals.hyperpar[[2]])
+rbind(delta=inla.zmarginal(post.delta, T),
+      sigma=inla.zmarginal(post.sigma, T))
+
+
+## Efeitos aleatórios: médias e modas por grupos.
+rbind(medias.grupos=q2.inla$summary.fix[1,1] +
+          q2.inla$summary.random$grupo$mean,
+      modas.grupos=q2.inla$summary.fix[1,6] +
+          q2.inla$summary.random$grupo$mode)
+
+## Comparação dos valores das variâncias dos grupos e residual.
+par(mfrow=c(1,2))
+plot(density(unlist(q2.sam[,"delta",drop=T])), main="",
+     xlab=expression(delta),
+     ylab=expression(group("[",paste(delta,"|",y),"]")), ylim=c(0, 0.5))
+lines(post.delta, lty=2, col=2)
+abline(v=c(as.data.frame(VarCorr(q2.lmer))$sdcor[1], delta),
+       col=3:4, lty=3:4)
+legend("topright", c("JAGS","INLA", "LMER", "Verd."), col=1:4, lty=1:4)
+plot(density(unlist(q2.sam[,"sigma",drop=T])), main="",
+     xlab=expression(sigma),
+     ylab=expression(group("[",paste(sigma,"|",y),"]")), ylim=c(0, 1.5))
+lines(post.sigma, lty=2, col=2)
+abline(v=c(as.data.frame(VarCorr(q2.lmer))$sdcor[2], sigma),
+       col=3:4, lty=3:4)
+legend("topright", c("JAGS","INLA", "LMER", "Verd."), col=1:4, lty=1:4)
+par(mfrow=c(1,1))
+
+## Médias dos grupos
+(q2.grupos <- data.frame(lmer = drop(t(ranef(q2.lmer)$grupo +
+                                                     fixef(q2.lmer)[[1]])),
+                         JAGS = summary(q2.sam)[[1]][2:11,1],
+                         INLA = q2.inla$summary.fix[1,1] +
+                             q2.inla$summary.random$grupo$mean,
+                         verd = mus))
+
+matplot(1:10, q2.grupos, type="p", xlab="grupo",
+        ylab=expression(mu[i]))
+legend("topleft", c("lmer","JAGS","INLA", "Verd"),
+       pch=as.character(1:4), col=1:4)
+
+##======================================================================
 ## Exemplo de Kinas e Andrade (2010)
 
 dados <- read.table("../dados/martelo.csv", header = TRUE,
@@ -94,39 +269,36 @@ library(runjags)
 ##   sigma ~ dunif(0, 100)
 ## }"
 
+## datalist <- dump.format(list(y = dados$lcpue,
+##                              g = as.factor(dados$area),
+##                              ygbar = as.numeric(ygbar),
+##                              N = N, G = G,
+##                              tauD = 1/se2G))
+## params <- c("mu", "sigma")
+## inicial <- dump.format(list(sigma = 1))
 
-datalist <- dump.format(list(y = dados$lcpue,
-                             g = as.factor(dados$area),
-                             ygbar = as.numeric(ygbar),
-                             N = N, G = G,
-                             tauD = 1/se2G))
-params <- c("mu", "sigma")
-inicial <- dump.format(list(sigma = 1))
+## ## Modelo
+## mod <- "model {
+##  	for (i in 1:N){
+## 		  y[i] ~ dnorm(mu[g[i]], tau)
+##  	}
+##   for(j in 1:G){
+##     mu[j] ~ dnorm(ygbar[j], tauD)
+##   }
+##   tau <- pow(sigma, -2)
+##   sigma ~ dunif(0, 100)
+## }"
 
-## Modelo
-mod <- "model {
- 	for (i in 1:N){
-		  y[i] ~ dnorm(mu[g[i]], tau)
- 	}
-  for(j in 1:G){
-    mu[j] ~ dnorm(ygbar[j], tauD)
-  }
-  tau <- pow(sigma, -2)
-  sigma ~ dunif(0, 100)
-}"
+## ## Ajuste
+## m.jags <- run.jags(
+##     model = mod, monitor = params, data = datalist, inits = inicial,
+##     n.chains = 1, burnin = 5000, thin = 5, sample = 10000
+## )
+## ## failed.jags(c('model','data','inits'))
 
-## Ajuste
-m.jags <- run.jags(
-    model = mod, monitor = params, data = datalist, inits = inicial,
-    n.chains = 1, burnin = 5000, thin = 5, sample = 10000
-)
-## failed.jags(c('model','data','inits'))
-
-## Resultados
-m.jags
-quantile(lambda.sam, probs = c(.025, .5, .975))
-quantile(beta.sam, probs = c(.025, .5, .975))
-plot(m.jags)
+## ## Resultados
+## m.jags
+## plot(m.jags)
 
 library(rjags)
 
@@ -170,7 +342,7 @@ p3 <- densityplot(~values, epost.jags.df, groups = ind, auto.key = TRUE,
 grid.arrange(p1, p2, p3, ncol = 1)
 
 ## ECDF das posteriores
-ecdfplot(~values, post.jags.df, groups = ind, auto.key = TRUE,
+ecdfplot(~values, epost.jags.df, groups = ind, auto.key = TRUE,
          xlab = expression(mu^cpue))
 
 ## Resumo numérico das posteriores
@@ -196,43 +368,17 @@ segplot(factor(c(9, 14, 15)) ~
                 xlab = expression(mu^cpue), ylab = "Áreas")
     )
 
-## Diferenca entre medias do Kinas
 
-##======================================================================
-## Exemplo prova PJ
-set.seed(22701)
-Ng <- 10
-Nobs <- 5
-N <- Ng*Nobs
-delta <- 5
-sigma <- 2
-mus <- rnorm(Ng, mean=50, sd=delta)
-y <- matrix(rnorm(N, mean=mus, sd=sigma), ncol=Ng, byrow=TRUE)
-q2.df <- data.frame(y = as.vector(y), grupo = rep(1:Ng, each=Nobs))
+## Compara com lm
+(tab.res.jags <- t(cbind(apply(post.jags, 2, respost),
+                         s2 = respost(sam[[1]][,4]))))
 
-require(lme4)
-(q2.lmer <- lmer(y ~ 1|grupo, data=q2.df, REML=FALSE))
-t(ranef(q2.lmer)$grupo)
-t(ranef(q2.lmer)$grupo +  fixef(q2.lmer)[[1]])
+m <- lm(lcpue ~ -1 + factor(area), dados)
+summary(m)
+anova(m)
 
-cat("model{
-  for(i in 1:M){
-     for(j in 1:N){
-        y[i,j] ~ dnorm(mu[i], tau)
-     }
-     mu[i] ~ dnorm(theta, tauD)
-  }
-  tau <- pow(sigma, -2)
-  sigma ~ dunif(0, 100)
-  theta ~ dnorm(0, .001)
-  tauD <- pow(delta, -2)
-  delta ~ dunif(0, 100)
-}", file="av04-q2.jags")
-
-q2.dat <- list(y = t(y), M = Ng, N = Nobs)
-q2.model <- jags.model(file="av04-q2.jags", data=q2.dat, n.chains=3)
-
-q2.sam <- coda.samples(q2.model,
-                       c("mu", "sigma", "delta", "theta"),
-                       20000, thin=10)
-summary(q2.sam)
+## Diferenca entre médias
+diff.post <- emuGpost[,3] - emuGpost[,1]
+hist(diff.post); abline(v = 0, col = 2)
+respost(diff.post)
+sum(diff.post > 0)/length(diff.post)
