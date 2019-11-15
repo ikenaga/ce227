@@ -1,0 +1,567 @@
+---
+title: "Obtendo distribuições posteriores conjuntas via INLA"
+# subtitle: "Método da transformação de variáveis"
+author: "Fernando P. Mayer"
+bibliography: ref.bib
+output:
+  html_document:
+    number_sections: true
+    toc_depth: 3
+---
+
+```{r, cache=FALSE, include=FALSE}
+source("setup_knitr.R")
+opts_chunk$set(fig.path = "figures/inf_LT-50/")
+```
+
+# Introdução
+
+Este documento tem a finalidade de exemplificar a obtenção de
+distribuições posteriores conjuntas via "Integrated Nested Laplace
+Approximation" (INLA), utilizando o pacote de mesmo nome no R.
+
+Como exemplo de motivação é utilizada uma regressão logística, onde o
+objetivo é estimar, além dos parâmetros $\beta_0$ e $\beta_1$, uma outra
+medida que é uma função linear destes dois parâmetros.
+
+Do ponto de vista frequentista, a estimativa pontual de uma função
+linear de parâmetros é obtida de maneira direta. No entanto, para se
+obter uma estimativa do erro-padrão dessa estimativa, é necessário
+recorrer à teoria assintótica para se obter a distribuição dessa função.
+
+No caso bayesiano, a distribuição conjunta dos parâmetros que formam
+essa função pode ser utilizada de imediato para se obter tanto
+estimativas pontuais quanto medidas de variação.
+
+A obtenção da distribuição conjunta dos parâmetros de um modelo pode ser
+obtida facilmente quando se realiza a inferância bayesiana via métodos
+de simulação como MCMC. No entanto, quando a inferência é realizada
+através de métodos de aproximação, como é o caso do INLA, a obtenção de
+posteriores conjuntas não é direta.
+
+Portanto, aqui serão mostrados três métodos de obtenção de estimativas
+pontuais e de variação para os parâmetros de uma regressão logística e
+para uma função linear destes parâmetros: método da máxima
+verossimilhança, método bayesiano via MCMC e método bayesiano via INLA.
+
+# Dados
+
+Os dados utilizados aqui como exemplo são do livro de
+@Kinas-Andrade2010, capítulo 8, e são referentes ao comprimento e
+maturidade de fêmeas do peixe-galo (*Zenopsis conchifera*).
+
+```{r, echo=-5}
+Classe <- paste0("[", seq(10, 50, 5), ",", seq(15, 55, 5), ")")
+Total <- c(97, 89, 73, 69, 62, 55, 59, 60, 40)
+Maturas <- c(4, 2, 9, 52, 62, 53, 59, 60, 40)
+dados <- data.frame(Classe, Total, Maturas)
+knitr::kable(dados,
+             caption = "Número total e de fêmeas maturas por classe de comprimento (cm)")
+```
+
+Com estes dados podemos calcular então a proporção de fêmeas maturas
+(`Prop`) e definir o ponto médio de cada classe (`PM`) como o valor de
+comprimento. Além disso, vamos centralizar o ponto médio (`PMc`) para
+facilidade de interpretação. A tabela de dados completa fica dessa
+forma:
+
+```{r, echo=-5}
+Prop <- Maturas/Total
+PM <- seq(10, 50, 5) + 2.5
+PMc <- PM - mean(PM)
+dados <- cbind(dados, Prop, PM, PMc)
+knitr::kable(dados, caption = "Tabela de dados completa")
+```
+
+Através do gráfico ao lado, podemos verificar que é razoável a suposição
+de que a proporção de fêmeas maturas aumenta conforme o tamanho.
+
+```{r, fig.cap='Proporção de fêmeas maturas por comprimento.'}
+library(ggplot2)
+ggplot(dados, aes(PM, Prop)) + geom_line() +
+    xlab("Comprimento (cm)") +
+    ylab("Proporção de fêmeas maturas")
+```
+
+Normalmente, existe o interesse em se determinar o "tamanho de primeira
+maturação" das fêmeas, que geralmente é o comprimento em que 50% das
+fêmeas estão maturas (LT-50). A inspeção visual do gráfico já da uma
+ideia de qual seria esse comprimento. No entanto, precisamos modelar
+esses dados e obter uma forma mais robusta de se obter essa estimativa.
+
+# Modelo
+
+Seja $p_i$ a probabilidade de uma fêmea estar matura na classe de
+comprimento $i$. Temos ao total $n_i$ fêmeas, das quais $y_i$ são
+maturas. Dessa forma, é natural que a variável aleatória $Y_i$ (número de
+fêmeas maturas) seja considerada como proveniente de uma distribuição
+binomial, ou seja $Y_i \sim \text{Bin}(n_i, p_i)$.
+
+Com isso, podemos assumir um modelo logístico para relacionar a
+proporção de fêmeas maturas com o comprimento, através das seguinte
+relação:
+
+$$
+\log \left( \frac{p_i}{1 - p_i} \right) = \beta_0 +
+  \beta_1 (x_i - \bar{x})
+$$
+
+onde a função $\log(\frac{p_i}{1-p_i})$ é chamada de *logit* e é a
+função de ligação canônica entre a variável resposta (proporção de
+fêmeas maturas, `Prop`) e o preditor linear, $\beta_0$ e $\beta_1$ são
+os parâmetros a serem estimados, e $(x_i - \bar{x})$ é a variável
+resposta centrada (ponto médio das classes de comprimento, `PMc`).
+
+Para encontrarmos o LT-50, basta lembrar que esse é o comprimento em que
+50% das fêmeas estão maturas. Portanto, fazemos $p_i = 0.5$ na equação
+acima e resolvemos para $x_i$, que agora chamaremos de LT-50. Portanto,
+temos que o LT-50 pode ser estimado com:
+
+\begin{align*}
+\log \left( \frac{0.5}{1 - 0.5} \right) &= \beta_0 +
+\beta_1 (\text{LT-50} - \bar{x}) \\
+0 &= \beta_0 + \beta_1 (\text{LT-50} - \bar{x}) \\
+-\frac{\beta_0}{\beta_1} &= \text{LT-50} - \bar{x} \\
+ & \Rightarrow \text{LT-50} = -\frac{\beta_0}{\beta_1} + \bar{x}
+\end{align*}
+
+# Métodos de estimação
+
+## Método da máxima verossimilhança
+
+As estimativas pontuais dos parâmetros do modelo pelo método da máxima
+verossimilhança serão obtidas através de um GLM, especificando a família
+de distribuição da variável resposta como binomial e função de ligação
+*logit*.
+
+```{r}
+m.glm <- glm(Prop ~ PMc, data = dados, weights = Total,
+             family = binomial(link = "logit"))
+summary(m.glm)
+```
+
+Através deste resultado, obtemos as estimativas pontuais e o erro-padrão
+para cada parâmetro. Com isso, já temos ideia da precisão dessas
+estimativas.
+
+Para calcular o LT-50, basta então aplicar a equação já obtida acima.
+
+```{r}
+## Estimativas pontuais
+b0.glm <- coef(m.glm)[1]
+b1.glm <- coef(m.glm)[2]
+
+## Cálculo do LT50
+(lt50.glm <- -(b0.glm/b1.glm) + mean(dados$PM))
+```
+
+Assim, obtemos uma estimativa do LT-50 como sendo `r round(lt50.glm,
+2)`. No entanto, não sabemos a precisão dessa estimativa pois para
+calcular o erro-padrão associado precisamos da distribuição assintótica
+do LT-50.
+
+Mas antes de obtê-la, vamos analisar a distribuição assintótica de
+$\beta_0$ e $\beta_1$.
+
+Mostrar que asintoticamente cada parâmetro tem distribuição normal com
+média $\beta$ e variância x. E que a matriz de variância-covariância das
+estimativas é a matriz de informação de Fisher...
+
+```{r}
+## Variâncias dos parâmetros
+varcov <- vcov(m.glm)
+var.b0 <- vcov(m.glm)[1,1]
+var.b1 <- vcov(m.glm)[2,2]
+
+## Distribuição assintótica de b0
+x.b0 <- seq(-3, 3, length = 100) + b0.glm
+dens.b0 <- dnorm(x.b0, mean = b0.glm, sd = sqrt(var.b0))
+## Distribuição assintótica de b1
+x.b1 <- seq(-2, 2, length = 100) + b1.glm
+dens.b1 <- dnorm(x.b1, mean = b1.glm, sd = sqrt(var.b1))
+```
+
+Gráficos com as distribuiçãos assintoticas dos parâmetros do modelo
+logístico \@ref(fig:assbetas).
+
+```{r assbetas, fig.cap='Distribuição assintótica dos betas.'}
+library(gridExtra)
+p1 <- qplot(x.b0, dens.b0, geom = "line",
+            xlab = expression(beta[0]), ylab = "Densidade")
+p2 <- qplot(x.b1, dens.b1, geom = "line",
+            xlab = expression(beta[1]), ylab = "Densidade")
+grid.arrange(p1, p2, ncol = 2)
+```
+
+
+<div class="panel panel-primary">
+<div class="panel-heading">Resultados assintóticos</div>
+<div class="panel-body">
+
+Dentre as várias propriedades de um estimador, duas são fundamentais: a
+**consistência** e a **eficiência**. A consistência se refere ao fato de
+que um estimador deve deve convergir para o verdadeiro valor do
+parâmetro, a medida que o tamanho da amostra aumenta.  Já a eficiência
+diz respeito à variância assintótica de um estimador. Quando dois (ou
+mais) estimadores não viesados são comparados, o melhor (mais eficiente)
+é aquele que possui a menor variância possível. Também podemos dizer que
+um estimador é eficiente se sua variância atinge um certo limite, ou a
+mínima variância possível.
+
+Os estimadores de máxima verossimilhança (EMV) possuem estas duas
+propriedades: são consistentes e eficientes. Isso significa que, à
+medida que o tamanho da amostra aumenta, a estimativa pontual fica cada
+vez mais próxima do verdadeiro valor, e a variância dessa estimativa é a
+menor possível entre todos os estimadores.
+
+Formalizando, dizemos que $\tau(\hat\theta)$ é um estimador consistente
+para $\tau(\theta)$ se
+
+$$
+\lim_{n \to \infty} P[|\tau(\hat\theta) - \tau(\theta)| \geq \epsilon] = 0
+$$
+
+para $\epsilon > 0$. Note que $\tau(\cdot)$ é uma função qualquer
+(diferenciável) de $\theta$.
+
+Como mencionado anteriormente, podemos definir uma "cota" ou "limite"
+inferior que a variância de um estimador deve atingir para ser
+considerado um estimador eficiente. Esse limite inferior é o **Limite
+Inferior de Cramér-Rao** (LICR), definido por [ver @Casella-Berger2011,
+pp. 299-301]:
+
+$$
+Var[\tau(\hat\theta)] \geq \frac{[\tau'(\theta)]^2}{I_E(\theta)}
+$$
+
+onde $\tau'(\theta) = \frac{\partial \tau(\theta)}{\partial\theta}$, e
+
+$$
+I_E(\theta) = E \left[ \left(\frac{\partial l(\theta)}{\partial \theta}
+ \right)^2 \right] =
+ -E \left[ \frac{\partial^2 l(\theta)}{\partial \theta^2} \right]
+$$
+
+é a **Informação de Fisher esperada**. Assim, se a variância de um
+estimador for igual ao LICR, então dizemos que ele é eficiente (e todos
+os EMVs são).
+
+De acordo com o LICR, existe uma variância assintótica ótima. Com isso,
+podemos definir que a distribuição assintótica de $\tau(\hat\theta)$ é
+
+$$
+\sqrt{n}[\tau(\hat\theta) - \tau(\theta)] \quad \rightarrow \quad
+ N(0, V[\tau(\theta)])
+$$
+
+onde $V[\tau(\theta)]$ é o LICR. Esse resultado nos diz então que o EMV
+$\tau(\hat\theta)$ é um estimador consistente e assintoticamente
+eficiente de $\tau(\theta)$. Também podemos escrever o mesmo resultado
+da seguinte forma:
+
+$$
+\tau(\hat\theta) \sim N(\tau(\theta), V[\tau(\theta)])
+$$
+
+Portanto, se um EMV é assintóticamente eficiente, sua variância
+assintótica é a variância do **Método Delta**. O Método Delta é uma
+generalização do **Teorema do Limite Central**, que diz o seguinte: se
+$\hat\theta$ satisfaz $\sqrt{n}[\hat\theta - \theta] \rightarrow N(0,
+\sigma^2)$, então dada uma função $\tau(\cdot)$ diferenciável em
+$\theta$, a distribuição de $\tau(\hat\theta)$ fica [ver
+@Casella-Berger2011, pp. 217]
+
+$$
+\sqrt{n}[\tau(\hat\theta) - \tau(\theta)] \quad \rightarrow \quad
+ N(0, \sigma^2 [\tau'(\theta)]^2)
+$$
+
+Portanto, podemos utilizar o LICR como uma aproximação para a variância
+verdadeira do EMV. Mas, note que no LICR o denominador é a informação de
+Fisher **esperada**. No entanto, nem sempre conseguimos calcular a
+esperança para chegar nessa informação. Sendo assim, a partir do Método
+Delta e da variância assintótica do EMV, podemos aproximar a variância
+de $\tau(\hat\theta)$ por:
+
+\begin{align*}
+V[\tau(\hat\theta)|\theta] &= \frac{[\tau'(\theta)]^2}{I_E(\theta)} \\
+  &\approx \frac{[\tau'(\theta)]^2}{I_O(\theta)}
+\end{align*}
+
+onde
+
+$$
+I_O(\theta) =  - \frac{\partial^2 l(\theta)}{\partial \theta^2}
+$$
+
+é a informação de Fisher **observada**. Segundo @Casella-Berger2011, o
+uso do *número de informações observado* é superior ao *número de
+informações esperado*, que é o utilizado no LICR. (Até aqui é um resumo
+de @Casella-Berger2011, pp. 421-423). Além disso, essa aproximação tem
+uma consequência computacional. No processo de otimização de uma função
+qualquer, é possível obter a matriz **Hessiana**, que contém as segundas
+derivadas parciais (numéricas) da função em relação a cada parâmetro,
+que é por si própria a matriz de informação de Fisher observada.
+Portanto, para obter as variâncias dos estimadores, basta inverter a
+matriz Hessiana e selecionar os elementos de sua diagonal.
+
+Resumindo, temos então que a distribuição assintótica de
+$\tau(\hat\theta)$ é
+
+$$
+\tau(\hat\theta) \sim N \left( \tau(\theta),
+  \frac{[\tau'(\theta)]^2}{I_O(\theta)} \right)
+$$
+
+Note também que essa notação até aqui define todos os componentes de
+forma geral, ou seja para $\tau(\theta)$, sendo $\tau(\cdot)$ qualquer
+função diferenciável. Um caso particular (e mais simples) é quando
+$\tau(\theta) = \theta$, ou seja, estamos interessados no próprio valor
+do parâmetro e não em uma função dele. Nessas condições, temos que
+$\tau'(\theta) = 1$ e a distribuição do estimador $\tau(\hat\theta) =
+\hat\theta$ fica
+
+$$
+\hat\theta \sim N \left( \theta,
+  \frac{1}{I_O(\theta)} \right)
+$$
+
+Ou seja, a variância assintótica de $\hat\theta$ é simplesmente o
+inverso da informação de Fisher observada (ou o inverso da matriz
+Hessiana).
+
+Outro detalhe importante é que o uso de $I_E(\theta)$ ou $I_O(\theta)$
+geralmente leva ao mesmo resultado, pois se a segunda derivada da função
+em cada parâmetro não depender de $Y$, então $I_E(\theta) = I_O(\theta)$
+(precisa de uma fonte aqui).
+
+Voltando ao exemplo que estávamos utilizando, queremos agora chegar nos
+mesmos resultados obtidos anteriormente pela função `lm()` (que estima
+os parâmetros analiticamente pelo método dos mínimos quadrados), e
+calculados à mão. Ou seja, queremos as estimativas pontuais dos betas e
+da variância através da maximização da função de verossimilhança (ou
+minimização do log da verossimilhança), e as estimativas das variâncias
+destes estimadores obtidas através dos resultados assintóticos.
+</div>
+</div>
+
+
+Para obter a distribuição assintotica do LT-50, precisamos:
+
+1. Derivadas parciais da função $-\frac{\beta_0}{\beta_1}$ em
+   relação a $\beta_0$ e $\beta_1$
+2. Com isso calculamos a variância dessa função
+3. Obtem a distribuição normal assintotica
+
+```{r}
+## Distribuição assintótica do LT50 ------------------------------------
+
+## Derivadas parciais de -(b0/b1)
+## Em relação a b0
+D(expression(-b0/b1), "b0")
+b0.deriv <- - (1/b1.glm)
+## Em relação a b1
+D(expression(-b0/b1), "b1")
+b1.deriv <- b0.glm/b1.glm^2
+
+## Vetor de derivadas
+u.theta <- cbind(b0.deriv, b1.deriv)
+
+## Variância de -(b0/b1)
+lt50.var <- as.numeric(u.theta %*% varcov %*% t(u.theta))
+
+## Distribuição assintótica de LT50
+x.lt50 <- seq(-3, 3, length = 100) + lt50.glm
+dens.lt50 <- dnorm(x.lt50, mean = lt50.glm, sd = sqrt(lt50.var))
+```
+
+```{r, fig.cap='Distribuição assintótica do LT-50.'}
+qplot(x.lt50, dens.lt50, geom = "line",
+      xlab = "LT-50", ylab = "Densidade")
+```
+
+## Inf. bayesiana via JAGS
+
+```{r, results='hide'}
+##----------------------------------------------------------------------
+## JAGS
+library(runjags)
+
+## Dados
+datalist <- dump.format(list(y = dados$Maturas,
+                             n = dados$Total,
+                             x = dados$PMc))
+params <- c("beta0", "beta1")
+inicial <- dump.format(list(beta0 = b0.glm,
+                            beta1 = b1.glm))
+
+## Modelo
+galomcmc <- "model{
+for(i in 1:length(y)){
+  logit(p[i]) <- beta0 + beta1 * x[i]
+  y[i] ~ dbin(p[i], n[i])
+}
+beta0 ~ dnorm(0, 0.001)
+beta1 ~ dnorm(0, 0.001)
+}"
+
+## Ajuste
+m.jags <- run.jags(model = galomcmc, monitor = params,
+                   data = datalist, inits = inicial,
+                   n.chains = 3, burnin = 50000, thin = 3,
+                   sample = 9000)
+
+## Resultados
+names(m.jags)
+head(m.jags$mcmc)
+b0.jags <- m.jags$mcmc[[1]][, 1]
+b1.jags <- m.jags$mcmc[[1]][, 2]
+summary(b0.jags)
+summary(b1.jags)
+par(mfrow = c(1,3))
+plot(density(b0.jags))
+plot(density(b1.jags))
+
+## LT50
+lt50.jags <- - (b0.jags/b1.jags) + mean(dados$PM)
+summary(lt50.jags)
+plot(density(lt50.jags))
+par(mfrow = c(1,1))
+```
+
+## Inf. bayesiana via INLA
+
+```{r}
+##----------------------------------------------------------------------
+## INLA
+library(INLA)
+
+## Modelo e ajuste
+f <- Maturas ~ PMc
+m.inla <- inla(f, family = "binomial", data = dados,
+               Ntrials = dados$Total,
+               control.compute = list(config = TRUE))
+
+## Resultados
+summary(m.inla)
+names(m.inla)
+m.inla$marginals.fixed
+b0.inla <- m.inla$marginals.fixed[[1]]
+b1.inla <- m.inla$marginals.fixed[[2]]
+par(mfrow = c(1,3))
+plot(b0.inla[, 1], b0.inla[, 2], type = "l")
+plot(b1.inla[, 1], b1.inla[, 2], type = "l")
+
+## LT50
+## Naive
+lt50.inla.naive <- - (b0.inla[, 1]/b1.inla[, 1]) + mean(dados$PM)
+## Na verdade, essa conta aqui não faz sentido nenhum, porque esses são
+## apenas pontos escolhidos para fazer a curva (de uma posterior
+## analítica, não simulada)
+summary(lt50.inla.naive)
+plot(density(lt50.inla.naive))
+par(mfrow = c(1,1))
+```
+
+# Comparativos
+
+```{r}
+##----------------------------------------------------------------------
+## Comparativos
+cbind(c(b0.glm, b1.glm, lt50.glm),
+      c(mean(b0.jags), mean(b1.jags), mean(lt50.jags)),
+      c(mean(b0.inla[, 1]), mean(b1.inla[, 1]), mean(lt50.inla.naive)))
+
+par(mfrow = c(2, 3))
+plot(density(b0.jags))
+plot(density(b1.jags))
+plot(density(lt50.jags))
+plot(b0.inla[, 1], b0.inla[, 2], type = "l")
+plot(b1.inla[, 1], b1.inla[, 2], type = "l")
+plot(density(lt50.inla.naive))
+par(mfrow = c(1, 1))
+
+## LT50
+## AQUI ESTA O TRUQUE!
+## posterior sample
+## help(inla.posterior.sample)
+m.inla.post <- inla.posterior.sample(n = 9000, m.inla, seed = 123)
+## Ele retorna as predições para cada observação e as duas últimas
+## linhas são os parâmetros
+m.inla.post[[1]]$latent
+betas.post <- t(sapply(m.inla.post, function(x) x$latent[10:11]))
+b0.inla.post <- betas.post[, 1]
+b1.inla.post <- betas.post[, 2]
+summary(b0.inla.post)
+summary(b1.inla.post)
+
+lt50.inla.post <- - (b0.inla.post/b1.inla.post) + mean(dados$PM)
+summary(lt50.inla.post)
+
+## Ver
+#m.inla$misc$configs
+```
+
+```{r}
+##----------------------------------------------------------------------
+## Comparativos
+tab <- cbind(c(b0.glm, b1.glm, lt50.glm),
+             c(mean(b0.jags), mean(b1.jags), mean(lt50.jags)),
+             c(mean(b0.inla[, 1]), mean(b1.inla[, 1]), mean(lt50.inla.naive)),
+             c(mean(b0.inla.post), mean(b1.inla.post), mean(lt50.inla.post)))
+dimnames(tab) <- list(c("b0", "b1", "lt50"),
+                      c("GLM", "JAGS", "INLA naive", "INLA sample"))
+tab
+
+tab.sum <- cbind(summary(as.numeric(b0.jags)),
+                 summary(b0.inla.post),
+                 summary(as.numeric(b1.jags)),
+                 summary(b1.inla.post),
+                 summary(as.numeric(lt50.jags)),
+                 summary(lt50.inla.post))
+colnames(tab.sum) <- c("b0 JAGS", "b0 INLA", "b1 JAGS", "b1 INLA",
+                       "LT50 JAGS", "LT50 INLA")
+tab.sum
+```
+
+```{r}
+## Posteriores de b0, b1 e lt50 (JAGS, INLA naive e INLA sample)
+par(mfrow = c(3, 3))
+plot(density(b0.jags))
+plot(density(b1.jags))
+plot(density(lt50.jags))
+plot(b0.inla[, 1], b0.inla[, 2], type = "l")
+plot(b1.inla[, 1], b1.inla[, 2], type = "l")
+plot(density(lt50.inla.naive))
+plot(density(b0.inla.post), type = "l")
+plot(density(b1.inla.post), type = "l")
+plot(density(lt50.inla.post))
+par(mfrow = c(1, 1))
+
+## Posterior conjunta (JAGS e INLA)
+par(mfrow = c(1,2))
+plot(as.numeric(b0.jags), as.numeric(b1.jags),
+     xlim = c(1.5, 5), ylim = c(0.2, 0.65))
+plot(b0.inla.post, b1.inla.post,
+     xlim = c(1.5, 5), ylim = c(0.2, 0.65))
+par(mfrow = c(1,1))
+```
+
+```{r teste, eval=F, include=F}
+set.seed(1)
+n <- 1000
+mu <- 170
+sigma.x <- 10
+b0 <- 15
+b1 <- 0.5
+x <- rnorm(n, mu, sigma)
+sigma.e <- 2
+y <- b0 + b1*x + rnorm(n, mean = 0, sd = sigma.e)
+plot(y ~ x)
+m0 <- lm(y ~ x)
+summary(m0)
+anova(m0)
+vcov(m0)
+```
+
+# Referências
