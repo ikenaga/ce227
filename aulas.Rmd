@@ -68,8 +68,9 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
 - **07/11 (Qui)**: (FM) Exemplos usando
   [JAGS](http://mcmc-jags.sourceforge.net/).
   [Script](scripts/gibbs-jags.R).
-- **12/11 (Ter)**: Bayes Empírico. Exemplos da apostila e taxas Baysianas empíricas (Poisson-Gamma)
-- **14/11 (Qui)**:
+- **12/11 (Ter)**: Bayes Empírico. Exemplos da apostila e taxas Bayesianas empíricas (Poisson-Gamma)
+- **14/11 (Qui)**: (FM) Aplicações via JAGS e INLA: modelos de efeitos
+  fixos e aleatórios. [Script](scripts/jags-aplicacoes.R).
 - **19/11 (Ter)**:
 - **21/11 (Qui)**:
 - **26/11 (Ter)**: **Prova 2.**
