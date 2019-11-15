@@ -1,17 +1,26 @@
 ---
 title: "Obtendo distribuições posteriores conjuntas via INLA"
-# subtitle: "Método da transformação de variáveis"
-author: "Fernando P. Mayer"
-bibliography: ref.bib
+author: "Fernando Mayer"
+date: |
+   | 2018-09-18
+   | Última atualização: `r Sys.Date()`
 output:
-  html_document:
+  bookdown::html_document2:
+    theme: flatly
+    highlight: haddock
+    code_folding: show
     number_sections: true
-    toc_depth: 3
+    toc: true
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+bibliography: ref.bib
 ---
 
 ```{r, cache=FALSE, include=FALSE}
-source("setup_knitr.R")
-opts_chunk$set(fig.path = "figures/inf_LT-50/")
+source("../setup_knitr.R")
+opts_chunk$set(fig.path = "../figures/inf_LT-50/")
 ```
 
 # Introdução
