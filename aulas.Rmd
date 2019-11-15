@@ -70,7 +70,9 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
   [Script](scripts/gibbs-jags.R).
 - **12/11 (Ter)**: Bayes Empírico. Exemplos da apostila e taxas Bayesianas empíricas (Poisson-Gamma)
 - **14/11 (Qui)**: (FM) Aplicações via JAGS e INLA: modelos de efeitos
-  fixos e aleatórios. [Script](scripts/jags-aplicacoes.R).
+  fixos e aleatórios. [Script](scripts/jags-aplicacoes.R). Ver também
+  exemplo de cáculo do LT-50 em regressão logística, usando inferência
+  clássica e bayesiana via JAGS e INLA. [HTML](scripts/inf_LT-50.html).
 - **19/11 (Ter)**:
 - **21/11 (Qui)**:
 - **26/11 (Ter)**: **Prova 2.**
