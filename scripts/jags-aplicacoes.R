@@ -1,4 +1,16 @@
 ##======================================================================
+## Aplicações de inferência bayesiana
+
+##----------------------------------------------------------------------
+## Pacotes
+library(lattice)
+library(latticeExtra)
+library(gridExtra)
+library(lme4)
+library(rjags)
+library(INLA)
+
+##======================================================================
 ## Exemplo prova PJ
 set.seed(22701)
 Ng <- 10
@@ -47,6 +59,10 @@ ecdfplot(~values, post.jags.df, groups = ind, auto.key = TRUE,
          xlab = expression(mu^cpue))
 
 ## Resumo numérico das posteriores
+respost <- function(x) {
+    c(quantile(x, probs = c(.025, .5, .975)),
+      media = mean(x), dp = sd(x))
+}
 (tab.res.jags <- t(cbind(apply(post.jags, 2, respost),
                          s2 = respost(q2.sam[[1]][,11]))))
 
@@ -236,11 +252,6 @@ grid.arrange(p1, p2, p3, ncol = 1)
 ecdfplot(~values, emuGpost.df, groups = ind, auto.key = TRUE,
          xlab = expression(mu^cpue))
 
-## Resumo numérico das posteriores
-respost <- function(x) {
-    c(quantile(x, probs = c(.025, .5, .975)),
-      media = mean(x), dp = sd(x))
-}
 (tab.res <- t(cbind(apply(emuGpost, 2, respost), s2 = respost(varG))))
 
 ## Compara intervalos de credibilidade
@@ -251,13 +262,15 @@ segplot(factor(c(9, 14, 15)) ~ tab.res[1:3, 1] + tab.res[1:3, 3],
 
 ##----------------------------------------------------------------------
 ## Usando o JAGS
-library(runjags)
 
-## Os dados tem que ser passados como uma matriz com i linhas (grupos) e
-## j colunas (observacoes)
-## da <- dados[, c("lcpue", "area")]
-## da <- da[order(da$area), ]
-## ## Modelo
+## A forma de especificar o modelo como está abaixo parece seguir a
+## lógica do exemplo anterior. O problema aqui é que o número de
+## observações por grupo é diferente (desbalanceado), portanto a matriz
+## de dados deve ser construída apropriadamente (com NAs para
+## preencher). No entanto isso pode ser complicado para bases grandes.
+## Mais abaixo é mostrada uma solução sem precisar mexer na estrutura
+## dos dados.
+## ## Modelo (aqui apenas para mostrar que dessa forma não funciona)
 ## mod <- "model {
 ##  	for (i in 1:G){
 ##     for(j in 1:ng){
@@ -269,39 +282,17 @@ library(runjags)
 ##   sigma ~ dunif(0, 100)
 ## }"
 
-## datalist <- dump.format(list(y = dados$lcpue,
-##                              g = as.factor(dados$area),
-##                              ygbar = as.numeric(ygbar),
-##                              N = N, G = G,
-##                              tauD = 1/se2G))
-## params <- c("mu", "sigma")
-## inicial <- dump.format(list(sigma = 1))
+## Usando o rjags
 
-## ## Modelo
-## mod <- "model {
-##  	for (i in 1:N){
-## 		  y[i] ~ dnorm(mu[g[i]], tau)
-##  	}
-##   for(j in 1:G){
-##     mu[j] ~ dnorm(ygbar[j], tauD)
-##   }
-##   tau <- pow(sigma, -2)
-##   sigma ~ dunif(0, 100)
-## }"
-
-## ## Ajuste
-## m.jags <- run.jags(
-##     model = mod, monitor = params, data = datalist, inits = inicial,
-##     n.chains = 1, burnin = 5000, thin = 5, sample = 10000
-## )
-## ## failed.jags(c('model','data','inits'))
-
-## ## Resultados
-## m.jags
-## plot(m.jags)
-
-library(rjags)
-
+## Definição do modelo mais geral. Aqui, g é o identificador de grupo e
+## i o identificador da observação. Portanto
+## mu[g[i]]
+## é uma forma de identificar a observação i do grupo g. Dessa forma, os
+## dados podem ser passados da maneira como estão no data frame.
+## Lembrando que isso é necessário pois o número de onservações por
+## grupo é diferente nesse caso. De qualquer maneira, o modelo
+## especificado dessa forma é mais geral e funciona também no caso
+## balanceado.
 cat("model {
  	for (i in 1:N){
 		  y[i] ~ dnorm(mu[g[i]], tau)
@@ -325,8 +316,10 @@ sam <- coda.samples(m.rjags,
                     c("mu", "sigma"), 20000, thin = 10)
 summary(sam)
 
+## Posteriores na escala log
 post.jags <- sam[[1]][, 1:3]
 str(post.jags)
+## Posteriores na escala original
 epost.jags <- exp(sam[[1]][, 1:3])
 str(epost.jags)
 
