@@ -91,6 +91,10 @@ cat("model{
   theta ~ dnorm(0, .001)
   tauD <- pow(delta, -2)
   delta ~ dunif(0, 100)
+  ## Coeficiente de correlação intra-classe (CCI)
+  ## Pode ser calculado diretamente por aqui, ou calculado depois
+  ## com as amostras das posteriores
+  # CCI <- pow(delta, 2)/(pow(delta, 2) + pow(sigma, 2))
 }", file = "av04-q2.jags")
 
 q2.dat <- list(y = t(y), M = Ng, N = Nobs)
@@ -101,6 +105,15 @@ q2.sam <- coda.samples(q2.model,
                        20000, thin=10)
 summary(q2.sam)
 
+## Coeficiente de correlação intra-classe, calculado usando as amostras
+## das posteriores
+post.delta <- q2.sam[[1]][, 1]
+post.sigma <- q2.sam[[1]][, 12]
+CCI <- post.delta^2/(post.delta^2 + post.sigma^2)
+hist(CCI)
+respost(CCI)
+
+## Posteriores dos mu[i]
 post.jags <- q2.sam[[1]][, 2:11]
 str(post.jags)
 
@@ -109,7 +122,8 @@ post.jags.df <- stack(as.data.frame(post.jags))
 str(post.jags.df)
 p1 <- densityplot(~values, post.jags.df, groups = ind, auto.key = TRUE,
                   xlab = expression(mu))
-p2 <- densityplot(~q2.sam[[1]][,12], xlab = expression(sigma^2))
+p1
+p2 <- densityplot(~q2.sam[[1]][,12], xlab = expression(sigma))
 p3 <- densityplot(~q2.sam[[1]][,13], xlab = expression(theta))
 p4 <- densityplot(~q2.sam[[1]][,1], xlab = expression(delta))
 grid.arrange(p2, p3, p4, ncol = 1)
