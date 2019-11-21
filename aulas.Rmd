@@ -73,8 +73,8 @@ cat(paste0("- **", datas1, " (Ter)", "**:\n", "- **",
   fixos e aleatórios. [Script](scripts/jags-aplicacoes.R). Ver também
   exemplo de cáculo do LT-50 em regressão logística, usando inferência
   clássica e bayesiana via JAGS e INLA. [HTML](scripts/inf_LT-50.html).
-- **19/11 (Ter)**:
-- **21/11 (Qui)**:
+- **19/11 (Ter)**: Preparação das apresentações
+- **21/11 (Qui)**: Apresentações do curso
 - **26/11 (Ter)**: **Prova 2.**
 - **28/11 (Qui)**: CH já integralizada
 - **03/12 (Ter)**: CH já integralizada
