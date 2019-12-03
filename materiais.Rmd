@@ -40,3 +40,6 @@ output:
 
 - [1a avaliação intermediária](provas/ce227-av01-2019.pdf)
 - [2a avaliação intermediária](provas/ce227-av02-2019.pdf)
+- [1a prova](provas/ce227-2019-prova1.pdf)
+- [2a prova](provas/ce227-2019-prova2.pdf)
+
