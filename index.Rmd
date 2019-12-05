@@ -37,7 +37,7 @@ source("setup_knitr.R")
 - **Datas importantes:** De acordo com a [Resolução 64/18 - CEPE][]:
     - **05/08**: Início do semestre letivo
     - **04/12**: Final do semestre letivo
-    - **09/12-14/12**: Período de exames
+    - **12/12**: Exame final
 
 # Programa/objetivos da disciplina
 
